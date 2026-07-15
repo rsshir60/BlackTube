@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import org.schabi.newpipe.R
 
@@ -93,7 +94,10 @@ class PromptLibraryAdapter(
     private inner class PromptViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvEmoji: TextView = itemView.findViewById(R.id.tv_prompt_emoji)
         private val tvTitle: TextView = itemView.findViewById(R.id.tv_prompt_title)
+        private val tvCategory: TextView = itemView.findViewById(R.id.tv_prompt_category)
         private val tvDesc: TextView = itemView.findViewById(R.id.tv_prompt_desc)
+        private val tvPreview: TextView = itemView.findViewById(R.id.tv_prompt_preview)
+        private val chipDefault: TextView = itemView.findViewById(R.id.chip_default)
         private val chipActive: TextView = itemView.findViewById(R.id.chip_active)
         private val chipBuiltin: TextView = itemView.findViewById(R.id.chip_builtin)
         private val btnFav: ImageButton = itemView.findViewById(R.id.btn_favorite)
@@ -104,12 +108,33 @@ class PromptLibraryAdapter(
 
         fun bind(item: ListItem.PromptItem) {
             val p = item.prompt
-            tvEmoji.text = p.category.emoji
-            tvTitle.text = p.title
-            tvDesc.text = p.description
+            val isDefault = p.id == PromptLibrary.DEFAULT_PROMPT_ID
 
+            itemView.background = ContextCompat.getDrawable(
+                itemView.context,
+                if (isDefault) R.drawable.bg_bt_default_prompt_card else R.drawable.bg_ai_panel
+            )
+            if (isDefault) {
+                tvEmoji.background = null
+                tvEmoji.textSize = 24f
+            } else {
+                tvEmoji.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_emoji_circle)
+                tvEmoji.textSize = 18f
+            }
+            tvEmoji.text = if (isDefault) "⭐" else p.category.emoji
+            tvTitle.text = p.title
+            tvTitle.textSize = if (isDefault) 16f else 15f
+            tvCategory.text = p.category.displayName.uppercase()
+            tvDesc.text = p.description
+            tvPreview.text = p.promptText
+                .lineSequence()
+                .firstOrNull { it.isNotBlank() }
+                ?.trim()
+                ?: p.description
+
+            chipDefault.visibility = if (isDefault) View.VISIBLE else View.GONE
             chipActive.visibility = if (item.isActive) View.VISIBLE else View.GONE
-            chipBuiltin.visibility = if (p.isBuiltIn) View.VISIBLE else View.GONE
+            chipBuiltin.visibility = if (p.isBuiltIn && !isDefault) View.VISIBLE else View.GONE
 
             btnFav.setImageResource(
                 if (item.isFav) R.drawable.ic_stars else R.drawable.ic_stars

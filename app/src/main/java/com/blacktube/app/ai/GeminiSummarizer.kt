@@ -8,31 +8,11 @@ import com.google.ai.client.generativeai.type.generationConfig
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import org.json.JSONObject
 import org.schabi.newpipe.extractor.stream.StreamInfo
-import java.util.concurrent.TimeUnit
 
 // Application context cached at init — used for PromptLibrary lookup
 private var _appContext: Context? = null
-
-data class AiSummaryChapter(
-    val startSeconds: Int,
-    val endSeconds: Int,
-    val summary: String,
-    val emoji: String
-)
-
-data class AiSummaryData(
-    val title: String,
-    val channel: String,
-    val category: String,
-    val categoryEmoji: String,
-    val corePurpose: String,
-    val chapters: List<AiSummaryChapter>,
-    val culturalImpact: String,
-    val vibeEmoji: String
-)
 
 object GeminiSummarizer {
     private const val TAG = "GeminiSummarizer"
@@ -67,7 +47,7 @@ object GeminiSummarizer {
             generationConfig = generationConfig {
                 temperature = 0.2f
                 maxOutputTokens = 4096
-                responseMimeType = "application/json"
+                // Removed responseMimeType = "application/json" to allow raw markdown
             }
         )
     }
@@ -75,9 +55,15 @@ object GeminiSummarizer {
     @JvmStatic
     fun isConfigured(): Boolean = model != null
 
+    @JvmStatic
+    fun hasCachedSummary(videoId: String, promptId: String): Boolean {
+        if (!::prefs.isInitialized) return false
+        val cacheKey = buildCacheKey(videoId, promptId)
+        return prefs.contains(cacheKey)
+    }
+
     sealed class SummaryResult {
-        data class Structured(val data: AiSummaryData, val cachedAt: Long = 0) : SummaryResult()
-        data class Fallback(val markdown: String, val cachedAt: Long = 0) : SummaryResult()
+        data class Markdown(val text: String, val cachedAt: Long = 0) : SummaryResult()
         data class Error(val message: String) : SummaryResult()
     }
 
@@ -87,9 +73,11 @@ object GeminiSummarizer {
             return@withContext SummaryResult.Error("Summarizer not initialized")
         }
 
-        val cached = getCachedSummary(video.id)
+        val summaryPrompt = PromptLibrary.getSummaryPrompt(_appContext)
+        val cacheKey = buildCacheKey(video.id, summaryPrompt.id)
+        val cached = getCachedSummary(cacheKey)
         if (cached != null) {
-            Log.d(TAG, "Cache hit for ${video.id}")
+            Log.d(TAG, "Cache hit for ${video.id} using ${summaryPrompt.id}")
             return@withContext cached
         }
 
@@ -98,13 +86,13 @@ object GeminiSummarizer {
 
         try {
             val transcript = buildTranscriptText(video)
-            val prompt = buildPrompt(video, transcript)
+            val prompt = buildPrompt(video, transcript, summaryPrompt)
 
             val response = currentModel.generateContent(prompt)
             val text = response.text ?: "No summary available."
 
-            val result = parseJsonResponse(text)
-            cacheSummary(video.id, text)
+            val result = SummaryResult.Markdown(text, System.currentTimeMillis())
+            cacheSummary(cacheKey, text)
             
             result
         } catch (e: Exception) {
@@ -113,105 +101,34 @@ object GeminiSummarizer {
         }
     }
 
-    private fun parseJsonResponse(text: String): SummaryResult {
-        return try {
-            val obj = JSONObject(text)
-            val title = obj.optString("title", "")
-            val channel = obj.optString("channel", "")
-            val category = obj.optString("category", "")
-            val categoryEmoji = obj.optString("categoryEmoji", "🎯")
-            val corePurpose = obj.optString("corePurpose", "")
-            val culturalImpact = obj.optString("culturalImpact", "")
-            val vibeEmoji = obj.optString("vibeEmoji", "✨")
-            
-            val chapters = mutableListOf<AiSummaryChapter>()
-            val chaptersArray = obj.optJSONArray("chapters")
-            if (chaptersArray != null) {
-                for (i in 0 until chaptersArray.length()) {
-                    val chapObj = chaptersArray.getJSONObject(i)
-                    chapters.add(
-                        AiSummaryChapter(
-                            startSeconds = chapObj.optInt("startSeconds", 0),
-                            endSeconds = chapObj.optInt("endSeconds", 0),
-                            summary = chapObj.optString("summary", ""),
-                            emoji = chapObj.optString("emoji", "⏱️")
-                        )
-                    )
-                }
-            }
+    private fun buildCacheKey(videoId: String, promptId: String): String =
+        "summary_${videoId}_${promptId}_v${PromptLibrary.PROMPT_CONTRACT_VERSION}"
 
-            val data = AiSummaryData(
-                title = title,
-                channel = channel,
-                category = category,
-                categoryEmoji = categoryEmoji,
-                corePurpose = corePurpose,
-                chapters = chapters,
-                culturalImpact = culturalImpact,
-                vibeEmoji = vibeEmoji
-            )
-            SummaryResult.Structured(data, System.currentTimeMillis())
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse JSON, falling back", e)
-            // Build markdown fallback manually
-            val fallbackMarkdown = buildFallbackMarkdown(text)
-            SummaryResult.Fallback(fallbackMarkdown, System.currentTimeMillis())
-        }
-    }
-    
-    private fun buildFallbackMarkdown(text: String): String {
-        try {
-            val obj = JSONObject(text)
-            val sb = java.lang.StringBuilder()
-            sb.append("## 🎯 ").append(obj.optString("category", "Video")).append("\n")
-            sb.append(obj.optString("corePurpose", "")).append("\n\n")
-            sb.append("## ⏱️ Chapters\n")
-            val chaptersArray = obj.optJSONArray("chapters")
-            if (chaptersArray != null) {
-                for (i in 0 until chaptersArray.length()) {
-                    val chapObj = chaptersArray.getJSONObject(i)
-                    val emoji = chapObj.optString("emoji", "⏱️")
-                    sb.append("• ").append(emoji).append(" ").append(chapObj.optString("summary", "")).append("\n")
-                }
-            }
-            sb.append("\n## 🌍 Impact\n")
-            sb.append(obj.optString("culturalImpact", ""))
-            return sb.toString()
-        } catch(e: Exception) {
-            return text
-        }
-    }
-
-    private fun getCachedSummary(videoId: String): SummaryResult? {
-        val json = prefs.getString("summary_${videoId}_v3", null) ?: return null
+    private fun getCachedSummary(cacheKey: String): SummaryResult? {
+        val json = prefs.getString(cacheKey, null) ?: return null
         return try {
             val obj = JSONObject(json)
             val timestamp = obj.getLong("timestamp")
             if (System.currentTimeMillis() - timestamp > CACHE_TTL_MS) {
-                prefs.edit().remove("summary_${videoId}_v3").apply()
+                prefs.edit().remove(cacheKey).apply()
                 return null
             }
             val content = obj.getString("content")
-            val result = parseJsonResponse(content)
-            when (result) {
-                is SummaryResult.Structured -> result.copy(cachedAt = timestamp)
-                is SummaryResult.Fallback -> result.copy(cachedAt = timestamp)
-                is SummaryResult.Error -> null
-            }
+            SummaryResult.Markdown(content, timestamp)
         } catch (e: Exception) {
-            prefs.edit().remove("summary_${videoId}_v3").apply()
+            prefs.edit().remove(cacheKey).apply()
             null
         }
     }
 
-    private fun cacheSummary(videoId: String, content: String) {
+    private fun cacheSummary(cacheKey: String, content: String) {
         if (defaultPrefs.getBoolean("enable_incognito", false)) {
             return
         }
         val obj = JSONObject()
         obj.put("timestamp", System.currentTimeMillis())
         obj.put("content", content)
-        prefs.edit().putString("summary_${videoId}_v3", obj.toString()).apply()
+        prefs.edit().putString(cacheKey, obj.toString()).apply()
     }
 
     private suspend fun buildTranscriptText(video: StreamInfo): String = withContext(Dispatchers.IO) {
@@ -231,7 +148,7 @@ object GeminiSummarizer {
         }
     }
 
-    private fun buildPrompt(video: StreamInfo, transcript: String): String {
+    private fun buildPrompt(video: StreamInfo, transcript: String, summaryPrompt: BuiltInPrompt): String {
         val desc = video.description?.content?.take(500) ?: ""
         val title = video.name ?: "Untitled"
         val uploader = video.uploaderName ?: "Unknown"
@@ -242,57 +159,16 @@ object GeminiSummarizer {
             ""
         }
 
-        // ── Check for user-selected prompt from Prompt Library ─────────────
-        val ctx = _appContext
-        if (ctx != null) {
-            val activePrompt = PromptLibrary.getActivePrompt(ctx)
-            if (activePrompt != null) {
-                Log.d(TAG, "Using library prompt: ${activePrompt.title}")
-                return buildString {
-                    append(activePrompt.promptText)
-                    append("\n\n---\n")
-                    append("Video Title: $title\n")
-                    append("Channel: $uploader\n")
-                    if (desc.isNotEmpty()) append("Description: $desc\n")
-                    if (transcriptSection.isNotEmpty()) append(transcriptSection)
-                }
-            }
-        }
+        Log.d(TAG, "Using summary prompt: ${summaryPrompt.title}")
 
-        // ── Default structured JSON prompt ─────────────────────────────────
         return """You are an expert content analyst. Extract maximum value from this video content.
-Return STRICT JSON ONLY. Do not wrap in markdown ```json blocks. Just the raw JSON object.
+Apply this selected Prompt Library style:
+${summaryPrompt.promptText}
 
-Schema required:
-{
-  "title": "string",
-  "channel": "string",
-  "category": "string",
-  "categoryEmoji": "string (single emoji from vocabulary)",
-  "corePurpose": "string",
-  "chapters": [
-    {
-      "startSeconds": int,
-      "endSeconds": int,
-      "summary": "string",
-      "emoji": "string (single emoji from vocabulary)"
-    }
-  ],
-  "culturalImpact": "string",
-  "vibeEmoji": "string (single emoji from vocabulary)"
-}
-
-Vocabulary constraints for emojis:
-- 🎯 for Core Purpose / Identity
-- ⏱️ for Chapters / Timeline
-- 🌍 for Cultural Impact
-- 🎵 for Music / Audio
-- ✨ for Key Insights / Highlights
-- 💬 for Lyrics / Dialogue
+Ensure your output is clearly formatted in Markdown. Do not include any meta-commentary, just the content requested by the prompt.
 
 Title: $title
 Channel: $uploader
 Description: $desc$transcriptSection""".trimIndent()
     }
 }
-

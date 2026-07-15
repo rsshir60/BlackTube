@@ -83,17 +83,8 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             lifecycleScope.launch {
                 showState(stateLoading)
                 when (val result = GeminiSummarizer.summarize(streamInfo!!)) {
-                    is GeminiSummarizer.SummaryResult.Structured -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(
-                            tvSummaryContent,
-                            "## Summary\n\n" + result.data.chapters.joinToString("\n\n") {
-                                "### ${it.emoji} ${it.summary}\n${it.startSeconds} - ${it.endSeconds}"
-                            }
-                        )
-                        showState(stateSuccess)
-                    }
-                    is GeminiSummarizer.SummaryResult.Fallback -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.markdown)
+                    is GeminiSummarizer.SummaryResult.Markdown -> {
+                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
                         showState(stateSuccess)
                     }
                     is GeminiSummarizer.SummaryResult.Error -> {
@@ -134,24 +125,16 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             return
         }
 
-        val prefs = requireContext().getSharedPreferences("blacktube_ai_cache", Context.MODE_PRIVATE)
-        val isCached = prefs.contains("summary_${streamInfo.id}_v2")
+        val activePrompt = PromptLibrary.getActivePrompt(requireContext())
+        val promptId = activePrompt?.id ?: PromptLibrary.DEFAULT_PROMPT_ID
+        val isCached = GeminiSummarizer.hasCachedSummary(streamInfo.id, promptId)
 
         if (isCached) {
             lifecycleScope.launch {
                 showState(stateLoading)
                 when (val result = GeminiSummarizer.summarize(streamInfo!!)) {
-                    is GeminiSummarizer.SummaryResult.Structured -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(
-                            tvSummaryContent,
-                            "## Summary\n\n" + result.data.chapters.joinToString("\n\n") {
-                                "### ${it.emoji} ${it.summary}\n${it.startSeconds} - ${it.endSeconds}"
-                            }
-                        )
-                        showState(stateSuccess)
-                    }
-                    is GeminiSummarizer.SummaryResult.Fallback -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.markdown)
+                    is GeminiSummarizer.SummaryResult.Markdown -> {
+                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
                         showState(stateSuccess)
                     }
                     is GeminiSummarizer.SummaryResult.Error -> {

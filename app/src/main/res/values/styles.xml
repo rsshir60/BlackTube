@@ -18,7 +18,11 @@
         <item name="actionColor">@color/white</item>
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonTheme</item>
         <item name="toolbarSearchColor">@color/white</item>
-        <item name="colorControlActivated">?attr/colorPrimary</item>
+        <item name="colorControlActivated">@color/bt_switch_on_color</item>
+        <item name="android:colorControlActivated">@color/bt_switch_on_color</item>
+        <item name="colorControlNormal">@color/bt_switch_off_thumb_color</item>
+        <item name="android:colorControlNormal">@color/bt_switch_off_thumb_color</item>
+        <item name="colorSwitchThumbNormal">@color/bt_switch_off_thumb_color</item>
     </style>
     <style name="Base" parent="Base.V21"/>
 
@@ -122,14 +126,32 @@
     <!-- Settings -->
     <style name="LightSettingsTheme" parent="LightTheme">
         <item name="colorAccent">@color/light_settings_accent_color</item>
+        <item name="android:colorAccent">@color/light_settings_accent_color</item>
+        <item name="colorControlActivated">@color/light_settings_accent_color</item>
+        <item name="android:colorControlActivated">@color/light_settings_accent_color</item>
+        <item name="colorControlNormal">@color/bt_switch_off_track_color</item>
+        <item name="android:colorControlNormal">@color/bt_switch_off_track_color</item>
+        <item name="colorSwitchThumbNormal">@color/bt_switch_off_thumb_color</item>
     </style>
 
     <style name="DarkSettingsTheme" parent="DarkTheme">
         <item name="colorAccent">@color/dark_settings_accent_color</item>
+        <item name="android:colorAccent">@color/dark_settings_accent_color</item>
+        <item name="colorControlActivated">@color/dark_settings_accent_color</item>
+        <item name="android:colorControlActivated">@color/dark_settings_accent_color</item>
+        <item name="colorControlNormal">@color/bt_switch_off_track_color</item>
+        <item name="android:colorControlNormal">@color/bt_switch_off_track_color</item>
+        <item name="colorSwitchThumbNormal">@color/bt_switch_off_thumb_color</item>
     </style>
 
     <style name="BlackSettingsTheme" parent="BlackTheme">
         <item name="colorAccent">@color/black_settings_accent_color</item>
+        <item name="android:colorAccent">@color/black_settings_accent_color</item>
+        <item name="colorControlActivated">@color/black_settings_accent_color</item>
+        <item name="android:colorControlActivated">@color/black_settings_accent_color</item>
+        <item name="colorControlNormal">@color/bt_switch_off_track_color</item>
+        <item name="android:colorControlNormal">@color/bt_switch_off_track_color</item>
+        <item name="colorSwitchThumbNormal">@color/bt_switch_off_thumb_color</item>
     </style>
 
     <!-- Router Activity -->

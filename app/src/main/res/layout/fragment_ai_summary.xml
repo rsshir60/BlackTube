@@ -88,32 +88,35 @@
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/chip_active_prompt"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="32dp"
                     android:layout_marginBottom="12dp"
-                    android:background="@drawable/bg_ai_chip"
-                    android:drawableStart="@drawable/ic_stars"
-                    android:drawablePadding="6dp"
-                    android:drawableTint="?attr/colorAccent"
+                    android:background="@drawable/bg_bt_ai_prompt_chip"
+                    android:drawableStart="@drawable/ic_stars_16"
+                    android:drawablePadding="5dp"
+                    android:drawableTint="@color/bt_switch_on_color"
                     android:gravity="center"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
                     android:text="@string/prompt_library_default"
                     android:textAllCaps="false"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:textColor="@color/bt_ai_button_text_selector"
                     android:textSize="12sp" />
 
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_summarize"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/summarize_button"
-                    style="?android:attr/buttonStyle"
-                    android:backgroundTint="?attr/colorAccent"
-                    android:textColor="@android:color/white"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_bt_ai_action_button"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
                     android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
+                    android:paddingEnd="24dp"
+                    android:text="@string/summarize_button"
+                    android:textAllCaps="false"
+                    android:textColor="@color/bt_ai_button_text_selector"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -163,13 +166,18 @@
                     android:textColor="@android:color/holo_red_light"
                     tools:text="Failed to summarize: Network error" />
 
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_retry"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_bt_ai_action_button"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
                     android:text="@string/retry"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:textColor="?attr/colorAccent" />
+                    android:textAllCaps="false"
+                    android:textColor="@color/bt_ai_button_text_selector" />
             </LinearLayout>
 
             <!-- SUCCESS STATE / RESULTS -->
@@ -208,15 +216,20 @@
                 </androidx.cardview.widget.CardView>
 
                 <!-- Re-summarize / Clear button -->
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_re_summarize"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Refresh Summary"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:textColor="?attr/colorAccent"
+                    android:layout_height="40dp"
                     android:layout_gravity="end"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_bt_ai_action_button"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:text="Refresh Summary"
+                    android:textAllCaps="false"
+                    android:textColor="@color/bt_ai_button_text_selector" />
             </LinearLayout>
 
         </FrameLayout>

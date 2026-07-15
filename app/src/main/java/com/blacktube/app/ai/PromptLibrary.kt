@@ -36,6 +36,9 @@ data class BuiltInPrompt(
 
 object PromptLibrary {
 
+    const val DEFAULT_PROMPT_ID = "builtin_default_summary"
+    const val PROMPT_CONTRACT_VERSION = 4
+
     private const val PREFS_NAME = "blacktube_prompt_library"
     private const val KEY_USER_PROMPTS = "user_prompts"
     private const val KEY_FAVORITES = "favorites"
@@ -44,6 +47,58 @@ object PromptLibrary {
     // ── Built-in prompt catalogue ──────────────────────────────────────────
 
     private val BUILT_IN_PROMPTS: List<BuiltInPrompt> = listOf(
+
+        BuiltInPrompt(
+            id = DEFAULT_PROMPT_ID,
+            title = "Default Prompt",
+            description = "Balanced AI summary optimized for YouTube videos.",
+            category = PromptCategory.YOUTUBE,
+            promptText = """
+Give a balanced YouTube video summary.
+Include the key points, important context, and useful takeaways.
+Make it easy to understand for a general viewer.
+Use a clean, premium tone and avoid unnecessary detail.
+""".trimIndent()
+        ),
+
+        BuiltInPrompt(
+            id = "builtin_technical_summary",
+            title = "Technical Summary",
+            description = "Explains technical details, architecture, tools, and methods.",
+            category = PromptCategory.CODE,
+            promptText = """
+Explain this video for a technical audience.
+Highlight architecture, implementation details, tools, methods, workflows, and tradeoffs.
+If the video discusses code, systems, hardware, AI, or engineering, focus on how it works.
+Keep the output structured and practical.
+""".trimIndent()
+        ),
+
+        BuiltInPrompt(
+            id = "builtin_educational_summary",
+            title = "Educational Summary",
+            description = "Explains like a teacher with examples and simple framing.",
+            category = PromptCategory.LEARNING,
+            promptText = """
+Explain this video like a teacher.
+Start from the core idea, then build understanding step by step.
+Add simple examples where helpful.
+Use friendly language and call out what the viewer should remember.
+""".trimIndent()
+        ),
+
+        BuiltInPrompt(
+            id = "builtin_short_summary",
+            title = "Short Summary",
+            description = "Concise bullet points for quick understanding.",
+            category = PromptCategory.YOUTUBE,
+            promptText = """
+Generate a short, concise summary.
+Use compact bullet-style phrasing.
+Focus only on the most important points.
+Avoid long explanations.
+""".trimIndent()
+        ),
 
         BuiltInPrompt(
             id = "builtin_yt_quick",
@@ -790,6 +845,13 @@ Logical next topics to explore.
             ?: getUserPrompts(context).find { it.id == id }
     }
 
+    fun getSummaryPrompt(context: Context?): BuiltInPrompt {
+        if (context != null) {
+            getActivePrompt(context)?.let { return it }
+        }
+        return getAllBuiltIn().first { it.id == DEFAULT_PROMPT_ID }
+    }
+
     fun setActivePrompt(context: Context, id: String?) {
         if (id == null) {
             clearActivePrompt(context)
@@ -820,7 +882,8 @@ Logical next topics to explore.
     fun getAllForDisplay(context: Context): List<BuiltInPrompt> {
         val all = getAllBuiltIn() + getUserPrompts(context)
         val favIds = getFavoriteIds(context)
-        return all.sortedWith(compareByDescending<BuiltInPrompt> { favIds.contains(it.id) }
+        return all.sortedWith(compareByDescending<BuiltInPrompt> { it.id == DEFAULT_PROMPT_ID }
+            .thenByDescending { favIds.contains(it.id) }
             .thenBy { it.category.ordinal }
             .thenBy { it.title })
     }

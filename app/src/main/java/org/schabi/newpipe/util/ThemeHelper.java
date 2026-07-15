@@ -93,7 +93,7 @@ public final class ThemeHelper {
      */
     @StyleRes
     public static int getDialogTheme(final Context context) {
-        return R.style.DarkDialogTheme;
+        return isBlackThemeSelected(context) ? R.style.DarkDialogTheme : R.style.DarkDialogTheme;
     }
 
     /**
@@ -117,7 +117,8 @@ public final class ThemeHelper {
      */
     @StyleRes
     public static int getThemeForService(final Context context, final int serviceId) {
-        int baseTheme = R.style.BlackTheme; // FORCE AMOLED BLACK
+        final boolean blackTheme = isBlackThemeSelected(context);
+        int baseTheme = blackTheme ? R.style.BlackTheme : R.style.DarkTheme;
         
         if (serviceId <= -1) {
             return baseTheme;
@@ -130,7 +131,7 @@ public final class ThemeHelper {
             return baseTheme;
         }
 
-        String themeName = "BlackTheme";
+        String themeName = blackTheme ? "BlackTheme" : "DarkTheme";
         themeName += "." + service.getServiceInfo().getName();
         final int resourceId = context.getResources()
                 .getIdentifier(themeName, "style", context.getPackageName());
@@ -143,7 +144,14 @@ public final class ThemeHelper {
 
     @StyleRes
     public static int getSettingsThemeStyle(final Context context) {
-        return R.style.BlackSettingsTheme;
+        return isBlackThemeSelected(context) ? R.style.BlackSettingsTheme : R.style.DarkSettingsTheme;
+    }
+
+    private static boolean isBlackThemeSelected(final Context context) {
+        final String nightTheme = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.night_theme_key),
+                        context.getString(R.string.default_night_theme_value));
+        return !context.getString(R.string.dark_theme_key).equals(nightTheme);
     }
 
     /**

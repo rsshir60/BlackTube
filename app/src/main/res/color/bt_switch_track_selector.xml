@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_checked="true"
+        android:state_enabled="false"
+        android:color="#55FF5252" />
+    <item
+        android:state_checked="true"
+        android:color="#66FF5252" />
+    <item
+        android:state_enabled="false"
+        android:color="#665F6368" />
+    <item android:color="@color/bt_switch_off_track_color" />
+</selector>

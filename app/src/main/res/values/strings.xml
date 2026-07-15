@@ -387,6 +387,7 @@
     <string name="charset_most_special_characters">Most special characters</string>
     <!-- About -->
     <string name="title_activity_about">About Tubular</string>
+    <string name="about_title">About BlackTube</string>
     <string name="title_licenses">Third-party Licenses</string>
     <string name="copyright">© %1$s by %2$s under %3$s</string>
     <string name="tab_about">About \u0026 FAQ</string>

@@ -56,9 +56,25 @@
                     android:layout_marginTop="2dp">
 
                     <TextView
+                        android:id="@+id/chip_default"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:background="@drawable/bg_bt_default_badge"
+                        android:gravity="center"
+                        android:minWidth="0dp"
+                        android:paddingStart="9dp"
+                        android:paddingEnd="9dp"
+                        android:text="Default"
+                        android:textColor="#FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <TextView
                         android:id="@+id/chip_active"
                         android:layout_width="wrap_content"
                         android:layout_height="24dp"
+                        android:layout_marginStart="4dp"
                         android:background="@drawable/bg_ai_chip_active"
                         android:gravity="center"
                         android:minWidth="0dp"
@@ -102,6 +118,17 @@
 
         <!-- Description -->
         <TextView
+            android:id="@+id/tv_prompt_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorAccent"
+            android:layout_marginStart="46dp"
+            android:layout_marginBottom="4dp"
+            android:letterSpacing="0.08" />
+
+        <TextView
             android:id="@+id/tv_prompt_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -109,6 +136,17 @@
             android:textColor="?android:attr/textColorSecondary"
             android:layout_marginStart="46dp"
             android:layout_marginBottom="10dp"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_prompt_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginStart="46dp"
+            android:layout_marginBottom="12dp"
             android:maxLines="2"
             android:ellipsize="end" />
 
@@ -123,7 +161,7 @@
                 android:id="@+id/btn_use"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:background="@drawable/bg_ai_chip"
+                android:background="@drawable/bg_bt_ai_action_button"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:paddingStart="12dp"

@@ -19,38 +19,15 @@ public class AppearanceSettingsFragment extends BasePreferenceFragment {
     public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
         addPreferencesFromResourceRegistry();
 
-        final String themeKey = getString(R.string.theme_key);
-        // the key of the active theme when settings were opened (or recreated after theme change)
-        final String startThemeKey = defaultPreferences
-                .getString(themeKey, getString(R.string.default_theme_value));
-        final String autoDeviceThemeKey = getString(R.string.auto_device_theme_key);
-        findPreference(themeKey).setOnPreferenceChangeListener((preference, newValue) -> {
-            if (newValue.toString().equals(autoDeviceThemeKey)) {
-                Toast.makeText(getContext(), getString(R.string.select_night_theme_toast),
-                        Toast.LENGTH_LONG).show();
-            }
-
-            applyThemeChange(startThemeKey, themeKey, newValue);
-            return false;
-        });
-
         final String nightThemeKey = getString(R.string.night_theme_key);
-        if (startThemeKey.equals(autoDeviceThemeKey)) {
-            final String startNightThemeKey = defaultPreferences
-                    .getString(nightThemeKey, getString(R.string.default_night_theme_value));
-
-            findPreference(nightThemeKey).setOnPreferenceChangeListener((preference, newValue) -> {
+        final String startNightThemeKey = defaultPreferences
+                .getString(nightThemeKey, getString(R.string.default_night_theme_value));
+        final Preference nightThemePreference = findPreference(nightThemeKey);
+        if (nightThemePreference != null) {
+            nightThemePreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 applyThemeChange(startNightThemeKey, nightThemeKey, newValue);
                 return false;
             });
-        } else {
-            // disable the night theme selection
-            final Preference preference = findPreference(nightThemeKey);
-            if (preference != null) {
-                preference.setEnabled(false);
-                preference.setSummary(getString(R.string.night_theme_available,
-                        getString(R.string.auto_device_theme_title)));
-            }
         }
 
         final String showKiosksKey = getString(R.string.show_kiosks_key);

@@ -6,9 +6,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.preference.Preference;
 
 import org.schabi.newpipe.MainActivity;
 import org.schabi.newpipe.R;
+import org.schabi.newpipe.about.AboutActivity;
 
 public class MainSettingsFragment extends BasePreferenceFragment {
     public static final boolean DEBUG = MainActivity.DEBUG;
@@ -58,5 +60,15 @@ public class MainSettingsFragment extends BasePreferenceFragment {
             settingsActivity = null;
         }
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onPreferenceTreeClick(final Preference preference) {
+        if (getString(R.string.about_settings_key).equals(preference.getKey())) {
+            startActivity(AboutActivity.createIntent(requireContext()));
+            return true;
+        }
+
+        return super.onPreferenceTreeClick(preference);
     }
 }

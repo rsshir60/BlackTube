@@ -20,6 +20,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.schabi.newpipe.R
+import org.schabi.newpipe.util.ThemeHelper
 
 class PromptLibraryActivity : AppCompatActivity() {
 
@@ -43,6 +44,7 @@ class PromptLibraryActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.setTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_prompt_library)
 

@@ -99,4 +99,18 @@
     <!-- Vote button colors -->
     <color name="sponsor_block_vote_button_selected">#CD201F</color>
 
+    <!-- BlackTube AppCompat control colors -->
+    <color name="bt_switch_on_color">#ff5252</color>
+    <color name="bt_switch_off_thumb_color">#E0E0E0</color>
+    <color name="bt_switch_off_track_color">#5F6368</color>
+
+    <color name="bt_ai_button_background">#1B1B1B</color>
+    <color name="bt_ai_button_background_pressed">#2A2A2A</color>
+    <color name="bt_ai_button_background_disabled">#262626</color>
+    <color name="bt_ai_button_text">#FFFFFFFF</color>
+    <color name="bt_ai_button_text_disabled">#80FFFFFF</color>
+
+    <color name="bt_ai_chip_background">#101010</color>
+    <color name="bt_ai_chip_background_pressed">#202020</color>
+
 </resources>
