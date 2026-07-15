@@ -36,12 +36,17 @@
 
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_clear_prompt_pref"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
+        android:background="@drawable/bg_ai_chip"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:text="@string/clear"
+        android:textAllCaps="false"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone" />

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -15,7 +16,6 @@ import androidx.preference.SwitchPreferenceCompat
 import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
-import com.google.android.material.button.MaterialButton
 import org.schabi.newpipe.R
 
 /**
@@ -167,7 +167,7 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
             if (isConfigured) 0xFF2E7D32.toInt() else 0xFFB71C1C.toInt()
         )
 
-        val btnTest = v.findViewById<MaterialButton>(R.id.btn_test_connection)
+        val btnTest = v.findViewById<Button>(R.id.btn_test_connection)
         btnTest?.setOnClickListener {
             if (!isConfigured) {
                 Toast.makeText(ctx, getString(R.string.gemini_not_configured), Toast.LENGTH_SHORT).show()
@@ -181,7 +181,7 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
         tvActivePromptPref?.text = activePrompt?.title
             ?: getString(R.string.prompt_library_default)
 
-        val btnClearPrompt = v.findViewById<MaterialButton>(R.id.btn_clear_prompt_pref)
+        val btnClearPrompt = v.findViewById<Button>(R.id.btn_clear_prompt_pref)
         if (btnClearPrompt != null) {
             btnClearPrompt.visibility = if (activePrompt != null) View.VISIBLE else View.GONE
             btnClearPrompt.setOnClickListener {

@@ -19,7 +19,6 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.schabi.newpipe.R
 
 class PromptLibraryActivity : AppCompatActivity() {
@@ -30,7 +29,7 @@ class PromptLibraryActivity : AppCompatActivity() {
     private lateinit var chipGroupFilter: LinearLayout
     private lateinit var tvActivePrompt: TextView
     private lateinit var btnClearActive: View
-    private lateinit var fabNew: FloatingActionButton
+    private lateinit var fabNew: View
 
     private var allPrompts: List<BuiltInPrompt> = emptyList()
     private var currentFilter: PromptCategory? = null

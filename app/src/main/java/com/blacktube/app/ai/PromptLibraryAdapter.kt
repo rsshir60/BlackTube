@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
 import org.schabi.newpipe.R
 
 private const val TYPE_HEADER = 0
@@ -97,10 +97,10 @@ class PromptLibraryAdapter(
         private val chipActive: TextView = itemView.findViewById(R.id.chip_active)
         private val chipBuiltin: TextView = itemView.findViewById(R.id.chip_builtin)
         private val btnFav: ImageButton = itemView.findViewById(R.id.btn_favorite)
-        private val btnUse: MaterialButton = itemView.findViewById(R.id.btn_use)
-        private val btnDuplicate: MaterialButton = itemView.findViewById(R.id.btn_duplicate)
-        private val btnEdit: MaterialButton = itemView.findViewById(R.id.btn_edit)
-        private val btnDelete: MaterialButton = itemView.findViewById(R.id.btn_delete)
+        private val btnUse: Button = itemView.findViewById(R.id.btn_use)
+        private val btnDuplicate: Button = itemView.findViewById(R.id.btn_duplicate)
+        private val btnEdit: Button = itemView.findViewById(R.id.btn_edit)
+        private val btnDelete: Button = itemView.findViewById(R.id.btn_delete)
 
         fun bind(item: ListItem.PromptItem) {
             val p = item.prompt

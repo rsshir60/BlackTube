@@ -1,119 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:fillViewport="false">
 
-    <!-- Header -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="✏️ Edit Prompt"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="?android:attr/textColorPrimary"
-        android:layout_marginBottom="16dp" />
-
-    <!-- Title field -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/prompt_editor_title_hint"
-        android:layout_marginBottom="12dp">
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="Edit Prompt"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="@string/prompt_editor_title_hint"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp" />
 
         <EditText
             android:id="@+id/et_prompt_editor_title"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_ai_input"
             android:inputType="text"
             android:maxLines="1"
-            android:background="@null" />
+            android:textColor="?android:attr/textColorPrimary"
+            android:textColorHint="?android:attr/textColorSecondary" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Description field -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Short description (optional)"
-        android:layout_marginBottom="12dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="Short description (optional)"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp" />
 
         <EditText
             android:id="@+id/et_prompt_editor_desc"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_ai_input"
+            android:gravity="top"
             android:inputType="textMultiLine"
             android:maxLines="2"
-            android:background="@null" />
+            android:textColor="?android:attr/textColorPrimary"
+            android:textColorHint="?android:attr/textColorSecondary" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Category spinner -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Category"
-        android:layout_marginBottom="12dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="Category"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp" />
 
         <AutoCompleteTextView
             android:id="@+id/spinner_prompt_category"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_ai_input"
             android:inputType="none"
-            android:background="@null" />
+            android:textColor="?android:attr/textColorPrimary"
+            android:textColorHint="?android:attr/textColorSecondary" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Prompt body -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/prompt_editor_body_hint"
-        android:layout_marginBottom="16dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="@string/prompt_editor_body_hint"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp" />
 
         <EditText
             android:id="@+id/et_prompt_editor_body"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:inputType="textMultiLine"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_ai_input"
+            android:fontFamily="monospace"
             android:gravity="top"
+            android:inputType="textMultiLine"
             android:scrollbars="vertical"
-            android:background="@null"
-            android:textSize="13sp"
-            android:fontFamily="monospace" />
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
-
-        <Button
-            android:id="@+id/btn_editor_cancel"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/cancel"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginEnd="8dp" />
+            android:gravity="end"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btn_editor_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save"
-            android:backgroundTint="?attr/colorAccent"
-            android:textColor="@android:color/white" />
+            <Button
+                android:id="@+id/btn_editor_cancel"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/cancel"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <Button
+                android:id="@+id/btn_editor_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?attr/colorAccent"
+                android:text="@string/save"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
