@@ -58,26 +58,33 @@
                     android:orientation="horizontal"
                     android:layout_marginTop="2dp">
 
-                    <com.google.android.material.chip.Chip
+                    <TextView
                         android:id="@+id/chip_active"
                         android:layout_width="wrap_content"
                         android:layout_height="24dp"
-                        android:text="● Active"
-                        android:textSize="10sp"
-                        app:chipBackgroundColor="#2E7D32"
-                        app:chipMinHeight="24dp"
+                        android:background="@drawable/bg_ai_chip_active"
+                        android:gravity="center"
+                        android:minWidth="0dp"
+                        android:paddingStart="9dp"
+                        android:paddingEnd="9dp"
+                        android:text="Active"
                         android:textColor="#FFFFFF"
+                        android:textSize="10sp"
                         android:visibility="gone" />
 
-                    <com.google.android.material.chip.Chip
+                    <TextView
                         android:id="@+id/chip_builtin"
                         android:layout_width="wrap_content"
                         android:layout_height="24dp"
                         android:layout_marginStart="4dp"
+                        android:background="@drawable/bg_ai_chip"
+                        android:gravity="center"
+                        android:minWidth="0dp"
+                        android:paddingStart="9dp"
+                        android:paddingEnd="9dp"
                         android:text="Built-in"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:textSize="10sp"
-                        app:chipMinHeight="24dp"
-                        app:chipBackgroundColor="?attr/colorSurfaceVariant"
                         android:visibility="gone" />
 
                 </LinearLayout>

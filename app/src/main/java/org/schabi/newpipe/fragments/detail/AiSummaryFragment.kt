@@ -12,11 +12,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.AppCompatButton
 import androidx.lifecycle.lifecycleScope
 import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
-import com.google.android.material.chip.Chip
 import kotlinx.coroutines.launch
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.schabi.newpipe.R
@@ -35,7 +35,7 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
 
     private lateinit var tvErrorMessage: TextView
     private lateinit var tvSummaryContent: TextView
-    private lateinit var chipActivePrompt: Chip
+    private lateinit var chipActivePrompt: AppCompatButton
 
     private lateinit var promptLibraryLauncher: ActivityResultLauncher<Intent>
 

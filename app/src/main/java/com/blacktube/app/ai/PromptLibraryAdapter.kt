@@ -8,7 +8,6 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.chip.Chip
 import org.schabi.newpipe.R
 
 private const val TYPE_HEADER = 0
@@ -95,8 +94,8 @@ class PromptLibraryAdapter(
         private val tvEmoji: TextView = itemView.findViewById(R.id.tv_prompt_emoji)
         private val tvTitle: TextView = itemView.findViewById(R.id.tv_prompt_title)
         private val tvDesc: TextView = itemView.findViewById(R.id.tv_prompt_desc)
-        private val chipActive: Chip = itemView.findViewById(R.id.chip_active)
-        private val chipBuiltin: Chip = itemView.findViewById(R.id.chip_builtin)
+        private val chipActive: TextView = itemView.findViewById(R.id.chip_active)
+        private val chipBuiltin: TextView = itemView.findViewById(R.id.chip_builtin)
         private val btnFav: ImageButton = itemView.findViewById(R.id.btn_favorite)
         private val btnUse: MaterialButton = itemView.findViewById(R.id.btn_use)
         private val btnDuplicate: MaterialButton = itemView.findViewById(R.id.btn_duplicate)

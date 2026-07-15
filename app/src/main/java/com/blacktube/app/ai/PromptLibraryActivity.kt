@@ -11,16 +11,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.schabi.newpipe.R
 
@@ -29,13 +27,14 @@ class PromptLibraryActivity : AppCompatActivity() {
     private lateinit var recycler: RecyclerView
     private lateinit var adapter: PromptLibraryAdapter
     private lateinit var searchEdit: EditText
-    private lateinit var chipGroupFilter: ChipGroup
+    private lateinit var chipGroupFilter: LinearLayout
     private lateinit var tvActivePrompt: TextView
     private lateinit var btnClearActive: View
     private lateinit var fabNew: FloatingActionButton
 
     private var allPrompts: List<BuiltInPrompt> = emptyList()
     private var currentFilter: PromptCategory? = null
+    private var selectedFilterButton: View? = null
 
     companion object {
         const val RESULT_PROMPT_SELECTED = "result_prompt_id"
@@ -70,35 +69,53 @@ class PromptLibraryActivity : AppCompatActivity() {
     }
 
     private fun setupCategoryChips() {
-        // "All" chip
-        val allChip = Chip(this).apply {
-            text = "All"
-            isCheckable = true
-            isChecked = true
-            id = View.generateViewId()
-        }
+        val allChip = createCategoryButton("All", null)
+        allChip.isSelected = true
+        selectedFilterButton = allChip
         chipGroupFilter.addView(allChip)
 
         PromptCategory.values().forEach { cat ->
-            val chip = Chip(this).apply {
-                text = "${cat.emoji} ${cat.displayName}"
-                isCheckable = true
-                tag = cat
-                id = View.generateViewId()
-            }
-            chipGroupFilter.addView(chip)
-        }
-
-        chipGroupFilter.setOnCheckedStateChangeListener { group, checkedIds ->
-            if (checkedIds.isEmpty()) {
-                currentFilter = null
-            } else {
-                val view = group.findViewById<Chip>(checkedIds[0])
-                currentFilter = view?.tag as? PromptCategory
-            }
-            applyFilter()
+            chipGroupFilter.addView(createCategoryButton("${cat.emoji} ${cat.displayName}", cat))
         }
     }
+
+    private fun createCategoryButton(label: String, category: PromptCategory?): AppCompatButton {
+        return AppCompatButton(this).apply {
+            text = label
+            tag = category
+            id = View.generateViewId()
+            minWidth = 0
+            minHeight = 0
+            isAllCaps = false
+            setTextColor(resolveThemeColor(android.R.attr.textColorPrimary))
+            setBackgroundResource(R.drawable.bg_ai_chip)
+            setPadding(dp(14), 0, dp(14), 0)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                dp(36)
+            ).apply {
+                marginEnd = dp(8)
+            }
+            setOnClickListener {
+                selectedFilterButton?.isSelected = false
+                isSelected = true
+                selectedFilterButton = this
+                currentFilter = tag as? PromptCategory
+                applyFilter()
+            }
+        }
+    }
+
+    private fun resolveThemeColor(attr: Int): Int {
+        val colors = theme.obtainStyledAttributes(intArrayOf(attr))
+        return try {
+            colors.getColor(0, 0)
+        } finally {
+            colors.recycle()
+        }
+    }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun setupRecycler() {
         adapter = PromptLibraryAdapter(

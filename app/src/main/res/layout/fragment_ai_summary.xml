@@ -85,18 +85,24 @@
                 tools:visibility="visible">
 
                 <!-- Active prompt chip -->
-                <com.google.android.material.chip.Chip
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/chip_active_prompt"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_marginBottom="12dp"
+                    android:background="@drawable/bg_ai_chip"
+                    android:drawableStart="@drawable/ic_stars"
+                    android:drawablePadding="6dp"
+                    android:drawableTint="?attr/colorAccent"
+                    android:gravity="center"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
                     android:text="@string/prompt_library_default"
-                    android:textSize="12sp"
-                    app:chipIcon="@drawable/ic_stars"
-                    app:chipIconTint="?attr/colorAccent"
-                    app:chipBackgroundColor="?attr/colorSurfaceVariant"
-                    app:chipStrokeWidth="1dp"
-                    app:chipStrokeColor="?attr/colorOutline" />
+                    android:textAllCaps="false"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="12sp" />
 
                 <Button
                     android:id="@+id/btn_summarize"

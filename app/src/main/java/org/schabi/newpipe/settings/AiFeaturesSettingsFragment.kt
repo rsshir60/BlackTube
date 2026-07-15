@@ -16,7 +16,6 @@ import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.chip.Chip
 import org.schabi.newpipe.R
 
 /**
@@ -136,24 +135,22 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
         val activePrompt = PromptLibrary.getActivePrompt(ctx)
 
         // ── Status header card ───────────────────────────────────────────
-        val chipStatus = v.findViewById<Chip>(R.id.chip_ai_global_status)
+        val chipStatus = v.findViewById<TextView>(R.id.chip_ai_global_status)
         val tvPromptHeader = v.findViewById<TextView>(R.id.tv_ai_active_prompt_header)
 
         if (chipStatus != null) {
             when {
                 !isEnabled -> {
                     chipStatus.text = "⚪ Disabled"
-                    chipStatus.setChipBackgroundColorResource(android.R.color.darker_gray)
+                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_disabled)
                 }
                 !isConfigured -> {
                     chipStatus.text = "🔴 Setup Required"
-                    chipStatus.chipBackgroundColor = android.content.res.ColorStateList.valueOf(
-                        requireContext().getColor(android.R.color.holo_red_dark))
+                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_error)
                 }
                 else -> {
                     chipStatus.text = "🟢 Active"
-                    chipStatus.chipBackgroundColor = android.content.res.ColorStateList.valueOf(
-                        0xFF1B5E20.toInt())
+                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_active)
                 }
             }
         }

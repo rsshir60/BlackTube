@@ -38,14 +38,18 @@
                 android:textColor="?android:attr/textColorPrimary" />
 
             <!-- Status badge -->
-            <com.google.android.material.chip.Chip
+            <TextView
                 android:id="@+id/chip_ai_global_status"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_ai_status_disabled"
+                android:gravity="center"
+                android:minWidth="0dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
                 android:text="Checking…"
-                android:textSize="11sp"
-                app:chipMinHeight="28dp"
-                app:chipBackgroundColor="?attr/colorSurfaceVariant" />
+                android:textColor="@android:color/white"
+                android:textSize="11sp" />
 
         </LinearLayout>
 
