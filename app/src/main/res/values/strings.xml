@@ -1026,8 +1026,9 @@
     <!-- BlackTube AI Features -->
     <string name="ai_features_title">AI Features</string>
     <string name="ai_features_summary">Configure Gemini AI-powered video summarization</string>
+    <string name="ai_features_key">ai_features_key</string>
     <string name="gemini_api_key_title">Gemini API Key</string>
-    <string name="gemini_api_key_summary">Enter your Google Gemini API key from AI Studio (free tier available)</string>
+    <string name="gemini_api_key_summary">Set your Gemini API Key</string>
     <string name="gemini_enable_title">Enable AI Summarizer</string>
     <string name="gemini_enable_summary">Show "Summarize" button on video pages using Gemini AI</string>
     <string name="clear_ai_cache_title">Clear AI Cache</string>
@@ -1050,7 +1051,31 @@
     <string name="force_auto_fullscreen_summary">Force auto fullscreen in landscape</string>
     <string name="force_auto_fullscreen_title">Force Auto Fullscreen</string>
     <string name="sponsor_block_reset_colors_toast">Colors Reset</string>
-    <string name="import_ai_prompt_title">Import Custom Prompt</string>
-    <string name="import_ai_prompt_summary">Load a .md file containing custom instructions for Gemini</string>
-</resources>
+    <!-- Prompt Library -->
+    <string name="prompt_library_title">Prompt Library</string>
+    <string name="prompt_library_summary">Browse and select built-in AI prompts</string>
+    <string name="prompt_library_search_hint">Search prompts…</string>
+    <string name="prompt_library_use">Use</string>
+    <string name="prompt_library_duplicate">Duplicate &amp; Edit</string>
+    <string name="prompt_library_edit">Edit</string>
+    <string name="prompt_library_delete">Delete</string>
+    <string name="prompt_library_default">Default Prompt</string>
+    <string name="prompt_library_active">Active: %s</string>
+    <string name="prompt_library_default_restored">Restored to default prompt</string>
+    <string name="prompt_activated">Prompt activated: %s</string>
 
+    <!-- Prompt Editor -->
+    <string name="prompt_editor_title_hint">Prompt title</string>
+    <string name="prompt_editor_body_hint">Enter your prompt instructions…</string>
+    <string name="save">Save</string>
+    <string name="prompt_saved">Prompt saved</string>
+    <string name="prompt_deleted">Prompt deleted</string>
+
+    <!-- AI Settings redesign -->
+    <string name="gemini_enable_summary_on">Gemini AI summarizer is active ✓</string>
+    <string name="gemini_enable_summary_off">AI-powered video summaries using Gemini</string>
+    <string name="ai_test_connection">Test Connection</string>
+    <string name="ai_connection_ok">Connection looks good</string>
+    <string name="clear_ai_cache_summary_count">%d summaries cached - tap to clear</string>
+
+</resources>

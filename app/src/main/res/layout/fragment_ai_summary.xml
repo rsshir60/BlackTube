@@ -78,11 +78,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="top|center_horizontal"
+                android:gravity="center_horizontal"
                 android:layout_gravity="top|center_horizontal"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:visibility="gone"
                 tools:visibility="visible">
+
+                <!-- Active prompt chip -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_active_prompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/prompt_library_default"
+                    android:textSize="12sp"
+                    app:chipIcon="@drawable/ic_stars"
+                    app:chipIconTint="?attr/colorAccent"
+                    app:chipBackgroundColor="?attr/colorSurfaceVariant"
+                    app:chipStrokeWidth="1dp"
+                    app:chipStrokeColor="?attr/colorOutline" />
 
                 <Button
                     android:id="@+id/btn_summarize"
@@ -94,6 +108,7 @@
                     android:textColor="@android:color/white"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp" />
+
             </LinearLayout>
 
             <!-- LOADING STATE -->

@@ -82,18 +82,12 @@ object ServiceHelper {
 
     @JvmStatic
     fun getSelectedServiceId(context: Context): Int {
-        return (getSelectedService(context) ?: DEFAULT_FALLBACK_SERVICE).serviceId
+        return 0 // Always YouTube for BlackTube
     }
 
     @JvmStatic
     fun getSelectedService(context: Context): StreamingService? {
-        val serviceName: String = PreferenceManager.getDefaultSharedPreferences(context)
-            .getStringSafe(
-                context.getString(R.string.current_service_key),
-                context.getString(R.string.default_service_value)
-            )
-
-        return runCatching { NewPipe.getService(serviceName) }.getOrNull()
+        return ServiceList.YouTube // Always YouTube for BlackTube
     }
 
     @JvmStatic
@@ -113,7 +107,9 @@ object ServiceHelper {
      */
     @JvmStatic
     fun getServiceById(serviceId: Int): StreamingService {
-        return ServiceList.all().firstNotNullOf { it.takeIf { it.serviceId == serviceId } }
+        // Enforce YouTube only, prevent loading other services
+        if (serviceId == 0) return ServiceList.YouTube
+        throw NoSuchElementException("BlackTube only supports YouTube (serviceId 0)")
     }
 
     @JvmStatic

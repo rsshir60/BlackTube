@@ -13,6 +13,9 @@ import org.json.JSONObject
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import java.util.concurrent.TimeUnit
 
+// Application context cached at init — used for PromptLibrary lookup
+private var _appContext: Context? = null
+
 data class AiSummaryChapter(
     val startSeconds: Int,
     val endSeconds: Int,
@@ -46,6 +49,7 @@ object GeminiSummarizer {
 
     fun init(context: Context) {
         if (isInitialized) return
+        _appContext = context.applicationContext
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context)
         isInitialized = true
@@ -238,6 +242,24 @@ object GeminiSummarizer {
             ""
         }
 
+        // ── Check for user-selected prompt from Prompt Library ─────────────
+        val ctx = _appContext
+        if (ctx != null) {
+            val activePrompt = PromptLibrary.getActivePrompt(ctx)
+            if (activePrompt != null) {
+                Log.d(TAG, "Using library prompt: ${activePrompt.title}")
+                return buildString {
+                    append(activePrompt.promptText)
+                    append("\n\n---\n")
+                    append("Video Title: $title\n")
+                    append("Channel: $uploader\n")
+                    if (desc.isNotEmpty()) append("Description: $desc\n")
+                    if (transcriptSection.isNotEmpty()) append(transcriptSection)
+                }
+            }
+        }
+
+        // ── Default structured JSON prompt ─────────────────────────────────
         return """You are an expert content analyst. Extract maximum value from this video content.
 Return STRICT JSON ONLY. Do not wrap in markdown ```json blocks. Just the raw JSON object.
 

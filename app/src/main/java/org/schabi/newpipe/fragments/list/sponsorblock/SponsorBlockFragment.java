@@ -25,6 +25,7 @@ import org.schabi.newpipe.extractor.stream.StreamInfo;
 import org.schabi.newpipe.local.sponsorblock.SponsorBlockDataManager;
 import org.schabi.newpipe.util.SponsorBlockHelper;
 import org.schabi.newpipe.util.SponsorBlockMode;
+import org.schabi.newpipe.util.ThirdPartyApiHelper;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -70,7 +71,7 @@ public class SponsorBlockFragment
         }
 
         segmentListAdapter = new SponsorBlockSegmentListAdapter(context, this);
-        segmentListAdapter.setItems(new SponsorBlockSegment[0]);
+        segmentListAdapter.setItems(ThirdPartyApiHelper.getCachedSponsorBlockSegments(streamInfo));
     }
 
     @Override
@@ -228,7 +229,7 @@ public class SponsorBlockFragment
             return;
         }
 
-        segmentListAdapter.setItems(new SponsorBlockSegment[0]);
+        segmentListAdapter.setItems(ThirdPartyApiHelper.getCachedSponsorBlockSegments(streamInfo));
     }
 
     private void doMarkPendingSegment(final boolean isStart) {

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Active prompt display for Prompt System section -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="4dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Active Prompt"
+            android:textSize="13sp"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <TextView
+            android:id="@+id/tv_active_prompt_pref"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Default (Auto)"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:textColor="?attr/colorAccent"
+            android:layout_marginTop="2dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_clear_prompt_pref"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/clear"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone" />
+
+</LinearLayout>

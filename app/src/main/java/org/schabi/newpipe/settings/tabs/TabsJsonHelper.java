@@ -55,8 +55,9 @@ public final class TabsJsonHelper {
 
             final JsonArray tabsArray = outerJsonObject.getArray(JSON_TABS_ARRAY_KEY, null);
 
-            final var returnTabs = tabsArray.streamAsJsonObjects()
-                    .map(Tab::from)
+            final var returnTabs = tabsArray.stream()
+                    .filter(obj -> obj instanceof JsonObject)
+                    .map(obj -> Tab.from((JsonObject) obj))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toUnmodifiableList());
 

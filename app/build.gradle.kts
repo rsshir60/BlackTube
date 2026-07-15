@@ -244,6 +244,7 @@ dependencies {
     implementation(libs.androidx.work.rxjava3)
     implementation(libs.google.android.material)
     implementation(libs.androidx.webkit)
+    implementation(libs.androidx.security.crypto)
 
     /** Third-party libraries **/
     implementation(libs.livefront.bridge)

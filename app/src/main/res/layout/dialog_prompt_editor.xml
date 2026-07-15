@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="✏️ Edit Prompt"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Title field -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/prompt_editor_title_hint"
+        android:layout_marginBottom="12dp">
+
+        <EditText
+            android:id="@+id/et_prompt_editor_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1"
+            android:background="@null" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Description field -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Short description (optional)"
+        android:layout_marginBottom="12dp">
+
+        <EditText
+            android:id="@+id/et_prompt_editor_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:maxLines="2"
+            android:background="@null" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Category spinner -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Category"
+        android:layout_marginBottom="12dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/spinner_prompt_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:background="@null" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Prompt body -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/prompt_editor_body_hint"
+        android:layout_marginBottom="16dp">
+
+        <EditText
+            android:id="@+id/et_prompt_editor_body"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:inputType="textMultiLine"
+            android:gravity="top"
+            android:scrollbars="vertical"
+            android:background="@null"
+            android:textSize="13sp"
+            android:fontFamily="monospace" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btn_editor_cancel"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btn_editor_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save"
+            android:backgroundTint="?attr/colorAccent"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+</LinearLayout>

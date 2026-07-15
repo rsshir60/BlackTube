@@ -92,6 +92,13 @@
             android:label="@string/settings" />
 
         <activity
+            android:name="com.blacktube.app.ai.PromptLibraryActivity"
+            android:exported="false"
+            android:label="@string/prompt_library_title"
+            android:windowSoftInputMode="adjustResize" />
+
+
+        <activity
             android:name=".about.AboutActivity"
             android:exported="false"
             android:label="@string/title_activity_about" />

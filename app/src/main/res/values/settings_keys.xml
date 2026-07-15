@@ -1631,6 +1631,6 @@
     <string name="gemini_enable_key" translatable="false">gemini_enable</string>
     <string name="ai_features_category_key" translatable="false">ai_features_category</string>
     <string name="clear_ai_cache_key" translatable="false">clear_ai_cache</string>
-    <string name="import_ai_prompt_key" translatable="false">import_ai_prompt</string>
-    <string name="custom_ai_prompt_value_key" translatable="false">custom_ai_prompt_value</string>
+    <string name="prompt_library_key" translatable="false">prompt_library</string>
 </resources>
+

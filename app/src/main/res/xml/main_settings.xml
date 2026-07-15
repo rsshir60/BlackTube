@@ -4,6 +4,12 @@
     android:key="general_preferences"
     android:title="@string/settings">
 
+    <Preference
+        android:fragment="org.schabi.newpipe.settings.AiFeaturesSettingsFragment"
+        android:icon="@drawable/ic_stars"
+        android:key="ai_features"
+        android:title="@string/ai_features_title" />
+
     <PreferenceScreen
         android:fragment="org.schabi.newpipe.settings.VideoAudioSettingsFragment"
         android:icon="@drawable/ic_headset"
@@ -60,11 +66,7 @@
         android:title="ReturnYouTubeDislike"
         app:iconSpaceReserved="false" />
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.AiFeaturesSettingsFragment"
-        android:icon="@drawable/ic_stars"
-        android:title="@string/ai_features_title"
-        app:iconSpaceReserved="false" />
+
 
     <PreferenceScreen
         android:fragment="org.schabi.newpipe.settings.DebugSettingsFragment"

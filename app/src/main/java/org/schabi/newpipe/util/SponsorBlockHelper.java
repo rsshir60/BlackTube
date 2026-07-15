@@ -110,7 +110,8 @@ public final class SponsorBlockHelper {
     ) {
         seekBar.clearMarkers();
 
-        final SponsorBlockSegment[] sponsorBlockSegments = new org.schabi.newpipe.extractor.sponsorblock.SponsorBlockSegment[0];
+        final SponsorBlockSegment[] sponsorBlockSegments =
+                ThirdPartyApiHelper.getCachedSponsorBlockSegments(streamInfo);
 
         if (sponsorBlockSegments == null) {
             return;
@@ -160,6 +161,7 @@ public final class SponsorBlockHelper {
                     R.string.sponsor_block_category_filler);
             case PENDING -> context.getString(
                     R.string.sponsor_block_category_pending);
+            default -> "";
         };
     }
 
@@ -185,6 +187,7 @@ public final class SponsorBlockHelper {
                     .getString(R.string.sponsor_block_skip_filler_toast);
             case PENDING -> context
                     .getString(R.string.sponsor_block_skip_pending_toast);
+            default -> "";
         };
     }
 }

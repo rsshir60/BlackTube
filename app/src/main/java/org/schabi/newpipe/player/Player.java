@@ -131,6 +131,7 @@ import org.schabi.newpipe.util.SponsorBlockSecondaryMode;
 import org.schabi.newpipe.util.SponsorBlockHelper;
 import org.schabi.newpipe.util.SerializedCache;
 import org.schabi.newpipe.util.StreamTypeUtil;
+import org.schabi.newpipe.util.ThirdPartyApiHelper;
 import org.schabi.newpipe.util.image.CoilHelper;
 
 import java.util.List;
@@ -2614,8 +2615,6 @@ public final class Player implements PlaybackListener, Listener {
 
     public Optional<SponsorBlockSegment> getSkippableSponsorBlockSegment(final int progress) {
         return getCurrentStreamInfo().map(info -> {
-            final SponsorBlockSegment[] sponsorBlockSegments = null;
-
             // fallback on old SponsorBlockSegment (for un-skip)
             if (lastSegment != null
                     && progress > getChainSkipEndTime(lastSegment) + UNSKIP_WINDOW_MILLIS) {
@@ -2630,16 +2629,27 @@ public final class Player implements PlaybackListener, Listener {
             }
 
             hideUnskipButtons();
+            for (final SponsorBlockSegment sponsorBlockSegment
+                    : ThirdPartyApiHelper.getCachedSponsorBlockSegments(info)) {
+                if (sponsorBlockSegment.action == SponsorBlockAction.POI
+                        || sponsorBlockSegment.action == SponsorBlockAction.HIGHLIGHT) {
+                    continue;
+                }
+                if (progress >= getChainStartTime(sponsorBlockSegment)
+                        && progress < getChainSkipEndTime(sponsorBlockSegment)) {
+                    return sponsorBlockSegment;
+                }
+            }
             return null;
         });
     }
 
     public double getChainStartTime(final SponsorBlockSegment segment) {
-        return 0.0;
+        return segment == null ? 0.0 : segment.getSegmentStart();
     }
 
     public double getChainSkipEndTime(final SponsorBlockSegment segment) {
-        return 0.0;
+        return segment == null ? 0.0 : segment.getSegmentEnd();
     }
 
     private void hideUnskipButtons() {

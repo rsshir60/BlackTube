@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AI Status Header Card — shows overall AI readiness state -->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="4dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="?attr/colorSurfaceVariant"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="✨ AI Assistant"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <!-- Status badge -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_ai_global_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Checking…"
+                android:textSize="11sp"
+                app:chipMinHeight="28dp"
+                app:chipBackgroundColor="?attr/colorSurfaceVariant" />
+
+        </LinearLayout>
+
+        <!-- Info rows -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="Model"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <TextView
+                android:id="@+id/tv_ai_model_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gemini"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="Prompt"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <TextView
+                android:id="@+id/tv_ai_active_prompt_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Default"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

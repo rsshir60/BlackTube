@@ -4,26 +4,90 @@
     android:key="ai_features_preferences"
     android:title="@string/ai_features_title">
 
-    <SwitchPreferenceCompat
-        android:defaultValue="true"
-        android:key="@string/gemini_enable_key"
-        android:summary="@string/gemini_enable_summary"
-        android:title="@string/gemini_enable_title" />
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION: AI Status Header (custom inflated view)
+         ══════════════════════════════════════════════════════════ -->
 
-    <EditTextPreference
-        android:key="@string/gemini_api_key_key"
-        android:summary="@string/gemini_api_key_summary"
-        android:title="@string/gemini_api_key_title"
-        app:useSimpleSummaryProvider="true" />
-
+    <!-- Blank preference used as a hook to inject the status card view -->
     <Preference
-        android:key="@string/import_ai_prompt_key"
-        android:summary="@string/import_ai_prompt_summary"
-        android:title="@string/import_ai_prompt_title" />
+        android:key="ai_status_header"
+        android:layout="@layout/preference_ai_status_header"
+        android:selectable="false" />
 
-    <Preference
-        android:key="@string/clear_ai_cache_key"
-        android:summary="@string/clear_ai_cache_summary"
-        android:title="@string/clear_ai_cache_title" />
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 1: AI Summary
+         ══════════════════════════════════════════════════════════ -->
+
+    <PreferenceCategory
+        android:title="✨  AI Summary"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="@string/gemini_enable_key"
+            android:summary="@string/gemini_enable_summary_off"
+            android:title="@string/gemini_enable_title" />
+
+    </PreferenceCategory>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 2: AI Provider
+         ══════════════════════════════════════════════════════════ -->
+
+    <PreferenceCategory
+        android:title="🤖  AI Provider"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:key="@string/gemini_api_key_key"
+            android:summary="@string/gemini_api_key_summary"
+            android:title="@string/gemini_api_key_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <!-- Connection status + Test button (custom view preference) -->
+        <Preference
+            android:key="ai_connection_status"
+            android:layout="@layout/preference_ai_connection_status"
+            android:selectable="false" />
+
+    </PreferenceCategory>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 3: Prompt System
+         ══════════════════════════════════════════════════════════ -->
+
+    <PreferenceCategory
+        android:title="📚  Prompt System"
+        app:iconSpaceReserved="false">
+
+        <!-- Active prompt display -->
+        <Preference
+            android:key="ai_active_prompt_display"
+            android:layout="@layout/preference_ai_active_prompt"
+            android:selectable="false" />
+
+        <Preference
+            android:key="@string/prompt_library_key"
+            android:summary="@string/prompt_library_summary"
+            android:title="@string/prompt_library_title"
+            android:icon="@drawable/ic_bookmark" />
+
+    </PreferenceCategory>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 4: Storage
+         ══════════════════════════════════════════════════════════ -->
+
+    <PreferenceCategory
+        android:title="💾  Storage"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="@string/clear_ai_cache_key"
+            android:summary="@string/clear_ai_cache_summary"
+            android:title="@string/clear_ai_cache_title"
+            android:icon="@drawable/ic_delete" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

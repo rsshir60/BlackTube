@@ -1,5 +1,6 @@
 package org.schabi.newpipe.fragments.detail
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,17 +10,21 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.blacktube.app.ai.GeminiSummarizer
+import com.blacktube.app.ai.PromptLibrary
+import com.blacktube.app.ai.PromptLibraryActivity
+import com.google.android.material.chip.Chip
 import kotlinx.coroutines.launch
-import org.schabi.newpipe.BaseFragment
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.schabi.newpipe.R
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.settings.SettingsActivity
 
-class AiSummaryFragment(private val streamInfo: StreamInfo?) : BaseFragment() {
+class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialogFragment() {
 
-    // Keep an empty constructor for the Android lifecycle recreation
     constructor() : this(null)
 
     private lateinit var stateNoKey: LinearLayout
@@ -30,6 +35,20 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BaseFragment() {
 
     private lateinit var tvErrorMessage: TextView
     private lateinit var tvSummaryContent: TextView
+    private lateinit var chipActivePrompt: Chip
+
+    private lateinit var promptLibraryLauncher: ActivityResultLauncher<Intent>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        promptLibraryLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                refreshPromptChip()
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +65,12 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BaseFragment() {
 
         tvErrorMessage = view.findViewById(R.id.tv_error_message)
         tvSummaryContent = view.findViewById(R.id.tv_summary_content)
+        chipActivePrompt = view.findViewById(R.id.chip_active_prompt)
+
+        // Prompt chip → opens Prompt Library
+        chipActivePrompt.setOnClickListener {
+            promptLibraryLauncher.launch(PromptLibraryActivity.createIntent(requireContext()))
+        }
 
         view.findViewById<Button>(R.id.btn_open_settings).setOnClickListener {
             val intent = Intent(requireContext(), SettingsActivity::class.java).apply {
@@ -59,7 +84,12 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BaseFragment() {
                 showState(stateLoading)
                 when (val result = GeminiSummarizer.summarize(streamInfo!!)) {
                     is GeminiSummarizer.SummaryResult.Structured -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, "## Summary\n\n" + result.data.chapters.joinToString("\n\n") { "### ${it.emoji} ${it.summary}\n${it.startSeconds} - ${it.endSeconds}" })
+                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(
+                            tvSummaryContent,
+                            "## Summary\n\n" + result.data.chapters.joinToString("\n\n") {
+                                "### ${it.emoji} ${it.summary}\n${it.startSeconds} - ${it.endSeconds}"
+                            }
+                        )
                         showState(stateSuccess)
                     }
                     is GeminiSummarizer.SummaryResult.Fallback -> {
@@ -78,9 +108,19 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BaseFragment() {
         view.findViewById<Button>(R.id.btn_retry).setOnClickListener { runSummarize() }
         view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { runSummarize() }
 
+        refreshPromptChip()
         checkStateAndLoad()
 
         return view
+    }
+
+    private fun refreshPromptChip() {
+        val active = PromptLibrary.getActivePrompt(requireContext())
+        if (active != null) {
+            chipActivePrompt.text = active.title
+        } else {
+            chipActivePrompt.text = getString(R.string.prompt_library_default)
+        }
     }
 
     private fun checkStateAndLoad() {
@@ -102,7 +142,12 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BaseFragment() {
                 showState(stateLoading)
                 when (val result = GeminiSummarizer.summarize(streamInfo!!)) {
                     is GeminiSummarizer.SummaryResult.Structured -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, "## Summary\n\n" + result.data.chapters.joinToString("\n\n") { "### ${it.emoji} ${it.summary}\n${it.startSeconds} - ${it.endSeconds}" })
+                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(
+                            tvSummaryContent,
+                            "## Summary\n\n" + result.data.chapters.joinToString("\n\n") {
+                                "### ${it.emoji} ${it.summary}\n${it.startSeconds} - ${it.endSeconds}"
+                            }
+                        )
                         showState(stateSuccess)
                     }
                     is GeminiSummarizer.SummaryResult.Fallback -> {
@@ -126,8 +171,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BaseFragment() {
         stateLoading.visibility = View.GONE
         stateError.visibility = View.GONE
         stateSuccess.visibility = View.GONE
-
         visibleState.visibility = View.VISIBLE
     }
 }
-

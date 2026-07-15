@@ -123,6 +123,7 @@ import org.schabi.newpipe.extractor.returnyoutubedislike.ReturnYouTubeDislikeInf
 import org.schabi.newpipe.util.PlayButtonHelper;
 import org.schabi.newpipe.util.SponsorBlockMode;
 import org.schabi.newpipe.util.StreamTypeUtil;
+import org.schabi.newpipe.util.ThirdPartyApiHelper;
 import org.schabi.newpipe.util.ThemeHelper;
 import org.schabi.newpipe.util.external_communication.KoreUtils;
 import org.schabi.newpipe.util.external_communication.ShareUtils;
@@ -552,6 +553,14 @@ public final class VideoDetailFragment
                 openDownloadDialog();
             }
         });
+        if (binding.detailControlsAiSummarize != null) {
+            binding.detailControlsAiSummarize.setOnClickListener(v -> {
+                if (currentInfo != null) {
+                    AiSummaryFragment aiFragment = new AiSummaryFragment(currentInfo);
+                    aiFragment.show(getChildFragmentManager(), "AiSummaryFragment");
+                }
+            });
+        }
         binding.detailControlsShare.setOnClickListener(makeOnClickListener(info ->
                 ShareUtils.shareText(requireContext(), info.getName(), info.getUrl(),
                         info.getThumbnails())));
@@ -1029,6 +1038,7 @@ public final class VideoDetailFragment
             sponsorBlockFragment.setListener(this);
 
             pageAdapter.updateItem(SPONSOR_BLOCK_TAB_TAG, sponsorBlockFragment);
+            loadSponsorBlockSegments(info);
 
             workerSponsorBlockModeCheck =
                     sponsorBlockDataManager
@@ -1615,8 +1625,7 @@ public final class VideoDetailFragment
             displayUploaderAsSubChannel(info);
         }
 
-        // final ReturnYouTubeDislikeInfo rydInfo = info.getRydInfo();
-final ReturnYouTubeDislikeInfo rydInfo = null;
+        final ReturnYouTubeDislikeInfo rydInfo = ThirdPartyApiHelper.getCachedRydInfo(info);
         final boolean isRydEnabled = prefs.getBoolean(
                 getString(R.string.return_youtube_dislike_enable_key), true);
         final boolean overrideLikeCount = prefs.getBoolean(
@@ -1708,6 +1717,8 @@ final ReturnYouTubeDislikeInfo rydInfo = null;
             binding.detailThumbsDisabledView.setVisibility(View.GONE);
         }
 
+        loadReturnYouTubeDislikeInfo(info);
+
         if (info.getDuration() > 0) {
             binding.detailDurationView.setText(Localization.getDurationString(info.getDuration()));
             binding.detailDurationView.setBackgroundColor(
@@ -1764,6 +1775,111 @@ final ReturnYouTubeDislikeInfo rydInfo = null;
         binding.detailControlsPopup.setVisibility(noVideoStreams ? View.GONE : View.VISIBLE);
         binding.detailThumbnailPlayButton.setImageResource(
                 noVideoStreams ? R.drawable.ic_headset_shadow : R.drawable.ic_play_arrow_shadow);
+    }
+
+    private void loadReturnYouTubeDislikeInfo(@NonNull final StreamInfo info) {
+        final Context context = requireContext().getApplicationContext();
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!prefs.getBoolean(getString(R.string.return_youtube_dislike_enable_key), true)
+                || !ThirdPartyApiHelper.isYoutubeStream(info)) {
+            return;
+        }
+
+        disposables.add(Single.fromCallable(() ->
+                        ThirdPartyApiHelper.fetchRydInfo(context, info))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(rydInfo -> {
+                    if (binding == null || currentInfo == null
+                            || !Objects.equals(currentInfo.getId(), info.getId())) {
+                        return;
+                    }
+                    applyReturnYouTubeDislikeInfo(rydInfo);
+                }, throwable -> {
+                    if (DEBUG) {
+                        Log.d(TAG, "ReturnYouTubeDislike request failed", throwable);
+                    }
+                }));
+    }
+
+    private void applyReturnYouTubeDislikeInfo(
+            @NonNull final ReturnYouTubeDislikeInfo rydInfo
+    ) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        final boolean isRydEnabled = prefs.getBoolean(
+                getString(R.string.return_youtube_dislike_enable_key), true);
+        if (!isRydEnabled) {
+            return;
+        }
+
+        final boolean overrideLikeCount = prefs.getBoolean(
+                getString(R.string.return_youtube_dislike_override_like_count_key), true);
+        final boolean overrideViewCount = prefs.getBoolean(
+                getString(R.string.return_youtube_dislike_override_view_count_key), true);
+
+        if (overrideViewCount && rydInfo.viewCount > 0) {
+            binding.detailViewCountView.setText(Localization
+                    .localizeViewCount(activity, rydInfo.viewCount));
+            binding.detailViewCountView.setVisibility(View.VISIBLE);
+        }
+
+        if (rydInfo.dislikes >= 0) {
+            final boolean showAsPercentage = prefs.getBoolean(
+                    activity.getString(
+                            R.string.return_youtube_dislike_show_dislikes_as_percentage_key),
+                    false);
+            final long totalRatings = rydInfo.likes + rydInfo.dislikes;
+            final String dislikeText;
+            if (showAsPercentage && totalRatings > 0) {
+                final double percentage = (double) rydInfo.dislikes / totalRatings * 100.0;
+                dislikeText = Localization.localizePercentage(percentage);
+            } else {
+                dislikeText = Localization.shortCount(activity, rydInfo.dislikes);
+            }
+
+            binding.detailThumbsDownCountView.setText(dislikeText);
+            binding.detailThumbsDownCountView.setVisibility(View.VISIBLE);
+            binding.detailThumbsDownImgView.setVisibility(View.VISIBLE);
+            binding.detailThumbsDisabledView.setVisibility(View.GONE);
+        }
+
+        if (overrideLikeCount && rydInfo.likes >= 0) {
+            binding.detailThumbsUpCountView.setText(Localization
+                    .shortCount(activity, rydInfo.likes));
+            binding.detailThumbsUpCountView.setVisibility(View.VISIBLE);
+            binding.detailThumbsUpImgView.setVisibility(View.VISIBLE);
+            binding.detailThumbsDisabledView.setVisibility(View.GONE);
+        }
+    }
+
+    private void loadSponsorBlockSegments(@NonNull final StreamInfo info) {
+        final Context context = requireContext().getApplicationContext();
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!prefs.getBoolean(getString(R.string.sponsor_block_enable_key), false)
+                || !ThirdPartyApiHelper.isYoutubeStream(info)) {
+            return;
+        }
+
+        disposables.add(Single.fromCallable(() ->
+                        ThirdPartyApiHelper.fetchSponsorBlockSegments(context, info))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(segments -> {
+                    if (binding == null || currentInfo == null
+                            || !Objects.equals(currentInfo.getId(), info.getId())) {
+                        return;
+                    }
+                    if (player != null) {
+                        player.UIs().get(MainPlayerUi.class).ifPresent(
+                                playerUi -> playerUi.onMarkSeekbarRequested(info));
+                    }
+                    getSponsorBlockFragment().ifPresent(
+                            SponsorBlockFragment::refreshSponsorBlockSegments);
+                }, throwable -> {
+                    if (DEBUG) {
+                        Log.d(TAG, "SponsorBlock request failed", throwable);
+                    }
+                }));
     }
 
     private void displayUploaderAsSubChannel(final StreamInfo info) {
@@ -2710,9 +2826,13 @@ final ReturnYouTubeDislikeInfo rydInfo = null;
             return;
         }
 
-        // currentInfo.removeSponsorBlockSegment("TEMP");
-
-        // segments stub
+        ThirdPartyApiHelper.replacePendingSponsorBlockSegment(currentInfo,
+                new SponsorBlockSegment(
+                        "TEMP",
+                        startTime,
+                        endTime,
+                        SponsorBlockCategory.PENDING,
+                        SponsorBlockAction.SKIP));
 
         player.UIs().get(MainPlayerUi.class).ifPresent(
                 playerUi -> playerUi.onMarkSeekbarRequested(currentInfo));
@@ -2730,7 +2850,7 @@ final ReturnYouTubeDislikeInfo rydInfo = null;
             return;
         }
 
-        // currentInfo.removeSponsorBlockSegment("TEMP");
+        ThirdPartyApiHelper.clearPendingSponsorBlockSegment(currentInfo);
 
         player.UIs().get(MainPlayerUi.class).ifPresent(
                 playerUi -> playerUi.onMarkSeekbarRequested(currentInfo));

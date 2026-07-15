@@ -27,7 +27,11 @@ include (":app")
 
 // Use a local copy of NewPipe Extractor by uncommenting the lines below.
 // We assume, that NewPipe and NewPipe Extractor have the same parent directory.
-// includeBuild("../PipePipeExtractor")
+includeBuild("./NewPipeExtractor") {
+    dependencySubstitution {
+        substitute(module("com.github.TeamNewPipe:NewPipeExtractor")).using(project(":extractor"))
+    }
+}
 
 
 

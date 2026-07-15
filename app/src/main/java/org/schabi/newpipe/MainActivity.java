@@ -274,12 +274,6 @@ public class MainActivity extends AppCompatActivity {
                         R.string.tab_subscriptions)
                 .setIcon(R.drawable.ic_tv);
         drawerLayoutBinding.navigation.getMenu()
-                .add(R.id.menu_tabs_group, ITEM_ID_FEED, ORDER, R.string.fragment_feed_title)
-                .setIcon(R.drawable.ic_subscriptions);
-        drawerLayoutBinding.navigation.getMenu()
-                .add(R.id.menu_tabs_group, ITEM_ID_BOOKMARKS, ORDER, R.string.tab_bookmarks)
-                .setIcon(R.drawable.ic_bookmark);
-        drawerLayoutBinding.navigation.getMenu()
                 .add(R.id.menu_tabs_group, ITEM_ID_DOWNLOADS, ORDER, R.string.downloads)
                 .setIcon(R.drawable.ic_file_download);
         drawerLayoutBinding.navigation.getMenu()
