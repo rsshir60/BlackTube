@@ -46,6 +46,24 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 refreshPromptChip()
+                // Auto-refresh summary when returning from Prompt Library with a new prompt
+                runSummarize(forceRefresh = false)
+            }
+        }
+    }
+
+    private fun runSummarize(forceRefresh: Boolean = false) {
+        lifecycleScope.launch {
+            showState(stateLoading)
+            when (val result = GeminiSummarizer.summarize(requireContext(), streamInfo!!, forceRefresh)) {
+                is GeminiSummarizer.SummaryResult.Markdown -> {
+                    io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
+                    showState(stateSuccess)
+                }
+                is GeminiSummarizer.SummaryResult.Error -> {
+                    tvErrorMessage.text = result.message
+                    showState(stateError)
+                }
             }
         }
     }
@@ -79,25 +97,9 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             startActivity(intent)
         }
 
-        val runSummarize = {
-            lifecycleScope.launch {
-                showState(stateLoading)
-                when (val result = GeminiSummarizer.summarize(streamInfo!!)) {
-                    is GeminiSummarizer.SummaryResult.Markdown -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
-                        showState(stateSuccess)
-                    }
-                    is GeminiSummarizer.SummaryResult.Error -> {
-                        tvErrorMessage.text = result.message
-                        showState(stateError)
-                    }
-                }
-            }
-        }
-
-        view.findViewById<Button>(R.id.btn_summarize).setOnClickListener { runSummarize() }
-        view.findViewById<Button>(R.id.btn_retry).setOnClickListener { runSummarize() }
-        view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { runSummarize() }
+        view.findViewById<Button>(R.id.btn_summarize).setOnClickListener { runSummarize(forceRefresh = false) }
+        view.findViewById<Button>(R.id.btn_retry).setOnClickListener { runSummarize(forceRefresh = false) }
+        view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { runSummarize(forceRefresh = true) }
 
         refreshPromptChip()
         checkStateAndLoad()
@@ -130,19 +132,7 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         val isCached = GeminiSummarizer.hasCachedSummary(streamInfo.id, promptId)
 
         if (isCached) {
-            lifecycleScope.launch {
-                showState(stateLoading)
-                when (val result = GeminiSummarizer.summarize(streamInfo!!)) {
-                    is GeminiSummarizer.SummaryResult.Markdown -> {
-                        io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
-                        showState(stateSuccess)
-                    }
-                    is GeminiSummarizer.SummaryResult.Error -> {
-                        tvErrorMessage.text = result.message
-                        showState(stateError)
-                    }
-                }
-            }
+            runSummarize(forceRefresh = false)
         } else {
             showState(stateReady)
         }

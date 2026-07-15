@@ -68,17 +68,20 @@ object GeminiSummarizer {
     }
 
     @JvmStatic
-    suspend fun summarize(video: StreamInfo): SummaryResult = withContext(Dispatchers.IO) {
+    suspend fun summarize(context: Context, video: StreamInfo, forceRefresh: Boolean = false): SummaryResult = withContext(Dispatchers.IO) {
         if (!isInitialized) {
             return@withContext SummaryResult.Error("Summarizer not initialized")
         }
 
-        val summaryPrompt = PromptLibrary.getSummaryPrompt(_appContext)
+        val summaryPrompt = PromptLibrary.getSummaryPrompt(context)
         val cacheKey = buildCacheKey(video.id, summaryPrompt.id)
-        val cached = getCachedSummary(cacheKey)
-        if (cached != null) {
-            Log.d(TAG, "Cache hit for ${video.id} using ${summaryPrompt.id}")
-            return@withContext cached
+        
+        if (!forceRefresh) {
+            val cached = getCachedSummary(cacheKey)
+            if (cached != null) {
+                Log.d(TAG, "Cache hit for ${video.id} using ${summaryPrompt.id}")
+                return@withContext cached
+            }
         }
 
         val currentModel = model

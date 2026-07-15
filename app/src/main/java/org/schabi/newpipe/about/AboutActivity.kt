@@ -26,6 +26,14 @@ class AboutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about_blacktube)
 
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener { finish() }
+
+        val tvVersion = findViewById<TextView>(R.id.tv_version)
+        tvVersion.text = "Version " + org.schabi.newpipe.BuildConfig.VERSION_NAME
+
         findViewById<TextView>(R.id.about_instagram).setOnClickListener { openUrl(INSTAGRAM_URL) }
         findViewById<TextView>(R.id.about_github).setOnClickListener { openUrl(GITHUB_URL) }
         findViewById<TextView>(R.id.about_linkedin).setOnClickListener { openUrl(LINKEDIN_URL) }

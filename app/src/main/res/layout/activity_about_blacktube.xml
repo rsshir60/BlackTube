@@ -1,109 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/windowBackground"
-    android:fillViewport="true">
+    android:background="#000000">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:background="#000000"
+        app:elevation="0dp">
 
-        <!-- App Logo and Header -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/about_title"
+            app:titleTextColor="?android:attr/textColorPrimary" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:orientation="vertical"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="32dp">
+            android:padding="24dp">
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@mipmap/ic_launcher"
-                android:layout_marginBottom="16dp"
-                android:contentDescription="BlackTube Logo" />
-
-            <org.schabi.newpipe.views.NewPipeTextView
-                android:layout_width="wrap_content"
+            <!-- App Logo and Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="BlackTube"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary" />
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="32dp">
 
-            <org.schabi.newpipe.views.NewPipeTextView
-                android:layout_width="wrap_content"
+                <ImageView
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:src="@mipmap/ic_launcher"
+                    android:layout_marginBottom="16dp"
+                    android:contentDescription="BlackTube Logo" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BlackTube"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AI-powered YouTube client"
+                    android:textSize="15sp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/bt_switch_on_color"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Version 1.0.0"
+                    android:textSize="13sp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_bt_ai_action_button"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Description -->
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="AI-powered YouTube client"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
-                android:textColor="?attr/colorAccent" />
+                android:text="BlackTube is an open-source YouTube client focused on privacy, customization, and modern AI-powered features.\n\nBuilt with performance, simplicity, and user freedom in mind."
+                android:textSize="15sp"
+                android:lineSpacingExtra="8sp"
+                android:gravity="center"
+                android:textColor="#B3B3B3"
+                android:layout_marginBottom="40dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Version 1.0.0"
+                android:text="DEVELOPER"
                 android:textSize="12sp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_ai_chip"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:textColor="?android:attr/textColorSecondary" />
-        </LinearLayout>
+                android:textStyle="bold"
+                android:textColor="@color/bt_switch_on_color"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="4dp" />
 
-        <!-- Description -->
-        <org.schabi.newpipe.views.NewPipeTextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="BlackTube is an open-source YouTube client focused on privacy, customization, and modern AI-powered features.\n\nBuilt with performance, simplicity, and user freedom in mind."
-            android:textSize="15sp"
-            android:lineSpacingExtra="6sp"
-            android:gravity="center"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginBottom="32dp" />
-
-        <!-- Developer Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="@drawable/bg_ai_panel"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-
+            <!-- Developer Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/bg_ai_panel"
-                android:padding="20dp">
+                android:padding="20dp"
+                android:layout_marginBottom="32dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="DEVELOPER"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorAccent"
-                    android:letterSpacing="0.1"
-                    android:layout_marginBottom="8dp" />
-
-                <org.schabi.newpipe.views.NewPipeTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="Ranjeet Shirsath"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:layout_marginBottom="16dp" />
+                    android:textColor="#FFFFFF"
+                    android:layout_marginBottom="20dp" />
 
                 <!-- Social Links -->
                 <LinearLayout
@@ -117,10 +133,13 @@
                         android:layout_height="48dp"
                         android:gravity="center_vertical"
                         android:text="Instagram"
-                        android:textSize="14sp"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:drawablePadding="16dp"
-                        android:background="?attr/selectableItemBackground" />
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_about_social_card" />
 
                     <TextView
                         android:id="@+id/about_github"
@@ -128,10 +147,13 @@
                         android:layout_height="48dp"
                         android:gravity="center_vertical"
                         android:text="GitHub"
-                        android:textSize="14sp"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:drawablePadding="16dp"
-                        android:background="?attr/selectableItemBackground" />
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_about_social_card" />
 
                     <TextView
                         android:id="@+id/about_linkedin"
@@ -139,30 +161,31 @@
                         android:layout_height="48dp"
                         android:gravity="center_vertical"
                         android:text="LinkedIn"
-                        android:textSize="14sp"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:drawablePadding="16dp"
-                        android:background="?attr/selectableItemBackground" />
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:background="@drawable/bg_about_social_card" />
 
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-        <!-- Footer -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="bottom|center_horizontal"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp">
+            <!-- Footer -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom|center_horizontal"
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Made with ❤️ from India"
-                android:textSize="13sp"
-                android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Made with ❤️ from India"
+                    android:textSize="14sp"
+                    android:textColor="#808080" />
+            </LinearLayout>
+
         </LinearLayout>
-
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

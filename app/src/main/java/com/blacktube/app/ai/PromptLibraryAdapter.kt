@@ -114,16 +114,21 @@ class PromptLibraryAdapter(
                 itemView.context,
                 if (isDefault) R.drawable.bg_bt_default_prompt_card else R.drawable.bg_ai_panel
             )
+            
+            val innerLayout = (itemView as ViewGroup).getChildAt(0)
             if (isDefault) {
+                innerLayout.setPadding(48, 48, 48, 48) // Convert to px if needed, but simple is fine or use resources
                 tvEmoji.background = null
-                tvEmoji.textSize = 24f
+                tvEmoji.textSize = 28f
+                tvTitle.textSize = 18f
             } else {
+                innerLayout.setPadding(36, 36, 36, 36)
                 tvEmoji.background = ContextCompat.getDrawable(itemView.context, R.drawable.bg_emoji_circle)
                 tvEmoji.textSize = 18f
+                tvTitle.textSize = 15f
             }
             tvEmoji.text = if (isDefault) "⭐" else p.category.emoji
             tvTitle.text = p.title
-            tvTitle.textSize = if (isDefault) 16f else 15f
             tvCategory.text = p.category.displayName.uppercase()
             tvDesc.text = p.description
             tvPreview.text = p.promptText
