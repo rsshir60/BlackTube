@@ -4,107 +4,109 @@
   </picture>
 
   <h1>BlackTube</h1>
-  
-  <p><b>A modern, privacy-respecting YouTube client with AI-powered video summaries.</b></p>
-  
+
+  <p><b>A privacy-respecting YouTube client with AI-powered video summaries.</b></p>
+
   <p>
     <a href="https://github.com/TeamNewPipe/NewPipe/blob/dev/LICENSE"><img alt="License: GPLv3" src="https://img.shields.io/badge/License-GPLv3-blue.svg"></a>
     <img alt="Kotlin Version" src="https://img.shields.io/badge/Kotlin-2.3.10-purple.svg?logo=kotlin">
-    <!-- TODO: Add valid GitHub Stars badge once repository is published -->
     <img alt="GitHub Stars" src="https://img.shields.io/github/stars/rsshir60/BlackTube?style=social">
-    <!-- TODO: Add Discord/Matrix link if applicable -->
   </p>
 </div>
 
-<details>
-  <summary><b>Table of Contents</b></summary>
+## Overview
 
-- [⚠️ Upstream Notice](#️-upstream-notice)
-- [🌟 Features](#-features)
-- [📸 Screenshots](#-screenshots)
-- [🛡️ Privacy & Philosophy](#️-privacy--philosophy)
-- [🚀 Installation](#-installation)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🔮 Roadmap](#-roadmap)
-- [🤝 Contributing](#-contributing)
-- [⚖️ License & Credits](#️-license--credits)
-</details>
+BlackTube is a fork of [NewPipe](https://github.com/TeamNewPipe/NewPipe) focused on a YouTube-first experience with optional AI features. Core extraction, streaming, subscriptions, background playback, and privacy-first behavior come from the NewPipe ecosystem. BlackTube adds bring-your-own-key AI summaries, prompt management, and app-specific defaults.
 
-## ⚠️ Upstream Notice
+## Features
 
-**BlackTube is a fork of [NewPipe](https://github.com/TeamNewPipe/NewPipe).** 
+### AI Summary
 
-All of the core extraction, streaming, and background playback capabilities are inherited directly from the incredible work done by the NewPipe contributors. We claim no originality for these upstream components. This project builds upon their foundation (under the GPLv3 license) to offer additional enhancements, most notably the integration of Bring-Your-Own-Key (BYOK) AI summaries.
+- Bring your own Gemini API key. No developer-owned key is bundled with the app.
+- Generate summaries from video metadata and transcript content when available.
+- Cache summaries locally to save API usage and make repeated views faster.
+- Render readable Markdown summaries in the video detail view.
+- Select a custom prompt from the built-in Prompt Library.
 
-## 🌟 Features
+### Prompt Library
 
-### 🤖 AI Summary (BYOK)
-The standout feature of BlackTube is the integration of on-demand AI video summaries powered by Google's Gemini AI SDK. 
-- **Bring Your Own Key (BYOK)**: In alignment with our privacy philosophy, BlackTube does not bundle any proprietary API keys. You must provide your own Gemini API key to activate the feature.
-- **Cached Locally**: Summaries are cached directly on your device (`SharedPreferences`), saving your API quota and providing instant access on re-visits.
-- **Markdown Rendering**: Rich formatting via `Markwon` for easy-to-read, structured output.
+- Browse built-in prompt styles for different summary formats.
+- Activate a prompt and reuse it across summaries.
+- Duplicate and edit prompts for custom workflows.
+- Return to the default prompt at any time.
 
-### 🎬 Playback
-- Smooth playback and background audio support inherited from NewPipe, now powered by the modern **AndroidX Media3** library (replacing ExoPlayer).
+### YouTube-First Experience
 
-### ⚙️ Customization
-- Retains all of the powerful customization, themes, and settings you expect from a premium client.
+- BlackTube currently forces YouTube as the selected streaming service.
+- SponsorBlock and Return YouTube Dislike integrations are retained.
+- Playback, downloads, subscriptions, and background audio are inherited from NewPipe.
 
-## 📸 Screenshots
+### Local Extractor Development
 
-| AI Summary (No Key) | AI Summary (Generated) | Player View |
-| :---: | :---: | :---: |
-| <!-- TODO: add screenshot of state_no_key view --> | <!-- TODO: add screenshot of generated markdown summary --> | <!-- TODO: add screenshot of Media3 player --> |
+This branch is configured to use a local `NewPipeExtractor` included build:
 
-## 🛡️ Privacy & Philosophy
+```kotlin
+includeBuild("./NewPipeExtractor")
+```
 
-BlackTube respects your privacy. Just like our upstream parent, there is **no tracking**, **no ads**, and **no analytics**. 
+That lets the app build against local extractor changes instead of relying only on the published JitPack artifact.
 
-Our AI functionality adheres to a strict **Bring-Your-Own-Key (BYOK)** philosophy. We believe that integrating proprietary AI capabilities should never compromise an open-source client's integrity. No developer API keys are bundled with the app, ensuring that you maintain total control over your data and API usage.
+## Privacy
 
-## 🚀 Installation
+BlackTube follows the same privacy posture as NewPipe: no ads, no analytics, and no tracking added by the app.
 
-### F-Droid
-<!-- TODO: Add actual F-Droid repository link once available -->
-*Our F-Droid repository is currently pending. Stay tuned!*
+AI summaries are optional. If you enable them, requests are sent to Google's Gemini API using the API key you provide. BlackTube does not ship with an API key and does not route AI requests through a BlackTube server.
+
+## Installation
 
 ### GitHub Releases
-You can download the latest pre-built APK directly from our [Releases page](https://github.com/rsshir60/BlackTube/releases). <!-- TODO: Update URL with actual repo URL -->
 
-### Build from Source
-To build BlackTube yourself, you'll need the Android SDK and JDK 17. 
+Prebuilt APKs are intended to be published on the [Releases page](https://github.com/rsshir60/BlackTube/releases).
+
+### Build From Source
+
+Requirements:
+
+- Android SDK
+- JDK 17
+- A local `NewPipeExtractor` checkout at `./NewPipeExtractor`
 
 ```bash
 git clone https://github.com/rsshir60/BlackTube.git
 cd BlackTube
 ./gradlew assembleRelease
 ```
-The compiled APK will be located in `app/build/outputs/apk/release/`.
 
-## 🛠️ Tech Stack
+The release APK is generated under:
 
-BlackTube is built using modern Android development practices:
+```text
+app/build/outputs/apk/release/
+```
 
-- **Language**: Kotlin 2.3.10
-- **UI Framework**: Jetpack Compose (BOM 2024.06.00)
-- **Media**: AndroidX Media3
-- **AI**: Gemini Generative AI SDK (`com.google.ai.client.generativeai`)
-- **Core Architecture**: RxJava, Room Database, OkHttp, Coil, Jsoup
+## Tech Stack
 
-## 🔮 Roadmap
+- Kotlin and Java
+- AndroidX, Material Components, and Android preferences
+- AndroidX Media3
+- Gemini Generative AI SDK
+- Markwon for Markdown rendering
+- RxJava, Room, OkHttp, Coil, and Jsoup
+- NewPipe Extractor via local included build
 
-- [ ] Complete transition of remaining legacy UI fragments to Jetpack Compose.
-- [ ] Regular syncing with upstream NewPipe changes.
-- [ ] Refine AI Summary prompt options (e.g., custom prompt lengths and styles).
-- [ ] Add explicit screenshots and visual assets to documentation.
+## Roadmap
 
-## 🤝 Contributing
+- Keep syncing with upstream NewPipe where practical.
+- Continue improving the prompt library and custom prompt editor.
+- Add screenshots for AI summary, prompt library, and playback screens.
+- Document release signing and distribution once release automation is finalized.
 
-Contributions are welcome! Currently, we do not have a dedicated `CONTRIBUTING.md` file. In the meantime, please feel free to open an Issue or a Pull Request for any bugs or enhancements. If you're contributing to core playback or extraction, consider submitting your patch directly to [NewPipe](https://github.com/TeamNewPipe/NewPipe) first.
+## Contributing
 
-## ⚖️ License & Credits
+Contributions are welcome. For changes to core extraction or playback behavior, consider whether the patch belongs upstream in NewPipe or NewPipe Extractor first.
 
-BlackTube is licensed under the **GNU General Public License v3.0 (GPLv3)**.
+## License And Credits
+
+BlackTube is licensed under the GNU General Public License v3.0 or later.
 
 ```text
 Copyright (C) 2025 NewPipe e.V. and BlackTube Contributors
@@ -114,4 +116,5 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 ```
-*Special thanks to the [NewPipe Team](https://github.com/TeamNewPipe/NewPipe) for the original codebase.*
+
+Special thanks to the [NewPipe Team](https://github.com/TeamNewPipe/NewPipe) for the original codebase.
