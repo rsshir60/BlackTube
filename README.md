@@ -14,6 +14,19 @@
   </p>
 </div>
 
+## Screenshots
+
+<div align="center">
+  <img src="assets/screenshots/Screenshot_20260716-171958_BlackTube.png" width="200" style="margin: 5px;">
+  <img src="assets/screenshots/Screenshot_20260716-172136_BlackTube.png" width="200" style="margin: 5px;">
+  <img src="assets/screenshots/Screenshot_20260716-172155_BlackTube.png" width="200" style="margin: 5px;">
+  <img src="assets/screenshots/Screenshot_20260716-172255_BlackTube.png" width="200" style="margin: 5px;">
+  <img src="assets/screenshots/Screenshot_20260716-172317_BlackTube.png" width="200" style="margin: 5px;">
+  <img src="assets/screenshots/Screenshot_20260716-172518_BlackTube.png" width="200" style="margin: 5px;">
+  <img src="assets/screenshots/Screenshot_20260716-172541_BlackTube.png" width="200" style="margin: 5px;">
+  <img src="assets/screenshots/20260716_172806.jpg" width="200" style="margin: 5px;">
+</div>
+
 ## Overview
 
 BlackTube is a fork of [NewPipe](https://github.com/TeamNewPipe/NewPipe) focused on a YouTube-first experience with optional AI features. Core extraction, streaming, subscriptions, background playback, and privacy-first behavior come from the NewPipe ecosystem. BlackTube adds bring-your-own-key AI summaries, prompt management, and app-specific defaults.
@@ -97,7 +110,6 @@ app/build/outputs/apk/release/
 
 - Keep syncing with upstream NewPipe where practical.
 - Continue improving the prompt library and custom prompt editor.
-- Add screenshots for AI summary, prompt library, and playback screens.
 - Document release signing and distribution once release automation is finalized.
 
 ## Contributing
