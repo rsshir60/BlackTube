@@ -19,3 +19,10 @@ app/release/
 bin/
 .vscode/
 *.code-workspace
+
+# Android / Build / Secrets
+*.apk
+*.aab
+*.jks
+*.keystore
+*.env

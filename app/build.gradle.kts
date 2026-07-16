@@ -80,6 +80,18 @@ configure<ApplicationExtension> {
         }
     }
 
+    flavorDimensions += "store"
+    productFlavors {
+        create("gplay") {
+            dimension = "store"
+            buildConfigField("boolean", "HAS_AI_SUMMARY", "true")
+        }
+        create("fdroid") {
+            dimension = "store"
+            buildConfigField("boolean", "HAS_AI_SUMMARY", "false")
+        }
+    }
+
     lint {
         lintConfig = file("lint.xml")
         // Continue the debug build even when errors are found
@@ -216,7 +228,7 @@ dependencies {
     implementation(libs.newpipe.filepicker)
 
     /** BlackTube: Gemini AI **/
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    "gplayImplementation"("com.google.ai.client.generativeai:generativeai:0.9.0")
 
     /** Checkstyle **/
     checkstyle(libs.puppycrawl.checkstyle)

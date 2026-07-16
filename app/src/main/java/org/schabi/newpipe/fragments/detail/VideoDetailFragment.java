@@ -209,7 +209,7 @@ public final class VideoDetailFragment
             showSponsorBlock = sharedPreferences.getBoolean(key, false);
             tabSettingsChanged = true;
         } else if (getString(R.string.gemini_enable_key).equals(key)) {
-            showAiSummary = sharedPreferences.getBoolean(key, true);
+            showAiSummary = org.schabi.newpipe.BuildConfig.HAS_AI_SUMMARY && sharedPreferences.getBoolean(key, true);
             tabSettingsChanged = true;
         }
     }
@@ -351,7 +351,7 @@ public final class VideoDetailFragment
         showRelatedItems = prefs.getBoolean(getString(R.string.show_next_video_key), true);
         showDescription = prefs.getBoolean(getString(R.string.show_description_key), true);
         showSponsorBlock = prefs.getBoolean(getString(R.string.sponsor_block_enable_key), false);
-        showAiSummary = prefs.getBoolean(getString(R.string.gemini_enable_key), true);
+        showAiSummary = org.schabi.newpipe.BuildConfig.HAS_AI_SUMMARY && prefs.getBoolean(getString(R.string.gemini_enable_key), true);
         selectedTabTag = prefs.getString(
                 getString(R.string.stream_info_selected_tab_key), COMMENTS_TAB_TAG);
         prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
