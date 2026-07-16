@@ -1,1 +1,20 @@
-Tubular is a fork of NewPipe. It comes with all the privacy features of NewPipe, but also adds features from SponsorBlock and ReturnYouTubeDislike. Like NewPipe, it does not use any Google framework libraries, or the YouTube API. It only parses the website in order to gain the information it needs. Therefore this app can be used on devices without Google Services installed. Also, you don't need a YouTube account to use Tubular, and it's FLOSS.
+BlackTube is a privacy-respecting YouTube-only Android video client. It is forked from NewPipe/PipePipe and strips away all non-YouTube services to deliver a focused, AMOLED-friendly experience with no ads, no analytics, and no tracking.
+
+Features:
+• YouTube-only: clean, distraction-free experience
+• SponsorBlock: skip sponsored segments, intros, outros, and filler
+• Return YouTube Dislike: restore hidden dislike counts via community data
+• Background playback and audio-only mode
+• Download videos and playlists for offline use
+• Subscriptions, history, and playlists — stored entirely on device
+• AMOLED true-black theme for OLED display battery savings
+• Sleep timer for hands-free playback
+
+AI Summary (optional, requires your own Gemini API key):
+• Generate structured video summaries via Google Gemini — no developer key bundled
+• Prompt Library: browse, create, activate, and edit custom summary prompts
+• Summaries cached locally (7-day TTL) to reduce API usage
+• First-use disclosure shown before any data leaves the device
+• AI features are fully opt-in and off by default
+
+BlackTube has no server of its own. All network calls go directly to YouTube (via the extractor), SponsorBlock, Return YouTube Dislike, and optionally Google Gemini using the API key you provide.

@@ -53,6 +53,20 @@ configure<ApplicationExtension> {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // BlackTube: Only create release signing config when the keystore is present.
+        // F-Droid's build server signs APKs with its own key — it won't have this file.
+        val keystoreFile = rootProject.file("release.keystore")
+        if (keystoreFile.exists()) {
+            create("release") {
+                storeFile = keystoreFile
+                storePassword = System.getenv("BLACKTUBE_STORE_PASS") ?: "android"
+                keyAlias = System.getenv("BLACKTUBE_KEY_ALIAS") ?: "release"
+                keyPassword = System.getenv("BLACKTUBE_KEY_PASS") ?: "android"
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isDebuggable = true
@@ -71,6 +85,8 @@ configure<ApplicationExtension> {
                 applicationIdSuffix = suffix
                 resValue("string", "app_name", "BlackTube $suffix")
             }
+            // BlackTube: Only apply signing if keystore is present (absent on F-Droid build server)
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

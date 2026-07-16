@@ -1,4 +1,5 @@
-[Tubular]
-
-Updated:
-• merged latest changes from NewPipe's master branch
+• BlackTube initial release
+• YouTube-only privacy client (forked from NewPipe/PipePipe)
+• SponsorBlock and Return YouTube Dislike integrated
+• Optional AI video summaries with Prompt Library (BYOK — bring your own Gemini key)
+• AMOLED true-black theme and sleep timer

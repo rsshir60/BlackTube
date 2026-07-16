@@ -1,1 +1,1 @@
-A fork of NewPipe, a free lightweight YouTube frontend for Android.
+Privacy-first YouTube client with AI summaries and SponsorBlock support.

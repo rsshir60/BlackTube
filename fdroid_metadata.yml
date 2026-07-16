@@ -1,0 +1,59 @@
+Categories:
+  - Multimedia
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: rsshir60
+SourceCode: https://github.com/rsshir60/BlackTube
+IssueTracker: https://github.com/rsshir60/BlackTube/issues
+Changelog: https://github.com/rsshir60/BlackTube/releases
+
+AutoName: BlackTube
+Summary: Privacy-respecting YouTube-only client with AI summaries (BYOK)
+Description: |-
+  BlackTube is a privacy-respecting YouTube-only Android video client. It is
+  forked from NewPipe/PipePipe and strips away all non-YouTube services for a
+  focused, AMOLED-friendly experience — no ads, no analytics, no tracking.
+
+  <b>Core features:</b>
+  * YouTube-only, clean and distraction-free
+  * SponsorBlock: skip sponsored segments, intros, outros, and filler
+  * Return YouTube Dislike: restore hidden dislike counts via community data
+  * Background playback and audio-only mode
+  * Download videos and playlists for offline use
+  * Subscriptions, history, and playlists — stored entirely on device
+  * AMOLED true-black theme for OLED display battery savings
+  * Sleep timer
+
+  <b>AI Summary (optional, requires your own Gemini API key):</b>
+  * Generate structured video summaries via Google Gemini — no developer key bundled
+  * Prompt Library: browse, create, activate, and edit custom summary prompts
+  * Summaries cached locally (7-day TTL) to reduce API usage
+  * First-use disclosure shown before any data leaves the device
+  * Fully opt-in and off by default
+
+  BlackTube has no server of its own. All network calls go directly to YouTube
+  (via the extractor), SponsorBlock, Return YouTube Dislike, and optionally
+  Google Gemini using the API key you provide.
+
+  Note: Minimum Android 13 (API 33) is required.
+
+AntiFeatures:
+  - NonFreeNet
+
+RequiresRoot: false
+
+RepoType: git
+Repo: https://github.com/rsshir60/BlackTube
+
+Builds:
+  - versionName: 1.0.0-BlackTube
+    versionCode: 1009
+    commit: v1.0.0
+    subdir: app
+    gradle:
+      - release
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 1.0.0-BlackTube
+CurrentVersionCode: 1009

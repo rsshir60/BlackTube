@@ -25,11 +25,16 @@ dependencyResolutionManagement {
 }
 include (":app")
 
-// Use a local copy of NewPipe Extractor by uncommenting the lines below.
-// We assume, that NewPipe and NewPipe Extractor have the same parent directory.
-includeBuild("./NewPipeExtractor") {
-    dependencySubstitution {
-        substitute(module("com.github.TeamNewPipe:NewPipeExtractor")).using(project(":extractor"))
+// BlackTube: Use the local PipePipeExtractor when it is present (dev builds).
+// On F-Droid's build server this directory does not exist, so Gradle falls back
+// to resolving com.github.TeamNewPipe:NewPipeExtractor from JitPack using the
+// commit hash pinned in gradle/libs.versions.toml.
+val localExtractorDir = file("./NewPipeExtractor")
+if (localExtractorDir.exists()) {
+    includeBuild("./NewPipeExtractor") {
+        dependencySubstitution {
+            substitute(module("com.github.TeamNewPipe:NewPipeExtractor")).using(project(":extractor"))
+        }
     }
 }
 
