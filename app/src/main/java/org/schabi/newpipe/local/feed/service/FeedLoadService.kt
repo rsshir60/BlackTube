@@ -56,6 +56,7 @@ class FeedLoadService : Service() {
         private const val NOTIFICATION_SAMPLING_PERIOD = 1500
 
         const val EXTRA_GROUP_ID: String = "FeedLoadService.EXTRA_GROUP_ID"
+        const val EXTRA_FORCE_UPDATE: String = "FeedLoadService.EXTRA_FORCE_UPDATE"
     }
 
     private var loadingDisposable: Disposable? = null
@@ -89,7 +90,8 @@ class FeedLoadService : Service() {
         setupBroadcastReceiver()
 
         val groupId = intent.getLongExtra(EXTRA_GROUP_ID, FeedGroupEntity.GROUP_ALL_ID)
-        loadingDisposable = feedLoadManager.startLoading(groupId)
+        val forceUpdate = intent.getBooleanExtra(EXTRA_FORCE_UPDATE, false)
+        loadingDisposable = feedLoadManager.startLoading(groupId, forceUpdate)
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe {
                 startForeground(NOTIFICATION_ID, notificationBuilder.build())

@@ -678,6 +678,7 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         getActivity()?.startService(
             Intent(requireContext(), FeedLoadService::class.java).apply {
                 putExtra(FeedLoadService.EXTRA_GROUP_ID, groupId)
+                putExtra(FeedLoadService.EXTRA_FORCE_UPDATE, true)
             }
         )
         listState = null

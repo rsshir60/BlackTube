@@ -198,8 +198,23 @@ class FeedLoadManager(private val context: Context) {
                 errors.addAll(channelInfo.errors)
                 originalInfo = channelInfo
 
-                errors.addAll(channelInfo.errors)
-                streams = emptyList()
+                val fetchedStreams = mutableListOf<StreamInfoItem>()
+                for (tab in channelInfo.tabs) {
+                    if (ChannelTabHelper.fetchFeedChannelTab(context, defaultSharedPreferences, tab)) {
+                        try {
+                            val tabInfo = getChannelTab(
+                                subscriptionEntity.serviceId,
+                                tab,
+                                true
+                            ).onErrorReturn(storeOriginalErrorAndRethrow).blockingGet()
+                            errors.addAll(tabInfo.errors)
+                            fetchedStreams.addAll(tabInfo.relatedItems.filterIsInstance<StreamInfoItem>())
+                        } catch (e: Throwable) {
+                            errors.add(e)
+                        }
+                    }
+                }
+                streams = fetchedStreams
             }
 
             return Notification.createOnNext(
