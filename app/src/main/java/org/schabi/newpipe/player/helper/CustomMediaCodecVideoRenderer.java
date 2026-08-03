@@ -49,7 +49,37 @@ public final class CustomMediaCodecVideoRenderer extends MediaCodecVideoRenderer
 
     @Override
     protected boolean codecNeedsSetOutputSurfaceWorkaround(final String name) {
-        return true;
+        // Do not force true for modern C2 decoders (e.g. c2.qti.vp9.decoder), as releasing
+        // decoders on surface detachment causes "client does not own the buffer" crashes on Android 10+.
+        return super.codecNeedsSetOutputSurfaceWorkaround(name);
+    }
+
+    @Override
+    protected boolean processOutputBuffer(final long positionUs,
+                                          final long elapsedRealtimeUs,
+                                          @Nullable final MediaCodecAdapter codec,
+                                          @Nullable final java.nio.ByteBuffer buffer,
+                                          final int bufferIndex,
+                                          final int flags,
+                                          final int sampleCount,
+                                          final long sampleTimeUs,
+                                          final boolean isDecodeOnlyBuffer,
+                                          final boolean isLastBuffer,
+                                          final androidx.media3.common.Format format)
+            throws androidx.media3.exoplayer.ExoPlaybackException {
+        try {
+            return super.processOutputBuffer(positionUs, elapsedRealtimeUs, codec, buffer,
+                    bufferIndex, flags, sampleCount, sampleTimeUs, isDecodeOnlyBuffer,
+                    isLastBuffer, format);
+        } catch (final androidx.media3.exoplayer.ExoPlaybackException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof android.media.MediaCodec.CodecException
+                    || (e.getMessage() != null && e.getMessage().contains("buffer"))) {
+                // Background playback surface detached buffer error - skip gracefully without crashing
+                return true;
+            }
+            throw e;
+        }
     }
 }
 
