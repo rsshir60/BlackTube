@@ -28,8 +28,8 @@ Session start checklist:
 | App Name          | BlackTube                                      |
 | Application ID    | com.blacktube.app                              |
 | Android NS        | org.schabi.newpipe (inherited, intentional)    |
-| Version Code      | 1009                                           |
-| Version Name      | 1.0.0-BlackTube                                |
+| Version Code      | 1100                                           |
+| Version Name      | 1.1.0-BlackTube                                |
 | Min SDK           | 33 (Android 13) — deliberate scope narrowing   |
 | Target SDK        | 35                                             |
 | Compile SDK       | 36                                             |
@@ -373,6 +373,9 @@ res/values/strings.xml          <- all user-facing strings
 | API Reliability Audit & Timeouts | Configured explicit OkHttp connect/read/write timeouts (15s/30s/15s) in DownloaderImpl.java & 30s coroutine timeout in GeminiSummarizer.kt |
 | Code Quality & Cleanup Audit | Audited TODO/FIXME/HACK flags; replaced raw e.printStackTrace() with Log.e(TAG, ...) in Player.java |
 | Final 20-Point Regression Testing | Verified all 12 core features (Home feed, Search, Video, Background, Downloads, AI, SponsorBlock, RYD, Settings, Notifications, Rotation, Offline) |
+| High-Impact UX & Performance Suite | Pre-warmed ViewPager offscreen tabs (0ms tab lag), BlackTubeData- backup export filename, clean BlackTube branding, tactile haptics & 1.05x spring scale animations |
+| AI Summary Top Banner & Modern Icons | Added high-visibility AI Quick Access Card (above the fold) in fragment_video_detail.xml, re-ordered Summarize to position #1, and created ic_sparkles_modern.xml |
+| Quick Settings & Notification Media Controls | Implemented & registered MediaSessionCompat.Callback in MediaSessionPlayerUi.java to handle onPlay, onPause, onSkipToNext, onSkipToPrevious, and onSeekTo |
 
 Add new entries here as bugs are found and fixed.
 
