@@ -41,9 +41,9 @@ public final class DownloaderImpl extends Downloader {
 
     private DownloaderImpl(final OkHttpClient.Builder builder) {
         this.client = builder
+                .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
-//                .cache(new Cache(new File(context.getExternalCacheDir(), "okhttp"),
-//                        16 * 1024 * 1024))
+                .writeTimeout(15, TimeUnit.SECONDS)
                 .build();
         this.mCookies = new HashMap<>();
     }

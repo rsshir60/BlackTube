@@ -91,8 +91,9 @@ object GeminiSummarizer {
             val transcript = buildTranscriptText(video)
             val prompt = buildPrompt(video, transcript, summaryPrompt)
 
-            val response = currentModel.generateContent(prompt)
-            val text = response.text ?: "No summary available."
+            val text = kotlinx.coroutines.withTimeoutOrNull(30_000L) {
+                currentModel.generateContent(prompt).text
+            } ?: return@withContext SummaryResult.Error("Request timed out. Please check your connection and try again.")
 
             val result = SummaryResult.Markdown(text, System.currentTimeMillis())
             cacheSummary(cacheKey, text)

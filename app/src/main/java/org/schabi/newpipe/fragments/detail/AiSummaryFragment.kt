@@ -52,8 +52,11 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         }
     }
 
+    private var summarizeJob: kotlinx.coroutines.Job? = null
+
     private fun runSummarize(forceRefresh: Boolean = false) {
-        lifecycleScope.launch {
+        summarizeJob?.cancel()
+        summarizeJob = lifecycleScope.launch {
             showState(stateLoading)
             when (val result = GeminiSummarizer.summarize(requireContext(), streamInfo!!, forceRefresh)) {
                 is GeminiSummarizer.SummaryResult.Markdown -> {
@@ -101,6 +104,16 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         view.findViewById<Button>(R.id.btn_retry).setOnClickListener { runSummarize(forceRefresh = false) }
         view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { runSummarize(forceRefresh = true) }
 
+        view.findViewById<Button>(R.id.btn_copy_summary)?.setOnClickListener {
+            val textToCopy = tvSummaryContent.text.toString()
+            if (textToCopy.isNotEmpty()) {
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("AI Summary", textToCopy)
+                clipboard.setPrimaryClip(clip)
+                android.widget.Toast.makeText(requireContext(), "Summary copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
         refreshPromptChip()
         checkStateAndLoad()
 
@@ -145,5 +158,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         stateError.visibility = View.GONE
         stateSuccess.visibility = View.GONE
         visibleState.visibility = View.VISIBLE
+        view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.ai_summary_scroll_view)?.smoothScrollTo(0, 0)
     }
 }

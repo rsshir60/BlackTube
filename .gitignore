@@ -12,6 +12,10 @@ captures/
 app/debug/
 app/release/
 
+# keystores & private secrets
+*.jks
+*.keystore
+
 # vscode / eclipse files
 *.classpath
 *.project

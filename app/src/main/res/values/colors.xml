@@ -2,7 +2,7 @@
 <resources>
 
     <color name="contrastColor">@color/black</color>
-    <color name="defaultIconTint">@color/black</color>
+    <color name="defaultIconTint">#E0E0E0</color>
 
     <color name="ic_launcher_background">#CD201F</color>
 
@@ -28,7 +28,7 @@
     <color name="dark_background_color">#000000</color>
     <color name="dark_dialog_background_color">#121212</color>
     <color name="dark_settings_accent_color">#ff5252</color>
-    <color name="dark_separator_color">#0affffff</color>
+    <color name="dark_separator_color">#26FFFFFF</color>
     <color name="dark_ripple_color">#48ffffff</color>
     <color name="dark_selected_color">#2affffff</color>
     <color name="dark_contrast_background_color">#1f717171</color>
@@ -43,7 +43,7 @@
     <!-- Black Theme -->
     <color name="black_background_color">#000000</color>
     <color name="black_settings_accent_color">@color/dark_settings_accent_color</color>
-    <color name="black_separator_color">#1effffff</color>
+    <color name="black_separator_color">#30FFFFFF</color>
     <color name="black_contrast_background_color">#23454545</color>
     <color name="black_card_item_background_color">#0F0F0F</color>
     <color name="black_card_item_contrast_color">#202020</color>

@@ -4,80 +4,138 @@
     android:key="general_preferences"
     android:title="@string/settings">
 
-    <Preference
-        android:fragment="org.schabi.newpipe.settings.AiFeaturesSettingsFragment"
-        android:icon="@drawable/ic_stars"
-        android:key="ai_features"
-        android:title="@string/ai_features_title" />
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 1: Intelligence & Features
+         ══════════════════════════════════════════════════════════ -->
+    <PreferenceCategory
+        android:title="✨  Intelligence &amp; Features"
+        app:iconSpaceReserved="true">
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.VideoAudioSettingsFragment"
-        android:icon="@drawable/ic_headset"
-        android:title="@string/settings_category_video_audio_title"
-        app:iconSpaceReserved="false" />
+        <Preference
+            android:fragment="org.schabi.newpipe.settings.AiFeaturesSettingsFragment"
+            android:icon="@drawable/ic_stars"
+            android:key="ai_features"
+            android:summary="Configure Gemini API, prompt templates, and AI summaries"
+            android:title="@string/ai_features_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.DownloadSettingsFragment"
-        android:icon="@drawable/ic_file_download"
-        android:title="@string/settings_category_downloads_title"
-        app:iconSpaceReserved="false" />
+    </PreferenceCategory>
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.AppearanceSettingsFragment"
-        android:icon="@drawable/ic_palette"
-        android:title="@string/settings_category_appearance_title"
-        app:iconSpaceReserved="false" />
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 2: Playback & Experience
+         ══════════════════════════════════════════════════════════ -->
+    <PreferenceCategory
+        android:title="🎬  Playback &amp; Experience"
+        app:iconSpaceReserved="true">
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.HistorySettingsFragment"
-        android:icon="@drawable/ic_history"
-        android:title="@string/settings_category_history_title"
-        app:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.VideoAudioSettingsFragment"
+            android:icon="@drawable/ic_headset"
+            android:summary="Default resolution, player controls, and background audio"
+            android:title="@string/settings_category_video_audio_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.ContentSettingsFragment"
-        android:icon="@drawable/ic_language"
-        android:title="@string/content"
-        app:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.DownloadSettingsFragment"
+            android:icon="@drawable/ic_file_download"
+            android:summary="Download directory, max downloads, and default format"
+            android:title="@string/settings_category_downloads_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.NotificationsSettingsFragment"
-        android:icon="@drawable/ic_notifications"
-        android:title="@string/notifications"
-        app:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.AppearanceSettingsFragment"
+            android:icon="@drawable/ic_palette"
+            android:summary="AMOLED theme styling, tab positions, and layout mode"
+            android:title="@string/settings_category_appearance_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.HistorySettingsFragment"
+            android:icon="@drawable/ic_history"
+            android:summary="Playback history, search history, and watch state"
+            android:title="@string/settings_category_history_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
+    </PreferenceCategory>
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.BackupRestoreSettingsFragment"
-        android:icon="@drawable/ic_settings_backup_restore"
-        android:title="@string/settings_category_backup_restore_title"
-        app:iconSpaceReserved="false" />
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 3: Extensions & Community Tools
+         ══════════════════════════════════════════════════════════ -->
+    <PreferenceCategory
+        android:title="🔌  Extensions &amp; Community Tools"
+        app:iconSpaceReserved="true">
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.SponsorBlockSettingsFragment"
-        android:icon="@drawable/ic_sponsor_block_enable"
-        android:title="@string/sponsor_block"
-        app:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.SponsorBlockSettingsFragment"
+            android:icon="@drawable/ic_sponsor_block_enable"
+            android:summary="Skip sponsored segments, self-promotions, and intros"
+            android:title="@string/sponsor_block"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.ReturnYouTubeDislikeSettingsFragment"
-        android:icon="@drawable/ic_thumb_down"
-        android:title="ReturnYouTubeDislike"
-        app:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.ReturnYouTubeDislikeSettingsFragment"
+            android:icon="@drawable/ic_thumb_down"
+            android:summary="Restore hidden dislike counts and video rating metrics"
+            android:title="Return YouTube Dislike"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.ContentSettingsFragment"
+            android:icon="@drawable/ic_language"
+            android:summary="Content region, preferred language, and age restrictions"
+            android:title="@string/content"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.NotificationsSettingsFragment"
+            android:icon="@drawable/ic_notifications"
+            android:summary="Channel upload alerts and download progress notifications"
+            android:title="@string/notifications"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
-    <PreferenceScreen
-        android:fragment="org.schabi.newpipe.settings.DebugSettingsFragment"
-        android:icon="@drawable/ic_bug_report"
-        android:key="@string/debug_pref_screen_key"
-        android:title="@string/settings_category_debug_title"
-        app:iconSpaceReserved="false" />
+    </PreferenceCategory>
 
-    <Preference
-        android:icon="@drawable/ic_info_outline"
-        android:key="@string/about_settings_key"
-        android:title="@string/about_title"
-        app:iconSpaceReserved="false" />
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 4: System & Backup
+         ══════════════════════════════════════════════════════════ -->
+    <PreferenceCategory
+        android:title="⚙️  System &amp; Data"
+        app:iconSpaceReserved="true">
+
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.BackupRestoreSettingsFragment"
+            android:icon="@drawable/ic_settings_backup_restore"
+            android:summary="Export and import subscriptions, playlists, and settings"
+            android:title="@string/settings_category_backup_restore_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
+
+        <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.DebugSettingsFragment"
+            android:icon="@drawable/ic_bug_report"
+            android:key="@string/debug_pref_screen_key"
+            android:summary="Developer diagnostic logs, crash reports, and flags"
+            android:title="@string/settings_category_debug_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
+
+        <Preference
+            android:icon="@drawable/ic_info_outline"
+            android:key="@string/about_settings_key"
+            android:summary="BlackTube v1.0.0, open-source licenses, and credits"
+            android:title="@string/about_title"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

@@ -234,6 +234,8 @@ public abstract class BaseListFragment<I, N> extends BaseStateFragment<I>
         super.initViews(rootView, savedInstanceState);
 
         itemsList = rootView.findViewById(R.id.items_list);
+        itemsList.setHasFixedSize(true);
+        itemsList.setItemViewCacheSize(20);
         refreshItemViewMode();
 
         final Supplier<View> listHeaderSupplier = getListHeaderSupplier();
