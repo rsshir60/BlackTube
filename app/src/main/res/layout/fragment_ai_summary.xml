@@ -280,6 +280,46 @@
 
                 </LinearLayout>
 
+                <!-- TALK TO VIDEO Q&A BAR -->
+                <LinearLayout
+                    android:id="@+id/layout_ask_video"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_ai_panel"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="8dp">
+
+                    <EditText
+                        android:id="@+id/et_ask_video"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent"
+                        android:hint="Ask AI about this video..."
+                        android:imeOptions="actionSend"
+                        android:inputType="text"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="8dp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textColorHint="?android:attr/textColorSecondary"
+                        android:textSize="13sp" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_send_ask"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_bt_ai_action_button"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:text="Ask ➔"
+                        android:textAllCaps="false"
+                        android:textColor="@color/bt_ai_button_text_selector"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
             </LinearLayout>
 
         </FrameLayout>

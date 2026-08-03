@@ -50,6 +50,13 @@
             android:layout="@layout/preference_ai_connection_status"
             android:selectable="false" />
 
+        <PreferenceScreen
+            app:iconSpaceReserved="false"
+            android:fragment="org.schabi.newpipe.settings.LocalAiModelSettingsFragment"
+            android:key="pref_key_local_ai_screen"
+            android:summary="Download &amp; manage local 3.8B model for airplane-mode video summaries"
+            android:title="🔒 Local AI Engine (Phi-4 Mini)" />
+
     </PreferenceCategory>
 
     <!-- ══════════════════════════════════════════════════════════

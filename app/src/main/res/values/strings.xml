@@ -207,6 +207,19 @@
     <string name="undo">Undo</string>
     <string name="file_deleted">File deleted</string>
     <string name="play_all">Play All</string>
+    <string-array name="local_ai_model_entries">
+        <item>✨ Phi-5 1.3B (Default / 850 MB)</item>
+        <item>⚡ Qwen 2.5 1.5B (Ultra-Fast / 1.1 GB)</item>
+        <item>🚀 Phi-4 Mini 3.8B (Flagship / 2.6 GB)</item>
+        <item>🧠 Llama 3.2 3B (Reasoning / 2.0 GB)</item>
+    </string-array>
+    <string-array name="local_ai_model_values">
+        <item>phi_5_1_3b</item>
+        <item>qwen_2_5_1_5b</item>
+        <item>phi_4_mini_3_8b</item>
+        <item>llama_3_2_3b</item>
+    </string-array>
+
     <string name="always">Always</string>
     <string name="just_once">Just Once</string>
     <string name="file">File</string>

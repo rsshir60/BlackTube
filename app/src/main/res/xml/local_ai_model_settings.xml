@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="Universal Local Model Hub">
+
+    <PreferenceCategory
+        android:layout="@layout/settings_category_header_layout"
+        android:title="Model Selection Catalog">
+
+        <ListPreference
+            app:iconSpaceReserved="false"
+            android:defaultValue="phi_4_mini_3_8b"
+            android:entries="@array/local_ai_model_entries"
+            android:entryValues="@array/local_ai_model_values"
+            android:key="pref_key_active_local_model_id"
+            android:summary="Select active local model"
+            android:title="Active Local LLM Model" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            android:key="pref_key_local_ai_status"
+            android:summary="Model status loading..."
+            android:title="Model Engine Status" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            android:key="pref_key_local_ai_download"
+            android:summary="Download active model for offline summaries"
+            android:title="Download Active Model" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/settings_category_header_layout"
+        android:title="Hardware &amp; Architecture">
+
+        <Preference
+            app:iconSpaceReserved="false"
+            android:selectable="false"
+            android:summary="Qwen 2.5 1.5B (4GB+ RAM) • Phi-4 Mini 3.8B (6GB+ RAM) • Llama 3.2 3B (6GB+ RAM). All models run 100% locally via GGUF neural weights."
+            android:title="Universal GGUF Compatibility" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

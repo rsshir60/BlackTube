@@ -58,7 +58,48 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         summarizeJob?.cancel()
         summarizeJob = lifecycleScope.launch {
             showState(stateLoading)
-            when (val result = GeminiSummarizer.summarize(requireContext(), streamInfo!!, forceRefresh)) {
+            val context = requireContext()
+            val result = if (org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(context)) {
+                val prompt = "Summarize video: ${streamInfo?.name ?: ""}\nDescription: ${streamInfo?.description ?: ""}"
+                val initialized = org.schabi.newpipe.ai.LocalModelEngine.initialize(context)
+                if (initialized) {
+                    val localText = org.schabi.newpipe.ai.LocalModelEngine.generateSummary(prompt)
+                    GeminiSummarizer.SummaryResult.Markdown(localText)
+                } else {
+                    GeminiSummarizer.summarize(context, streamInfo!!, forceRefresh)
+                }
+            } else {
+                GeminiSummarizer.summarize(context, streamInfo!!, forceRefresh)
+            }
+
+            when (result) {
+                is GeminiSummarizer.SummaryResult.Markdown -> {
+                    io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
+                    showState(stateSuccess)
+                }
+                is GeminiSummarizer.SummaryResult.Error -> {
+                    tvErrorMessage.text = result.message
+                    showState(stateError)
+                }
+            }
+        }
+    }
+
+    private fun runCustomQuestion(userQuery: String) {
+        summarizeJob?.cancel()
+        summarizeJob = lifecycleScope.launch {
+            showState(stateLoading)
+            val context = requireContext()
+            val prompt = "Question about video '${streamInfo?.name ?: ""}': $userQuery"
+            val result = if (org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(context)) {
+                org.schabi.newpipe.ai.LocalModelEngine.initialize(context)
+                val ans = org.schabi.newpipe.ai.LocalModelEngine.generateSummary(prompt)
+                GeminiSummarizer.SummaryResult.Markdown("💬 **Q: $userQuery**\n\n$ans")
+            } else {
+                GeminiSummarizer.summarize(context, streamInfo!!, forceRefresh = true)
+            }
+
+            when (result) {
                 is GeminiSummarizer.SummaryResult.Markdown -> {
                     io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
                     showState(stateSuccess)
@@ -100,6 +141,17 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             startActivity(intent)
         }
 
+        view.findViewById<Button>(R.id.btn_open_settings)?.let { btn ->
+            val activeModel = org.schabi.newpipe.ai.UniversalModelRegistry.getActiveModel(requireContext())
+            if (!org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
+                btn.text = "⚡ 1-Click Download ${activeModel.name} (${activeModel.fileSizeMB} MB)"
+                btn.setOnClickListener {
+                    org.schabi.newpipe.ai.ModelDownloaderManager.startModelDownload(requireContext(), activeModel)
+                    android.widget.Toast.makeText(requireContext(), "Downloading ${activeModel.name} in background...", android.widget.Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
         fun animateAndHaptic(v: View, action: () -> Unit) {
             v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
             v.animate().scaleX(1.05f).scaleY(1.05f).setDuration(80).withEndAction {
@@ -112,14 +164,13 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         view.findViewById<Button>(R.id.btn_retry).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = false) } }
         view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = true) } }
 
-        view.findViewById<Button>(R.id.btn_copy_summary)?.setOnClickListener { btn ->
-            animateAndHaptic(btn) {
-                val textToCopy = tvSummaryContent.text.toString()
-                if (textToCopy.isNotEmpty()) {
-                    val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                    val clip = android.content.ClipData.newPlainText("AI Summary", textToCopy)
-                    clipboard.setPrimaryClip(clip)
-                    android.widget.Toast.makeText(requireContext(), "Summary copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+        view.findViewById<AppCompatButton>(R.id.btn_send_ask)?.setOnClickListener { btn ->
+            val etQuery = view.findViewById<android.widget.EditText>(R.id.et_ask_video)
+            val queryText = etQuery?.text?.toString()?.trim() ?: ""
+            if (queryText.isNotEmpty()) {
+                animateAndHaptic(btn) {
+                    etQuery?.setText("")
+                    runCustomQuestion(queryText)
                 }
             }
         }
@@ -145,7 +196,8 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             return
         }
 
-        if (!GeminiSummarizer.isConfigured()) {
+        val isLocalReady = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())
+        if (!isLocalReady && !GeminiSummarizer.isConfigured()) {
             showState(stateNoKey)
             return
         }
@@ -154,7 +206,7 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         val promptId = activePrompt?.id ?: PromptLibrary.DEFAULT_PROMPT_ID
         val isCached = GeminiSummarizer.hasCachedSummary(streamInfo.id, promptId)
 
-        if (isCached) {
+        if (isCached || isLocalReady) {
             runSummarize(forceRefresh = false)
         } else {
             showState(stateReady)
