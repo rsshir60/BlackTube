@@ -553,13 +553,17 @@ public final class VideoDetailFragment
                 openDownloadDialog();
             }
         });
+        View.OnClickListener openAiSummaryListener = v -> {
+            if (currentInfo != null) {
+                AiSummaryFragment aiFragment = new AiSummaryFragment(currentInfo);
+                aiFragment.show(getChildFragmentManager(), "AiSummaryFragment");
+            }
+        };
         if (binding.detailControlsAiSummarize != null) {
-            binding.detailControlsAiSummarize.setOnClickListener(v -> {
-                if (currentInfo != null) {
-                    AiSummaryFragment aiFragment = new AiSummaryFragment(currentInfo);
-                    aiFragment.show(getChildFragmentManager(), "AiSummaryFragment");
-                }
-            });
+            binding.detailControlsAiSummarize.setOnClickListener(openAiSummaryListener);
+        }
+        if (binding.cardAiSummaryBanner != null) {
+            binding.cardAiSummaryBanner.setOnClickListener(openAiSummaryListener);
         }
         binding.detailControlsShare.setOnClickListener(makeOnClickListener(info ->
                 ShareUtils.shareText(requireContext(), info.getName(), info.getUrl(),

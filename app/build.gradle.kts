@@ -45,9 +45,9 @@ configure<ApplicationExtension> {
         minSdk = 33
         targetSdk = 35
 
-        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: 1009
+        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: 1100
 
-        versionName = "1.0.0-BlackTube"
+        versionName = "1.1.0-BlackTube"
         System.getProperty("versionNameSuffix")?.let { versionNameSuffix = it }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

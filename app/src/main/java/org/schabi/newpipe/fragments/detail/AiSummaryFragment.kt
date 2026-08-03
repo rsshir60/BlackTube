@@ -100,17 +100,27 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             startActivity(intent)
         }
 
-        view.findViewById<Button>(R.id.btn_summarize).setOnClickListener { runSummarize(forceRefresh = false) }
-        view.findViewById<Button>(R.id.btn_retry).setOnClickListener { runSummarize(forceRefresh = false) }
-        view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { runSummarize(forceRefresh = true) }
+        fun animateAndHaptic(v: View, action: () -> Unit) {
+            v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            v.animate().scaleX(1.05f).scaleY(1.05f).setDuration(80).withEndAction {
+                v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+            }.start()
+            action()
+        }
 
-        view.findViewById<Button>(R.id.btn_copy_summary)?.setOnClickListener {
-            val textToCopy = tvSummaryContent.text.toString()
-            if (textToCopy.isNotEmpty()) {
-                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val clip = android.content.ClipData.newPlainText("AI Summary", textToCopy)
-                clipboard.setPrimaryClip(clip)
-                android.widget.Toast.makeText(requireContext(), "Summary copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+        view.findViewById<Button>(R.id.btn_summarize).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = false) } }
+        view.findViewById<Button>(R.id.btn_retry).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = false) } }
+        view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = true) } }
+
+        view.findViewById<Button>(R.id.btn_copy_summary)?.setOnClickListener { btn ->
+            animateAndHaptic(btn) {
+                val textToCopy = tvSummaryContent.text.toString()
+                if (textToCopy.isNotEmpty()) {
+                    val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    val clip = android.content.ClipData.newPlainText("AI Summary", textToCopy)
+                    clipboard.setPrimaryClip(clip)
+                    android.widget.Toast.makeText(requireContext(), "Summary copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+                }
             }
         }
 

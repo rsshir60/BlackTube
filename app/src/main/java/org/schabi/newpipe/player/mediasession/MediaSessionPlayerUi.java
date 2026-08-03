@@ -48,6 +48,51 @@ public class MediaSessionPlayerUi extends PlayerUi
     private List<NotificationActionData> prevNotificationActions = List.of();
 
 
+    private final MediaSessionCompat.Callback sessionCallback = new MediaSessionCompat.Callback() {
+        @Override
+        public void onPlay() {
+            if (player != null) {
+                player.play();
+            }
+        }
+
+        @Override
+        public void onPause() {
+            if (player != null) {
+                player.pause();
+            }
+        }
+
+        @Override
+        public void onSkipToNext() {
+            if (player != null) {
+                player.playNext();
+            }
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            if (player != null) {
+                player.playPrevious();
+            }
+        }
+
+        @Override
+        public void onSeekTo(final long pos) {
+            if (player != null) {
+                player.seekTo(pos);
+            }
+        }
+
+        @Override
+        public boolean onMediaButtonEvent(final Intent mediaButtonEvent) {
+            if (shouldIgnoreHardwareMediaButtons) {
+                return true;
+            }
+            return super.onMediaButtonEvent(mediaButtonEvent);
+        }
+    };
+
     public MediaSessionPlayerUi(@NonNull final Player player,
                                 @NonNull final MediaSessionCompat mediaSession) {
         super(player);
@@ -62,13 +107,13 @@ public class MediaSessionPlayerUi extends PlayerUi
         super.initPlayer();
         destroyPlayer(); // release previously used resources
 
+        mediaSession.setCallback(sessionCallback);
         mediaSession.setActive(true);
 
         // listen to changes to ignore_hardware_media_buttons_key
         updateShouldIgnoreHardwareMediaButtons(player.getPrefs());
         player.getPrefs().registerOnSharedPreferenceChangeListener(this);
 
-        // Removed sessionConnector logic
         // force updating media session actions by resetting the previous ones
         prevNotificationActions = List.of();
         updateMediaSessionActions();
@@ -82,6 +127,7 @@ public class MediaSessionPlayerUi extends PlayerUi
             final PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                     .setState(PlaybackStateCompat.STATE_NONE, 0, 0);
             mediaSession.setPlaybackState(stateBuilder.build());
+            mediaSession.setCallback(null);
             mediaSession.setActive(false);
         } catch (final Exception ignored) {
         }

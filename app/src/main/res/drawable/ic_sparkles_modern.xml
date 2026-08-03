@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Main Center Sparkle -->
+    <path
+        android:fillColor="?attr/colorAccent"
+        android:pathData="M12,2 C12,6.42 8.42,10 4,10 C8.42,10 12,13.58 12,18 C12,13.58 15.58,10 20,10 C15.58,10 12,6.42 12,2 Z" />
+    <!-- Secondary Top Right Sparkle -->
+    <path
+        android:fillColor="?attr/colorAccent"
+        android:pathData="M19,2 C19,3.66 17.66,5 16,5 C17.66,5 19,6.34 19,8 C19,6.34 20.34,5 22,5 C20.34,5 19,3.66 19,2 Z" />
+    <!-- Secondary Bottom Left Sparkle -->
+    <path
+        android:fillColor="?attr/colorAccent"
+        android:pathData="M5,16 C5,17.1 4.1,18 3,18 C4.1,18 5,18.9 5,20 C5,18.9 5.9,18 7,18 C5.9,18 5,17.1 5,16 Z" />
+</vector>

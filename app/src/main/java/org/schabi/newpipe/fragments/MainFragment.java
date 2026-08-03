@@ -196,6 +196,8 @@ public class MainFragment extends BaseFragment implements TabLayout.OnTabSelecte
 
         binding.pager.setAdapter(null);
         binding.pager.setAdapter(pagerAdapter);
+        binding.pager.setOffscreenPageLimit(Math.max(1, tabsList.size() - 1));
+        binding.pager.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
         updateTabsIconAndDescription();
         updateTitleForTab(binding.pager.getCurrentItem());
