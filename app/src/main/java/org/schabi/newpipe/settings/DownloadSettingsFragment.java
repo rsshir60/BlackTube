@@ -32,10 +32,12 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
     public static final boolean IGNORE_RELEASE_ON_OLD_PATH = true;
     private String downloadPathVideoPreference;
     private String downloadPathAudioPreference;
+    private String downloadPathSummaryPreference;
     private String storageUseSafPreference;
 
     private Preference prefPathVideo;
     private Preference prefPathAudio;
+    private Preference prefPathSummary;
     private Preference prefStorageAsk;
 
     private Context ctx;
@@ -45,6 +47,9 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
     private final ActivityResultLauncher<Intent> requestDownloadAudioPathLauncher =
             registerForActivityResult(
                     new StartActivityForResult(), this::requestDownloadAudioPathResult);
+    private final ActivityResultLauncher<Intent> requestDownloadSummaryPathLauncher =
+            registerForActivityResult(
+                    new StartActivityForResult(), this::requestDownloadSummaryPathResult);
 
     @Override
     public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
@@ -52,11 +57,13 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
 
         downloadPathVideoPreference = getString(R.string.download_path_video_key);
         downloadPathAudioPreference = getString(R.string.download_path_audio_key);
+        downloadPathSummaryPreference = getString(R.string.download_path_summary_key);
         storageUseSafPreference = getString(R.string.storage_use_saf);
         final String downloadStorageAsk = getString(R.string.downloads_storage_ask);
 
         prefPathVideo = findPreference(downloadPathVideoPreference);
         prefPathAudio = findPreference(downloadPathAudioPreference);
+        prefPathSummary = findPreference(downloadPathSummaryPreference);
         prefStorageAsk = findPreference(downloadStorageAsk);
 
         final SwitchPreferenceCompat prefUseSaf = findPreference(storageUseSafPreference);
@@ -99,10 +106,13 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
                 prefPathVideo);
         showPathInSummary(downloadPathAudioPreference, R.string.download_path_audio_summary,
                 prefPathAudio);
+        showPathInSummary(downloadPathSummaryPreference, R.string.download_path_summary_summary,
+                prefPathSummary);
     }
 
     private void showPathInSummary(final String prefKey, @StringRes final int defaultString,
                                    final Preference target) {
+        if (target == null) return;
         final Uri uri = Uri.parse(defaultPreferences.getString(prefKey, ""));
         if (uri.equals(Uri.EMPTY)) {
             target.setSummary(getString(defaultString));
@@ -124,8 +134,9 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
     }
 
     private void updatePathPickers(final boolean enabled) {
-        prefPathVideo.setEnabled(enabled);
-        prefPathAudio.setEnabled(enabled);
+        if (prefPathVideo != null) prefPathVideo.setEnabled(enabled);
+        if (prefPathAudio != null) prefPathAudio.setEnabled(enabled);
+        if (prefPathSummary != null) prefPathSummary.setEnabled(enabled);
     }
 
     // FIXME: after releasing the old path, all downloads created on the folder becomes inaccessible
@@ -174,7 +185,8 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
                 NewPipeSettings.saveDefaultAudioDownloadDirectory(ctx);
             } else {
                 defaultPreferences.edit().putString(downloadPathVideoPreference, null)
-                        .putString(downloadPathAudioPreference, null).apply();
+                        .putString(downloadPathAudioPreference, null)
+                        .putString(downloadPathSummaryPreference, null).apply();
             }
             updatePreferencesSummary();
             return true;
@@ -182,6 +194,8 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
             launchDirectoryPicker(requestDownloadVideoPathLauncher);
         } else if (key.equals(downloadPathAudioPreference)) {
             launchDirectoryPicker(requestDownloadAudioPathLauncher);
+        } else if (key.equals(downloadPathSummaryPreference)) {
+            launchDirectoryPicker(requestDownloadSummaryPathLauncher);
         } else {
             return super.onPreferenceTreeClick(preference);
         }
@@ -204,6 +218,10 @@ public class DownloadSettingsFragment extends BasePreferenceFragment {
 
     private void requestDownloadAudioPathResult(final ActivityResult result) {
         requestDownloadPathResult(result, downloadPathAudioPreference);
+    }
+
+    private void requestDownloadSummaryPathResult(final ActivityResult result) {
+        requestDownloadPathResult(result, downloadPathSummaryPreference);
     }
 
     private void requestDownloadPathResult(final ActivityResult result, final String key) {

@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "blacktube_llama::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-blacktube_llama-RelWithDebInfo-10f2544490af8ea9ad98.json",
+					"jsonFile" : "target-blacktube_llama-RelWithDebInfo-f74ac99a08da231d7d14.json",
 					"name" : "blacktube_llama",
 					"projectIndex" : 0
 				}
@@ -49,7 +49,7 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/SUPRIYA/Desktop/foss/BlackTube/app/.cxx/RelWithDebInfo/2d5q514b/x86",
+		"build" : "C:/Users/SUPRIYA/Desktop/foss/BlackTube/app/.cxx/RelWithDebInfo/2d5q514b/armeabi-v7a",
 		"source" : "C:/Users/SUPRIYA/Desktop/foss/BlackTube/app/src/main/cpp"
 	},
 	"version" : 

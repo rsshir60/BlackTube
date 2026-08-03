@@ -1104,4 +1104,10 @@
         <item>gemini</item>
     </string-array>
 
+    <!-- AI Summary Download Folder Settings -->
+    <string name="download_path_summary_key" translatable="false">download_path_summary_key</string>
+    <string name="download_path_summary_title">AI Summary folder</string>
+    <string name="download_path_summary_dialog_title">Select AI Summary download folder</string>
+    <string name="download_path_summary_summary">Folder to store downloaded PDF, Markdown, and Text AI summaries</string>
+
 </resources>

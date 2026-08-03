@@ -5,6 +5,7 @@ import static org.schabi.newpipe.util.ListHelper.getStreamsOfSpecifiedDelivery;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -1192,7 +1193,21 @@ public class DownloadDialog extends DialogFragment
         }
 
         final String sanitizedTitle = videoTitle.replaceAll("[^a-zA-Z0-9._-]", "_");
-        final File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        
+        SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
+        String customSummaryPath = prefs.getString(context.getString(R.string.download_path_summary_key), null);
+        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if (customSummaryPath != null && !customSummaryPath.isEmpty()) {
+            try {
+                Uri uri = Uri.parse(customSummaryPath);
+                if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()) && uri.getPath() != null) {
+                    File customFile = new File(uri.getPath());
+                    if (customFile.exists() || customFile.mkdirs()) {
+                        downloadsDir = customFile;
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
 
         File targetFile = null;
         if (formatIndex == 0) {
