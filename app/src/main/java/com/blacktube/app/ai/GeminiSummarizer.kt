@@ -113,6 +113,42 @@ object GeminiSummarizer {
         }
     }
 
+    @JvmStatic
+    suspend fun askQuestion(context: Context, video: StreamInfo, userQuery: String): SummaryResult = withContext(Dispatchers.IO) {
+        if (!isInitialized) {
+            return@withContext SummaryResult.Error("Summarizer not initialized")
+        }
+
+        val currentModel = model
+            ?: return@withContext SummaryResult.Error("Gemini API key not configured. Add your key in Settings > AI Features or switch to Local AI.")
+
+        try {
+            val transcript = buildTranscriptText(video)
+            val title = video.name ?: "Untitled"
+            val desc = video.description?.content?.take(500) ?: ""
+
+            val prompt = """
+                You are an interactive AI assistant analyzing this video for the user.
+                Video Title: $title
+                Description: $desc
+                ${if (transcript.isNotEmpty()) "Transcript Excerpt:\n$transcript" else ""}
+
+                User Question: $userQuery
+
+                Provide a direct, concise, and helpful answer to the user's question based on the video context in Markdown format.
+            """.trimIndent()
+
+            val responseText = kotlinx.coroutines.withTimeoutOrNull(25_000L) {
+                currentModel.generateContent(prompt).text
+            } ?: return@withContext SummaryResult.Error("Q&A request timed out. Please try again.")
+
+            SummaryResult.Markdown("💬 **Q: $userQuery**\n\n$responseText")
+        } catch (e: Exception) {
+            Log.e(TAG, "AI Q&A failed", e)
+            SummaryResult.Error("Failed to answer question: ${e.localizedMessage}")
+        }
+    }
+
     private fun buildCacheKey(videoId: String, promptId: String): String =
         "summary_${videoId}_${promptId}_v${PromptLibrary.PROMPT_CONTRACT_VERSION}"
 

@@ -31,39 +31,60 @@
 
     <RadioGroup
         android:id="@+id/video_audio_group"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/file_name"
-        android:layout_marginLeft="20dp"
-        android:layout_marginBottom="6dp"
-        android:gravity="left"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         tools:ignore="RtlHardcoded">
 
         <RadioButton
             android:id="@+id/video_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:checked="true"
-            android:text="@string/video" />
+            android:paddingStart="4dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:text="@string/video"
+            android:textSize="12.5sp" />
 
         <RadioButton
             android:id="@+id/audio_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/audio" />
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:text="@string/audio"
+            android:textSize="12.5sp" />
 
         <RadioButton
             android:id="@+id/subtitle_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/caption_setting_title" />
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:text="@string/caption_setting_title"
+            android:textSize="12.5sp" />
 
         <RadioButton
             android:id="@+id/summary_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Summary" />
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:text="Summary"
+            android:textSize="12.5sp" />
     </RadioGroup>
 
     <Spinner

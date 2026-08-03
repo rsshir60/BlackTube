@@ -19,10 +19,15 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.pdf.PdfDocument;
+import android.media.MediaScannerConnection;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
@@ -1189,49 +1194,190 @@ public class DownloadDialog extends DialogFragment
         final String sanitizedTitle = videoTitle.replaceAll("[^a-zA-Z0-9._-]", "_");
         final File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
+        File targetFile = null;
         if (formatIndex == 0) {
             // 1. PDF Document (.pdf)
             final String fileName = sanitizedTitle + "_Summary.pdf";
-            final File pdfFile = new File(downloadsDir, fileName);
-            createPdfDocument(pdfFile, videoTitle, summaryText);
+            targetFile = new File(downloadsDir, fileName);
+            createPdfDocument(targetFile, videoTitle, summaryText);
             Toast.makeText(context, "✅ AI Summary PDF saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
         } else if (formatIndex == 1) {
             // 2. Markdown File (.md)
             final String fileName = sanitizedTitle + "_Summary.md";
-            final File mdFile = new File(downloadsDir, fileName);
-            writeTextToFile(mdFile, "# " + videoTitle + "\n\n" + summaryText);
+            targetFile = new File(downloadsDir, fileName);
+            writeTextToFile(targetFile, "# " + videoTitle + "\n\n" + summaryText);
             Toast.makeText(context, "✅ AI Summary Markdown saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
         } else {
             // 3. Plain Text File (.txt)
             final String fileName = sanitizedTitle + "_Summary.txt";
-            final File txtFile = new File(downloadsDir, fileName);
-            writeTextToFile(txtFile, videoTitle + "\n\n" + summaryText);
+            targetFile = new File(downloadsDir, fileName);
+            writeTextToFile(targetFile, videoTitle + "\n\n" + summaryText);
             Toast.makeText(context, "✅ AI Summary Text saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+        }
+
+        if (targetFile != null && targetFile.exists()) {
+            MediaScannerConnection.scanFile(context, new String[]{targetFile.getAbsolutePath()}, null, (path, uri) -> {
+                Log.d(TAG, "Scanned summary file into Downloads provider: " + path);
+            });
         }
     }
 
     private void createPdfDocument(final File outputFile, final String title, final String content) {
         final PdfDocument pdfDoc = new PdfDocument();
-        final PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
-        final PdfDocument.Page page = pdfDoc.startPage(pageInfo);
+        int pageNumber = 1;
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
+        PdfDocument.Page page = pdfDoc.startPage(pageInfo);
+        Canvas canvas = page.getCanvas();
 
-        final Canvas canvas = page.getCanvas();
-        final Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(16);
-        paint.setFakeBoldText(true);
+        // 🎨 Paints for Executive PDF Layout
+        final Paint headerTitlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        headerTitlePaint.setColor(Color.parseColor("#E50914")); // BlackTube Red Accent
+        headerTitlePaint.setTextSize(17);
+        headerTitlePaint.setFakeBoldText(true);
 
-        canvas.drawText("BlackTube AI Summary", 40, 50, paint);
-        paint.setTextSize(12);
-        paint.setFakeBoldText(false);
+        final Paint headerSubPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        headerSubPaint.setColor(Color.parseColor("#666666"));
+        headerSubPaint.setTextSize(9);
 
-        int y = 90;
-        final String[] lines = (title + "\n\n" + content).split("\n");
-        for (String line : lines) {
-            if (y > 800) break;
-            canvas.drawText(line.length() > 70 ? line.substring(0, 70) + "..." : line, 40, y, paint);
-            y += 20;
+        final Paint sectionHeaderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        sectionHeaderPaint.setColor(Color.parseColor("#B20710")); // Dark Crimson
+        sectionHeaderPaint.setTextSize(13);
+        sectionHeaderPaint.setFakeBoldText(true);
+
+        final Paint bodyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bodyPaint.setColor(Color.parseColor("#222222"));
+        bodyPaint.setTextSize(10.5f);
+
+        final Paint bulletDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bulletDotPaint.setColor(Color.parseColor("#E50914"));
+        bulletDotPaint.setStyle(Paint.Style.FILL);
+
+        final Paint dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        dividerPaint.setColor(Color.parseColor("#E0E0E0"));
+        dividerPaint.setStrokeWidth(1.2f);
+
+        final Paint cardBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        cardBgPaint.setColor(Color.parseColor("#F4F4F6"));
+        cardBgPaint.setStyle(Paint.Style.FILL);
+
+        // 🖼️ Decode App Logo
+        Bitmap logoBitmap = null;
+        try {
+            if (context != null) {
+                logoBitmap = BitmapFactory.decodeResource(context.getResources(), org.schabi.newpipe.R.mipmap.ic_launcher);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Could not load logo bitmap for PDF", e);
         }
+
+        // 1. Draw Executive Header
+        if (logoBitmap != null) {
+            final Rect srcRect = new Rect(0, 0, logoBitmap.getWidth(), logoBitmap.getHeight());
+            final RectF dstRect = new RectF(40, 24, 68, 52);
+            canvas.drawBitmap(logoBitmap, srcRect, dstRect, null);
+            canvas.drawText("BLACKTUBE EXECUTIVE AI REPORT", 78, 40, headerTitlePaint);
+            canvas.drawText("On-Device Confidential Video Analysis • BlackTube v1.1.0", 78, 52, headerSubPaint);
+        } else {
+            canvas.drawText("BLACKTUBE EXECUTIVE AI REPORT", 40, 40, headerTitlePaint);
+            canvas.drawText("On-Device Confidential Video Analysis • BlackTube v1.1.0", 40, 52, headerSubPaint);
+        }
+
+        dividerPaint.setColor(Color.parseColor("#E50914"));
+        dividerPaint.setStrokeWidth(2f);
+        canvas.drawLine(40, 62, 555, 62, dividerPaint);
+
+        // 2. Draw Video Title Card
+        int y = 76;
+        final RectF titleCardRect = new RectF(40, y, 555, y + 36);
+        canvas.drawRoundRect(titleCardRect, 6, 6, cardBgPaint);
+
+        final Paint videoTitlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        videoTitlePaint.setColor(Color.parseColor("#111111"));
+        videoTitlePaint.setTextSize(11.5f);
+        videoTitlePaint.setFakeBoldText(true);
+
+        final String sanitizedTitle = title != null ? title.trim() : "Untitled Video";
+        final String displayTitle = "📹 " + (sanitizedTitle.length() > 68 ? sanitizedTitle.substring(0, 68) + "..." : sanitizedTitle);
+        canvas.drawText(displayTitle, 50, y + 22, videoTitlePaint);
+
+        y += 54;
+
+        // 3. Render Clean Markdown Content Lines (Stripping raw syntax symbols)
+        final String rawContent = content != null ? content : "";
+        final String[] lines = rawContent.split("\n");
+
+        for (String rawLine : lines) {
+            String line = rawLine.trim();
+            if (line.isEmpty()) {
+                y += 6;
+                continue;
+            }
+
+            if (y > 780) {
+                pdfDoc.finishPage(page);
+                pageNumber++;
+                pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
+                page = pdfDoc.startPage(pageInfo);
+                canvas = page.getCanvas();
+                y = 45;
+
+                canvas.drawText("BLACKTUBE EXECUTIVE AI REPORT (Cont.)", 40, y, headerTitlePaint);
+                canvas.drawLine(40, y + 10, 555, y + 10, dividerPaint);
+                y += 28;
+            }
+
+            // Section Headers (### 1. or 1. or #)
+            if (line.startsWith("#") || line.startsWith("1.") || line.startsWith("2.") || line.startsWith("3.") || line.startsWith("🎯") || line.startsWith("💡") || line.startsWith("📌")) {
+                String cleanHeader = line.replaceAll("^[#\\s]+", "")
+                                         .replace("**", "")
+                                         .replace("__", "");
+                canvas.drawText(cleanHeader, 40, y, sectionHeaderPaint);
+                y += 18;
+            }
+            // Bullet Points (• or - or *)
+            else if (line.startsWith("•") || line.startsWith("-") || line.startsWith("* ")) {
+                String cleanBullet = line.replaceAll("^[•\\-\\*\\s]+", "")
+                                         .replace("**", "")
+                                         .replace("__", "");
+                canvas.drawCircle(48, y - 3, 2.5f, bulletDotPaint);
+
+                final int maxLineChars = 75;
+                if (cleanBullet.length() > maxLineChars) {
+                    canvas.drawText(cleanBullet.substring(0, maxLineChars), 56, y, bodyPaint);
+                    y += 14;
+                    canvas.drawText(cleanBullet.substring(maxLineChars), 56, y, bodyPaint);
+                } else {
+                    canvas.drawText(cleanBullet, 56, y, bodyPaint);
+                }
+                y += 15;
+            }
+            // Horizontal Dividers (---)
+            else if (line.startsWith("---") || line.startsWith("___")) {
+                dividerPaint.setColor(Color.parseColor("#E0E0E0"));
+                dividerPaint.setStrokeWidth(1f);
+                canvas.drawLine(40, y, 555, y, dividerPaint);
+                y += 10;
+            }
+            // Standard Paragraph Text
+            else {
+                String cleanText = line.replace("**", "").replace("__", "").replace("`", "");
+                final int maxLineChars = 80;
+                if (cleanText.length() > maxLineChars) {
+                    canvas.drawText(cleanText.substring(0, maxLineChars), 40, y, bodyPaint);
+                    y += 14;
+                    canvas.drawText(cleanText.substring(maxLineChars), 40, y, bodyPaint);
+                } else {
+                    canvas.drawText(cleanText, 40, y, bodyPaint);
+                }
+                y += 15;
+            }
+        }
+
+        // Footer Metadata
+        final Paint footerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        footerPaint.setColor(Color.parseColor("#999999"));
+        footerPaint.setTextSize(8.5f);
+        canvas.drawText("Page " + pageNumber + " • Confidential On-Device AI Summary Report • BlackTube", 40, 815, footerPaint);
 
         pdfDoc.finishPage(page);
         try (FileOutputStream os = new FileOutputStream(outputFile)) {

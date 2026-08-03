@@ -331,10 +331,7 @@ public final class Player implements PlaybackListener, Listener {
                         R.string.always_use_exoplayer_set_output_surface_workaround_key), false)
                 ? new CustomRenderersFactory(context) : new DefaultRenderersFactory(context);
 
-        renderFactory.setEnableDecoderFallback(
-                prefs.getBoolean(
-                        context.getString(
-                                R.string.use_exoplayer_decoder_fallback_key), false));
+        renderFactory.setEnableDecoderFallback(true);
 
         videoResolver = new VideoPlaybackResolver(context, dataSource, getQualityResolver());
         audioResolver = new AudioPlaybackResolver(context, dataSource);

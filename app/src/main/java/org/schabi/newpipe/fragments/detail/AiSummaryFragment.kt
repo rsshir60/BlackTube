@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatButton
@@ -82,7 +83,7 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
 
             val result = if (useLocal) {
                 if (isLocalDownloaded) {
-                    val prompt = "Summarize video: ${info.name ?: ""}\nDescription: ${info.description?.content ?: ""}"
+                    val prompt = buildRichLocalPrompt(info)
                     val initialized = org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
                     if (initialized) {
                         val localText = org.schabi.newpipe.ai.LocalModelEngine.generateSummary(prompt)
@@ -143,7 +144,7 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
                     GeminiSummarizer.SummaryResult.Error("Local AI model is not downloaded yet. Please tap 1-Click Download below.")
                 }
             } else if (GeminiSummarizer.isConfigured()) {
-                GeminiSummarizer.summarize(ctx, info, forceRefresh = true)
+                GeminiSummarizer.askQuestion(ctx, info, userQuery)
             } else {
                 GeminiSummarizer.SummaryResult.Error("No AI engine configured for custom questions.")
             }
@@ -242,16 +243,36 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         view.findViewById<Button>(R.id.btn_summarize).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = false) } }
         view.findViewById<Button>(R.id.btn_retry).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = false) } }
         view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = true) } }
-
-        view.findViewById<AppCompatButton>(R.id.btn_send_ask)?.setOnClickListener { btn ->
-            val etQuery = view.findViewById<android.widget.EditText>(R.id.et_ask_video)
-            val queryText = etQuery?.text?.toString()?.trim() ?: ""
-            if (queryText.isNotEmpty()) {
-                animateAndHaptic(btn) {
-                    etQuery?.setText("")
-                    runCustomQuestion(queryText)
+        view.findViewById<Button>(R.id.btn_copy_summary)?.setOnClickListener { btn ->
+            animateAndHaptic(btn) {
+                val summaryText = tvSummaryContent.text?.toString() ?: ""
+                if (summaryText.isNotEmpty()) {
+                    val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    val clip = android.content.ClipData.newPlainText("AI Summary", summaryText)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(requireContext(), "📋 Summary copied to clipboard!", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+
+        val etQuery = view.findViewById<android.widget.EditText>(R.id.et_ask_video)
+        val btnAsk = view.findViewById<AppCompatButton>(R.id.btn_send_ask)
+
+        val triggerAsk = {
+            val queryText = etQuery?.text?.toString()?.trim() ?: ""
+            if (queryText.isNotEmpty()) {
+                if (btnAsk != null) animateAndHaptic(btnAsk) { etQuery?.setText("") }
+                else etQuery?.setText("")
+                runCustomQuestion(queryText)
+            }
+        }
+
+        btnAsk?.setOnClickListener { triggerAsk() }
+        etQuery?.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEND || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                triggerAsk()
+                true
+            } else false
         }
 
         refreshPromptChip()
@@ -323,7 +344,7 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         val promptId = activePrompt?.id ?: PromptLibrary.DEFAULT_PROMPT_ID
         val isCached = GeminiSummarizer.hasCachedSummary(streamInfo.id, promptId)
 
-        if (isCached || isLocalReady) {
+        if (isCached) {
             runSummarize(forceRefresh = false)
         } else {
             showState(stateReady)
@@ -338,5 +359,34 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         stateSuccess.visibility = View.GONE
         visibleState.visibility = View.VISIBLE
         view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.ai_summary_scroll_view)?.smoothScrollTo(0, 0)
+    }
+
+    private suspend fun buildRichLocalPrompt(info: StreamInfo): String = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val activePrompt = PromptLibrary.getSummaryPrompt(requireContext())
+        val title = info.name ?: "Untitled Video"
+        val uploader = info.uploaderName ?: "Unknown Creator"
+        val desc = info.description?.content?.take(800) ?: ""
+
+        val transcriptText = try {
+            val subtitles = info.subtitles
+            if (!subtitles.isNullOrEmpty()) {
+                val sub = subtitles.find { it.languageTag.startsWith("en") } ?: subtitles[0]
+                val response = org.schabi.newpipe.extractor.NewPipe.getDownloader().get(sub.content)
+                response.responseBody().take(3000)
+            } else ""
+        } catch (e: Exception) {
+            ""
+        }
+
+        return@withContext """
+            Video Title: $title
+            Creator: $uploader
+            Description: $desc
+            ${if (transcriptText.isNotEmpty()) "Transcript Excerpt: $transcriptText" else ""}
+
+            Active Prompt Style: ${activePrompt.title}
+            Instructions:
+            ${activePrompt.promptText}
+        """.trimIndent()
     }
 }
