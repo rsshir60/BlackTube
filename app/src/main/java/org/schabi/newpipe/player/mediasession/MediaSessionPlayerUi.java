@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -77,15 +78,20 @@ public class MediaSessionPlayerUi extends PlayerUi
     public void destroyPlayer() {
         super.destroyPlayer();
         player.getPrefs().unregisterOnSharedPreferenceChangeListener(this);
-        mediaSession.setActive(false);
+        try {
+            final PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                    .setState(PlaybackStateCompat.STATE_NONE, 0, 0);
+            mediaSession.setPlaybackState(stateBuilder.build());
+            mediaSession.setActive(false);
+        } catch (final Exception ignored) {
+        }
         prevNotificationActions = List.of();
     }
 
     @Override
     public void onThumbnailLoaded(@Nullable final Bitmap bitmap) {
         super.onThumbnailLoaded(bitmap);
-        // the thumbnail is now loaded: invalidate the metadata to trigger a metadata update
-        // sessionConnector.invalidateMediaSessionMetadata();
+        updateMediaSessionState();
     }
 
 
@@ -144,42 +150,42 @@ public class MediaSessionPlayerUi extends PlayerUi
         return builder.build();
     }
 
+    private void updateMediaSessionState() {
+        if (!mediaSession.isActive()) {
+            return;
+        }
+
+        final long actions = PlaybackStateCompat.ACTION_PLAY
+                | PlaybackStateCompat.ACTION_PAUSE
+                | PlaybackStateCompat.ACTION_PLAY_PAUSE
+                | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                | PlaybackStateCompat.ACTION_SEEK_TO;
+
+        final int state;
+        if (player.isPlaying()) {
+            state = PlaybackStateCompat.STATE_PLAYING;
+        } else if (player.getCurrentState() == Player.STATE_BUFFERING) {
+            state = PlaybackStateCompat.STATE_BUFFERING;
+        } else {
+            state = PlaybackStateCompat.STATE_PAUSED;
+        }
+
+        final float speed = player.getPlaybackSpeed();
+        final long position = player.getExoPlayer() != null
+                ? player.getExoPlayer().getCurrentPosition()
+                : 0L;
+
+        final PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(actions)
+                .setState(state, position, speed);
+
+        mediaSession.setPlaybackState(stateBuilder.build());
+        mediaSession.setMetadata(buildMediaMetadata());
+    }
 
     private void updateMediaSessionActions() {
-        // On Android 13+ (or Android T or API 33+) the actions in the player notification can't be
-        // controlled directly anymore, but are instead derived from custom media session actions.
-        // However the system allows customizing only two of these actions, since the other three
-        // are fixed to play-pause-buffering, previous, next.
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            // Although setting media session actions on older android versions doesn't seem to
-            // cause any trouble, it also doesn't seem to do anything, so we don't do anything to
-            // save battery. Check out NotificationUtil.updateActions() to see what happens on
-            // older android versions.
-            return;
-        }
-
-        if (!mediaSession.isActive()) {
-            // mediaSession will be inactive after destroyPlayer is called
-            return;
-        }
-
-        // only use the fourth and fifth actions (the settings page also shows only the last 2 on
-        // Android 13+)
-        final List<NotificationActionData> newNotificationActions = IntStream.of(3, 4)
-                .map(i -> player.getPrefs().getInt(
-                        player.getContext().getString(NotificationConstants.SLOT_PREF_KEYS[i]),
-                        NotificationConstants.SLOT_DEFAULTS[i]))
-                .mapToObj(action -> NotificationActionData
-                        .fromNotificationActionEnum(player, action))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        // avoid costly notification actions update, if nothing changed from last time
-        if (!newNotificationActions.equals(prevNotificationActions)) {
-            prevNotificationActions = newNotificationActions;
-            // sessionConnector.setCustomActionProviders(...)
-        }
+        updateMediaSessionState();
     }
 
     @Override

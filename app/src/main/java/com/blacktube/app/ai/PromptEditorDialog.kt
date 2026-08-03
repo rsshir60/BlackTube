@@ -17,9 +17,10 @@ object PromptEditorDialog {
      * [onSave] called with the updated prompt when user taps Save.
      */
     fun show(context: Context, prompt: BuiltInPrompt, onSave: (BuiltInPrompt) -> Unit) {
-        val dialog = BottomSheetDialog(context)
+        val dialog = BottomSheetDialog(context, R.style.DarkDialogTheme)
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_prompt_editor, null)
         dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val etTitle = view.findViewById<EditText>(R.id.et_prompt_editor_title)
         val etDesc = view.findViewById<EditText>(R.id.et_prompt_editor_desc)
