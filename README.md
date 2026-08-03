@@ -3,12 +3,14 @@
     <img alt="BlackTube Logo" src="assets/icon_readme.png" width="150" height="150">
   </picture>
 
-  <h1>BlackTube</h1>
+  <h1>BlackTube v1.1.0</h1>
 
-  <p><b>A privacy-respecting YouTube client with AI-powered video summaries.</b></p>
+  <p><b>A privacy-first YouTube client powered by On-Device Local AI (Phi-5) & Cloud Gemini.</b></p>
 
   <p>
     <a href="https://github.com/TeamNewPipe/NewPipe/blob/dev/LICENSE"><img alt="License: GPLv3" src="https://img.shields.io/badge/License-GPLv3-blue.svg"></a>
+    <img alt="Version" src="https://img.shields.io/badge/Version-v1.1.0-red.svg">
+    <img alt="Local AI Model" src="https://img.shields.io/badge/Local_AI-Phi--5_1.3B-success.svg?logo=android">
     <img alt="Kotlin Version" src="https://img.shields.io/badge/Kotlin-2.3.10-purple.svg?logo=kotlin">
     <img alt="GitHub Stars" src="https://img.shields.io/github/stars/rsshir60/BlackTube?style=social">
   </p>
@@ -29,59 +31,48 @@
 
 ## Overview
 
-BlackTube is a fork of [NewPipe](https://github.com/TeamNewPipe/NewPipe) focused on a YouTube-first experience with optional AI features. Core extraction, streaming, subscriptions, background playback, and privacy-first behavior come from the NewPipe ecosystem. BlackTube adds bring-your-own-key AI summaries, prompt management, and app-specific defaults.
+BlackTube is a high-performance fork of [NewPipe](https://github.com/TeamNewPipe/NewPipe) focused on a YouTube-first experience with advanced on-device and cloud AI features. Core extraction, streaming, subscriptions, background playback, and zero-tracking privacy come from the NewPipe ecosystem. 
 
-## Features
+BlackTube adds **On-Device Local AI (Phi-5 1.3B)**, **Bring-Your-Own-Key Cloud Gemini**, **Interactive Talk-to-Video Q&A**, **Executive PDF Exports**, and a customizable **Prompt Library**.
 
-### AI Summary
+## Key Features
 
-- Bring your own Gemini API key. No developer-owned key is bundled with the app.
-- Generate summaries from video metadata and transcript content when available.
-- Cache summaries locally to save API usage and make repeated views faster.
-- Render readable Markdown summaries in the video detail view.
-- Select a custom prompt from the built-in Prompt Library.
+### 🔒 Dual AI Engine Suite
 
-### Prompt Library
+- **On-Device Local AI Engine (Microsoft Phi-5 1.3B)**: Runs 100% offline via native C++ NDK GGUF inference (`llama.cpp`). Zero cloud data transmission, complete airplane-mode privacy.
+- **Cloud Gemini Engine**: Bring-your-own-key Google Gemini 3.1 Flash-Lite API integration for instant cloud synthesis.
+- **Universal Engine Provider Selector**: Switch seamlessly between *Local AI*, *Cloud Gemini*, or *Auto-Select* via Settings or 1-tap in-fragment chip menu.
 
-- Browse built-in prompt styles for different summary formats.
-- Activate a prompt and reuse it across summaries.
-- Duplicate and edit prompts for custom workflows.
-- Return to the default prompt at any time.
+### 🎯 User-Controlled Summaries & Prompt Library
 
-### YouTube-First Experience
+- **User-Controlled Generation**: Zero intrusive auto-summarization on video load. Pick your prompt style and engine provider first, then tap **[ ✨ Summarize Video with AI ]** on your command.
+- **Prompt Library**: Browse built-in prompt templates (*Executive Summary*, *TL;DR Bullets*, *Key Takeaways*, *Deep Technical Analysis*, *ELI5 Explanation*).
+- **Auto-Re-Generation**: Tapping **Use** on any prompt automatically returns to the summary sheet and re-generates the report under the new style.
 
-- BlackTube currently forces YouTube as the selected streaming service.
-- SponsorBlock and Return YouTube Dislike integrations are retained.
-- Playback, downloads, subscriptions, and background audio are inherited from NewPipe.
+### 💬 Talk-to-Video Interactive Q&A (Ask ➔)
 
-### Local Extractor Development
+- Always-accessible Q&A bar allows asking custom questions about any video's content, transcript, or description 24/7.
+- Supports physical keyboard send and soft keyboard `IME_ACTION_SEND` triggers.
 
-This branch is configured to use a local `NewPipeExtractor` included build:
+### 📄 Executive AI Summary Export Suite
 
-```kotlin
-includeBuild("./NewPipeExtractor")
-```
+- **Executive PDF Exporter**: Export summaries as structured PDF reports featuring the official App Logo, red accent header divider, video metadata card, stripped raw markdown symbols, custom red bullet dots, and multi-page pagination.
+- **Markdown (.md) & Text (.txt) Exports**: Export raw summaries directly to the Downloads folder.
+- **System MediaScanner Provider Integration**: All exported PDF, MD, and TXT files are automatically indexed into Android's Downloads provider for instant visibility in system and in-app Downloads tabs.
+- **Clipboard Copy System**: 1-tap **Copy Summary** with tactile spring haptics and toast confirmation.
 
-That lets the app build against local extractor changes instead of relying only on the published JitPack artifact.
+### 📺 YouTube-First Experience
 
-## Privacy
+- YouTube service locked as default with SponsorBlock & Return YouTube Dislike integrations.
+- Background audio playback, notification media controls, picture-in-picture mode, and video downloads inherited from NewPipe.
+- ExoPlayer hardware video codec buffer ownership fallback fix for Qualcomm Snapdragon and Samsung devices.
 
-BlackTube follows the same privacy posture as NewPipe: no ads, no analytics, and no tracking added by the app.
-
-AI summaries are optional. If you enable them, requests are sent to Google's Gemini API using the API key you provide. BlackTube does not ship with an API key and does not route AI requests through a BlackTube server.
-
-## Installation
-
-### GitHub Releases
-
-Prebuilt APKs are intended to be published on the [Releases page](https://github.com/rsshir60/BlackTube/releases).
-
-### Build From Source
+## Build From Source
 
 Requirements:
-
-- Android SDK
+- Android SDK (API 34)
 - JDK 17
+- CMake 3.22+ and Android NDK 27+ for native C++ GGUF inference
 - A local `NewPipeExtractor` checkout at `./NewPipeExtractor`
 
 ```bash
@@ -90,38 +81,26 @@ cd BlackTube
 ./gradlew assembleRelease
 ```
 
-The release APK is generated under:
+The signed release package will be located at:
 
 ```text
-app/build/outputs/apk/release/
+app/build/outputs/apk/release/app-release-signed-v1.1.apk
 ```
 
 ## Tech Stack
 
-- Kotlin and Java
-- AndroidX, Material Components, and Android preferences
-- AndroidX Media3
-- Gemini Generative AI SDK
-- Markwon for Markdown rendering
-- RxJava, Room, OkHttp, Coil, and Jsoup
-- NewPipe Extractor via local included build
-
-## Roadmap
-
-- Keep syncing with upstream NewPipe where practical.
-- Continue improving the prompt library and custom prompt editor.
-- Document release signing and distribution once release automation is finalized.
-
-## Contributing
-
-Contributions are welcome. For changes to core extraction or playback behavior, consider whether the patch belongs upstream in NewPipe or NewPipe Extractor first.
+- **Core**: Kotlin & Java, AndroidX Media3, Material Design 3
+- **Local AI**: C++ NDK, `llama.cpp` JNI, Microsoft Phi-5 1.3B GGUF Q5_K_M
+- **Cloud AI**: Google Gemini Generative AI SDK
+- **Markdown & PDF**: Markwon, Android `PdfDocument` & `Canvas` API
+- **Extractor**: NewPipe Extractor via local included build
 
 ## License And Credits
 
 BlackTube is licensed under the GNU General Public License v3.0 or later.
 
 ```text
-Copyright (C) 2025 NewPipe e.V. and BlackTube Contributors
+Copyright (C) 2026 NewPipe e.V. and BlackTube Contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
