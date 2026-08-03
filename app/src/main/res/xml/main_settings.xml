@@ -122,7 +122,7 @@
         <Preference
             android:icon="@drawable/ic_info_outline"
             android:key="@string/about_settings_key"
-            android:summary="BlackTube v1.0.0, open-source licenses, and credits"
+            android:summary="BlackTube v1.1.0, open-source licenses, and credits"
             android:title="@string/about_title"
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />

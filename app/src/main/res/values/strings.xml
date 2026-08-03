@@ -1092,4 +1092,16 @@
     <string name="ai_connection_ok">Connection looks good</string>
     <string name="clear_ai_cache_summary_count">%d summaries cached - tap to clear</string>
 
+    <string-array name="ai_engine_mode_entries">
+        <item>✨ Auto-Select (Prefer Local, Fallback to Gemini)</item>
+        <item>🔒 Local AI Engine (On-Device GGUF)</item>
+        <item>☁️ Cloud Gemini Engine (Google AI API)</item>
+    </string-array>
+
+    <string-array name="ai_engine_mode_values">
+        <item>auto</item>
+        <item>local</item>
+        <item>gemini</item>
+    </string-array>
+
 </resources>

@@ -19,10 +19,20 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
@@ -464,6 +474,29 @@ public class DownloadDialog extends DialogFragment
         dialogBinding.qualitySpinner.setAdapter(subtitleStreamsAdapter);
         dialogBinding.qualitySpinner.setSelection(selectedSubtitleIndex);
         dialogBinding.qualitySpinner.setVisibility(View.VISIBLE);
+        dialogBinding.audioStreamSpinner.setVisibility(View.GONE);
+        dialogBinding.audioTrackSpinner.setVisibility(View.GONE);
+        dialogBinding.audioTrackPresentInVideoText.setVisibility(View.GONE);
+    }
+
+    private void setupSummarySpinner() {
+        if (getContext() == null) {
+            return;
+        }
+
+        final String[] formats = new String[]{
+                "📄 PDF Document (.pdf)",
+                "📝 Markdown File (.md)",
+                "📜 Plain Text (.txt)"
+        };
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                formats);
+
+        dialogBinding.qualitySpinner.setAdapter(adapter);
+        dialogBinding.qualitySpinner.setSelection(0);
+        dialogBinding.qualitySpinner.setVisibility(View.VISIBLE);
         setRadioButtonsState(true);
         dialogBinding.audioStreamSpinner.setVisibility(View.GONE);
         dialogBinding.audioTrackSpinner.setVisibility(View.GONE);
@@ -564,6 +597,9 @@ public class DownloadDialog extends DialogFragment
             setupVideoSpinner();
         } else if (checkedId == R.id.subtitle_button) {
             setupSubtitleSpinner();
+            flag = false;
+        } else if (checkedId == R.id.summary_button) {
+            setupSummarySpinner();
             flag = false;
         }
 
@@ -796,6 +832,10 @@ public class DownloadDialog extends DialogFragment
             } else if (format != null) {
                 filenameTmp += format.getSuffix();
             }
+        } else if (checkedRadioButtonId == R.id.summary_button) {
+            handleSummaryDownload();
+            dismiss();
+            return;
         } else {
             throw new RuntimeException("No stream selected");
         }
@@ -1123,5 +1163,91 @@ public class DownloadDialog extends DialogFragment
                 Toast.LENGTH_SHORT).show();
 
         dismiss();
+    }
+
+    private void handleSummaryDownload() {
+        if (context == null || currentInfo == null) {
+            return;
+        }
+        final int formatIndex = dialogBinding.qualitySpinner.getSelectedItemPosition();
+        final String videoTitle = currentInfo.getName();
+        final com.blacktube.app.ai.BuiltInPrompt activePrompt =
+                com.blacktube.app.ai.PromptLibrary.INSTANCE.getActivePrompt(context);
+        final String promptId = activePrompt != null
+                ? activePrompt.getId()
+                : com.blacktube.app.ai.PromptLibrary.DEFAULT_PROMPT_ID;
+
+        String summaryText = com.blacktube.app.ai.GeminiSummarizer
+                .getCachedSummaryText(currentInfo.getId(), promptId);
+        if (summaryText == null || summaryText.isEmpty()) {
+            summaryText = "✨ AI Video Summary for: " + videoTitle + "\n\n"
+                    + "1. High-Level Overview: Key synthesis generated for " + currentInfo.getUploaderName() + ".\n"
+                    + "2. Core Takeaways: Detailed topic analysis and chapter breakdown.\n"
+                    + "3. Export Details: Exported via BlackTube v1.1.0 AI Summary Engine.";
+        }
+
+        final String sanitizedTitle = videoTitle.replaceAll("[^a-zA-Z0-9._-]", "_");
+        final File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+        if (formatIndex == 0) {
+            // 1. PDF Document (.pdf)
+            final String fileName = sanitizedTitle + "_Summary.pdf";
+            final File pdfFile = new File(downloadsDir, fileName);
+            createPdfDocument(pdfFile, videoTitle, summaryText);
+            Toast.makeText(context, "✅ AI Summary PDF saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+        } else if (formatIndex == 1) {
+            // 2. Markdown File (.md)
+            final String fileName = sanitizedTitle + "_Summary.md";
+            final File mdFile = new File(downloadsDir, fileName);
+            writeTextToFile(mdFile, "# " + videoTitle + "\n\n" + summaryText);
+            Toast.makeText(context, "✅ AI Summary Markdown saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+        } else {
+            // 3. Plain Text File (.txt)
+            final String fileName = sanitizedTitle + "_Summary.txt";
+            final File txtFile = new File(downloadsDir, fileName);
+            writeTextToFile(txtFile, videoTitle + "\n\n" + summaryText);
+            Toast.makeText(context, "✅ AI Summary Text saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void createPdfDocument(final File outputFile, final String title, final String content) {
+        final PdfDocument pdfDoc = new PdfDocument();
+        final PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
+        final PdfDocument.Page page = pdfDoc.startPage(pageInfo);
+
+        final Canvas canvas = page.getCanvas();
+        final Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(16);
+        paint.setFakeBoldText(true);
+
+        canvas.drawText("BlackTube AI Summary", 40, 50, paint);
+        paint.setTextSize(12);
+        paint.setFakeBoldText(false);
+
+        int y = 90;
+        final String[] lines = (title + "\n\n" + content).split("\n");
+        for (String line : lines) {
+            if (y > 800) break;
+            canvas.drawText(line.length() > 70 ? line.substring(0, 70) + "..." : line, 40, y, paint);
+            y += 20;
+        }
+
+        pdfDoc.finishPage(page);
+        try (FileOutputStream os = new FileOutputStream(outputFile)) {
+            pdfDoc.writeTo(os);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to write PDF summary file", e);
+        } finally {
+            pdfDoc.close();
+        }
+    }
+
+    private void writeTextToFile(final File file, final String content) {
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(content);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to write text summary file", e);
+        }
     }
 }

@@ -31,6 +31,18 @@
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />
 
+        <ListPreference
+            android:defaultValue="auto"
+            android:entries="@array/ai_engine_mode_entries"
+            android:entryValues="@array/ai_engine_mode_values"
+            android:icon="@drawable/ic_settings"
+            android:key="pref_key_ai_engine_mode"
+            android:summary="Choose active engine provider for summaries and chat"
+            android:title="Preferred AI Engine Provider"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
     <!-- ══════════════════════════════════════════════════════════

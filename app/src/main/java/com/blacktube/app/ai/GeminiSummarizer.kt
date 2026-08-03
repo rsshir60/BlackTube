@@ -116,6 +116,13 @@ object GeminiSummarizer {
     private fun buildCacheKey(videoId: String, promptId: String): String =
         "summary_${videoId}_${promptId}_v${PromptLibrary.PROMPT_CONTRACT_VERSION}"
 
+    @JvmStatic
+    fun getCachedSummaryText(videoId: String, promptId: String): String? {
+        val cacheKey = buildCacheKey(videoId, promptId)
+        val result = getCachedSummary(cacheKey)
+        return (result as? SummaryResult.Markdown)?.text
+    }
+
     private fun getCachedSummary(cacheKey: String): SummaryResult? {
         val json = prefs.getString(cacheKey, null) ?: return null
         return try {

@@ -90,28 +90,55 @@
                 android:gravity="center_horizontal"
                 android:layout_gravity="top|center_horizontal"
                 android:layout_marginTop="24dp"
-                android:visibility="gone"
+                android:visibility="visible"
                 tools:visibility="visible">
 
-                <!-- Active prompt chip -->
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/chip_active_prompt"
+                <!-- Active prompt & Engine Selector chips -->
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="34dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/bg_bt_ai_prompt_chip"
-                    android:drawableStart="@drawable/ic_stars_16"
-                    android:drawablePadding="6dp"
-                    android:drawableTint="@color/bt_switch_on_color"
-                    android:gravity="center"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:text="@string/prompt_library_default"
-                    android:textAllCaps="false"
-                    android:textColor="@color/bt_ai_button_text_selector"
-                    android:textSize="12sp" />
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/chip_active_prompt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_bt_ai_prompt_chip"
+                        android:drawableStart="@drawable/ic_stars_16"
+                        android:drawablePadding="6dp"
+                        android:drawableTint="@color/bt_switch_on_color"
+                        android:gravity="center"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:text="@string/prompt_library_default"
+                        android:textAllCaps="false"
+                        android:textColor="@color/bt_ai_button_text_selector"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/chip_engine_selector"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:background="@drawable/bg_bt_ai_prompt_chip"
+                        android:drawableStart="@drawable/ic_settings"
+                        android:drawablePadding="6dp"
+                        android:drawableTint="?attr/colorAccent"
+                        android:gravity="center"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:text="✨ Auto ▾"
+                        android:textAllCaps="false"
+                        android:textColor="@color/bt_ai_button_text_selector"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_summarize"

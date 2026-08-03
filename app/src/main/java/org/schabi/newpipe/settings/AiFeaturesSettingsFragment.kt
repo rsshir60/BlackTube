@@ -46,8 +46,17 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.ai_features_settings)
         hookApiKeyPref()
+        hookEngineModePref()
         hookClearCache()
         hookPromptLibrary()
+    }
+
+    private fun hookEngineModePref() {
+        findPreference<androidx.preference.ListPreference>("pref_key_ai_engine_mode")
+            ?.setOnPreferenceChangeListener { _, _ ->
+                view?.post { refreshCustomViews() }
+                true
+            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -142,32 +151,51 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
         val activeLocalModel = org.schabi.newpipe.ai.UniversalModelRegistry.getActiveModel(ctx)
         val isLocalDownloaded = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
 
+        val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
+        val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
+
         if (tvModelName != null) {
-            when {
-                isLocalDownloaded -> {
-                    tvModelName.text = "⚡ Local ${activeLocalModel.name} (${activeLocalModel.fileSizeMB} MB GGUF)"
+            when (engineMode) {
+                "local" -> {
+                    tvModelName.text = if (isLocalDownloaded)
+                        "🔒 Local ${activeLocalModel.name} (${activeLocalModel.fileSizeMB} MB GGUF)"
+                    else
+                        "⚠️ Local Engine Selected (Model Download Required)"
                 }
-                isConfigured -> {
-                    tvModelName.text = "☁️ Gemini 3.1 Flash-Lite (Cloud API)"
+                "gemini" -> {
+                    tvModelName.text = if (isConfigured)
+                        "☁️ Gemini 3.1 Flash-Lite (Cloud API)"
+                    else
+                        "⚠️ Gemini Engine Selected (API Key Required)"
                 }
                 else -> {
-                    tvModelName.text = "⚠️ No Model (1-Click Download Phi-5 AI)"
+                    tvModelName.text = if (isLocalDownloaded)
+                        "✨ Auto: Local ${activeLocalModel.name} Active"
+                    else if (isConfigured)
+                        "✨ Auto: Cloud Gemini Active"
+                    else
+                        "⚠️ No Engine Ready (Tap 1-Click Download or Add Key)"
                 }
             }
         }
 
         if (chipStatus != null) {
+            val isActive = when (engineMode) {
+                "local" -> isLocalDownloaded
+                "gemini" -> isConfigured
+                else -> isLocalDownloaded || isConfigured
+            }
+
             when {
                 !isEnabled -> {
                     chipStatus.text = "⚪ Disabled"
                     chipStatus.setBackgroundResource(R.drawable.bg_ai_status_disabled)
                 }
-                isLocalDownloaded -> {
-                    chipStatus.text = "🟢 Local AI Active"
-                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_active)
-                }
-                isConfigured -> {
-                    chipStatus.text = "🟢 Cloud AI Active"
+                isActive -> {
+                    chipStatus.text = if (engineMode == "local" || (engineMode == "auto" && isLocalDownloaded))
+                        "🟢 Local AI Active"
+                    else
+                        "🟢 Cloud AI Active"
                     chipStatus.setBackgroundResource(R.drawable.bg_ai_status_active)
                 }
                 else -> {

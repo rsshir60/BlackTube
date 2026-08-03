@@ -70,13 +70,25 @@ class PromptLibraryActivity : AppCompatActivity() {
     }
 
     private fun setupCategoryChips() {
+        chipGroupFilter.removeAllViews()
         val allChip = createCategoryButton("All", null)
-        allChip.isSelected = true
+        updateChipStyle(allChip, true)
         selectedFilterButton = allChip
         chipGroupFilter.addView(allChip)
 
         PromptCategory.values().forEach { cat ->
-            chipGroupFilter.addView(createCategoryButton("${cat.emoji} ${cat.displayName}", cat))
+            val chip = createCategoryButton("${cat.emoji} ${cat.displayName}", cat)
+            updateChipStyle(chip, false)
+            chipGroupFilter.addView(chip)
+        }
+    }
+
+    private fun updateChipStyle(button: AppCompatButton, isSelected: Boolean) {
+        button.isSelected = isSelected
+        if (isSelected) {
+            button.setTextColor(0xFF000000.toInt()) // Bold high-contrast black text on bright selected chip!
+        } else {
+            button.setTextColor(resolveThemeColor(android.R.attr.textColorPrimary))
         }
     }
 
@@ -88,7 +100,6 @@ class PromptLibraryActivity : AppCompatActivity() {
             minWidth = 0
             minHeight = 0
             isAllCaps = false
-            setTextColor(resolveThemeColor(android.R.attr.textColorPrimary))
             setBackgroundResource(R.drawable.bg_ai_chip)
             setPadding(dp(14), 0, dp(14), 0)
             layoutParams = LinearLayout.LayoutParams(
@@ -98,8 +109,10 @@ class PromptLibraryActivity : AppCompatActivity() {
                 marginEnd = dp(8)
             }
             setOnClickListener {
-                selectedFilterButton?.isSelected = false
-                isSelected = true
+                if (selectedFilterButton is AppCompatButton) {
+                    updateChipStyle(selectedFilterButton as AppCompatButton, false)
+                }
+                updateChipStyle(this, true)
                 selectedFilterButton = this
                 currentFilter = tag as? PromptCategory
                 applyFilter()

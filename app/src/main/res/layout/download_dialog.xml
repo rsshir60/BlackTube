@@ -58,6 +58,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/caption_setting_title" />
+
+        <RadioButton
+            android:id="@+id/summary_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Summary" />
     </RadioGroup>
 
     <Spinner
