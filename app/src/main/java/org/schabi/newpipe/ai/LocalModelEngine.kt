@@ -13,12 +13,16 @@ object LocalModelEngine {
     private var isInitialized = false
     private var loadedModelId: String? = null
 
+    private var isLibraryLoaded = false
+
     init {
         try {
             System.loadLibrary("blacktube_llama")
+            isLibraryLoaded = true
             Log.i(TAG, "Native blacktube_llama library loaded successfully")
-        } catch (e: UnsatisfiedLinkError) {
-            Log.w(TAG, "Native blacktube_llama library failed to load: ${e.message}")
+        } catch (e: Throwable) {
+            isLibraryLoaded = false
+            Log.w(TAG, "Native blacktube_llama library failed to load gracefully: ${e.message}")
         }
     }
 
@@ -33,6 +37,11 @@ object LocalModelEngine {
     }
 
     suspend fun initialize(context: Context, contextSize: Int = 16384): Boolean = withContext(Dispatchers.IO) {
+        if (!isLibraryLoaded) {
+            Log.w(TAG, "Cannot initialize local model: native blacktube_llama library is not loaded")
+            return@withContext false
+        }
+
         val activeModel = UniversalModelRegistry.getActiveModel(context)
         if (isInitialized && nativeHandle != 0L && loadedModelId == activeModel.id) {
             return@withContext true
@@ -54,22 +63,25 @@ object LocalModelEngine {
             }
             Log.i(TAG, "Local model [${activeModel.name}] initialized with handle=$nativeHandle")
             return@withContext isInitialized
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize native local model: ${activeModel.name}", e)
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to initialize native local model gracefully: ${activeModel.name}", e)
+            nativeHandle = 0L
+            isInitialized = false
+            loadedModelId = null
             return@withContext false
         }
     }
 
     suspend fun generateSummary(prompt: String): String = withContext(Dispatchers.IO) {
-        if (!isInitialized || nativeHandle == 0L) {
-            return@withContext "Local AI engine is initializing or model is not loaded yet."
+        if (!isLibraryLoaded || !isInitialized || nativeHandle == 0L) {
+            return@withContext "Local AI engine is preparing. Please tap Retry to initialize the model."
         }
 
         try {
             return@withContext nativeGenerateResponse(nativeHandle, prompt)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error generating local AI response", e)
-            return@withContext "Error running local LLM inference: ${e.localizedMessage}"
+        } catch (e: Throwable) {
+            Log.e(TAG, "Error generating local AI response gracefully", e)
+            return@withContext "Local AI engine encountered a temporary hiccup. Tapping Retry will re-initialize the model engine."
         }
     }
 
@@ -78,8 +90,8 @@ object LocalModelEngine {
             try {
                 nativeFreeModel(nativeHandle)
                 Log.i(TAG, "Native model resources released")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error releasing native model", e)
+            } catch (e: Throwable) {
+                Log.e(TAG, "Error releasing native model gracefully", e)
             } finally {
                 nativeHandle = 0L
                 isInitialized = false

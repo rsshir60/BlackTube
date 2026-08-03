@@ -5,95 +5,108 @@
     android:title="@string/ai_features_title">
 
     <!-- ══════════════════════════════════════════════════════════
-         SECTION: AI Status Header (custom inflated view)
+         SECTION 0: AI Status Header (custom inflated card)
          ══════════════════════════════════════════════════════════ -->
 
-    <!-- Blank preference used as a hook to inject the status card view -->
     <Preference
         android:key="ai_status_header"
         android:layout="@layout/preference_ai_status_header"
         android:selectable="false" />
 
     <!-- ══════════════════════════════════════════════════════════
-         SECTION 1: AI Summary
+         SECTION 1: AI Summary Master Controls
          ══════════════════════════════════════════════════════════ -->
 
     <PreferenceCategory
-        android:title="✨  AI Summary"
-        app:iconSpaceReserved="false">
+        android:layout="@layout/settings_category_header_layout"
+        android:title="✨  AI Summary System"
+        app:iconSpaceReserved="true">
 
         <SwitchPreferenceCompat
             android:defaultValue="true"
+            android:icon="@drawable/ic_sparkles_modern"
             android:key="@string/gemini_enable_key"
-            android:summary="@string/gemini_enable_summary_off"
-            android:title="@string/gemini_enable_title" />
+            android:summary="Enable AI video summaries, chapter insights, and Q&amp;A"
+            android:title="Enable AI Summaries"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
     </PreferenceCategory>
 
     <!-- ══════════════════════════════════════════════════════════
-         SECTION 2: AI Provider
+         SECTION 2: Cloud Engine (Google Gemini)
          ══════════════════════════════════════════════════════════ -->
 
     <PreferenceCategory
-        android:title="🤖  AI Provider"
-        app:iconSpaceReserved="false">
+        android:layout="@layout/settings_category_header_layout"
+        android:title="☁️  Cloud Engine (Google Gemini)"
+        app:iconSpaceReserved="true">
 
         <EditTextPreference
+            android:icon="@drawable/ic_language"
             android:key="@string/gemini_api_key_key"
-            android:summary="@string/gemini_api_key_summary"
-            android:title="@string/gemini_api_key_title"
+            android:summary="Enter your Gemini API key for fast cloud summaries"
+            android:title="Gemini API Key"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false"
             app:useSimpleSummaryProvider="true" />
 
-        <!-- Connection status + Test button (custom view preference) -->
         <Preference
             android:key="ai_connection_status"
             android:layout="@layout/preference_ai_connection_status"
             android:selectable="false" />
 
+    </PreferenceCategory>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 3: Local Engine (Universal Model Hub)
+         ══════════════════════════════════════════════════════════ -->
+
+    <PreferenceCategory
+        android:layout="@layout/settings_category_header_layout"
+        android:title="🔒  Local Engine (On-Device AI)"
+        app:iconSpaceReserved="true">
+
         <PreferenceScreen
-            app:iconSpaceReserved="false"
             android:fragment="org.schabi.newpipe.settings.LocalAiModelSettingsFragment"
+            android:icon="@drawable/ic_sparkles_modern"
             android:key="pref_key_local_ai_screen"
-            android:summary="Download &amp; manage local 3.8B model for airplane-mode video summaries"
-            android:title="🔒 Local AI Engine (Phi-4 Mini)" />
+            android:summary="Manage local 1.3B/3.8B GGUF models for 100% offline summaries"
+            android:title="Universal Local Model Hub"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
     </PreferenceCategory>
 
     <!-- ══════════════════════════════════════════════════════════
-         SECTION 3: Prompt System
+         SECTION 4: Prompt System & Storage
          ══════════════════════════════════════════════════════════ -->
 
     <PreferenceCategory
-        android:title="📚  Prompt System"
-        app:iconSpaceReserved="false">
+        android:layout="@layout/settings_category_header_layout"
+        android:title="📚  Prompts &amp; Cache Storage"
+        app:iconSpaceReserved="true">
 
-        <!-- Active prompt display -->
         <Preference
             android:key="ai_active_prompt_display"
             android:layout="@layout/preference_ai_active_prompt"
             android:selectable="false" />
 
         <Preference
+            android:icon="@drawable/ic_bookmark"
             android:key="@string/prompt_library_key"
-            android:summary="@string/prompt_library_summary"
-            android:title="@string/prompt_library_title"
-            android:icon="@drawable/ic_bookmark" />
-
-    </PreferenceCategory>
-
-    <!-- ══════════════════════════════════════════════════════════
-         SECTION 4: Storage
-         ══════════════════════════════════════════════════════════ -->
-
-    <PreferenceCategory
-        android:title="💾  Storage"
-        app:iconSpaceReserved="false">
+            android:summary="Customize AI summary templates and tone presets"
+            android:title="Prompt Library"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <Preference
+            android:icon="@drawable/ic_delete"
             android:key="@string/clear_ai_cache_key"
-            android:summary="@string/clear_ai_cache_summary"
-            android:title="@string/clear_ai_cache_title"
-            android:icon="@drawable/ic_delete" />
+            android:summary="Clear all cached summary outputs from local storage"
+            android:title="Clear AI Summary Cache"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
     </PreferenceCategory>
 

@@ -100,8 +100,16 @@ object GeminiSummarizer {
             
             result
         } catch (e: Exception) {
-            Log.e(TAG, "Summarization failed", e)
-            SummaryResult.Error("Failed to summarize: ${e.localizedMessage}")
+            Log.e(TAG, "AI Summarization failed gracefully", e)
+            val friendlyMessage = when {
+                e is java.net.UnknownHostException || e is java.net.SocketTimeoutException ->
+                    "Unable to reach AI services. Please check your internet connection or use Local Airplane-Mode AI."
+                e.message?.contains("API_KEY", ignoreCase = true) == true || e.message?.contains("403") == true ->
+                    "Invalid or expired Gemini API key. Please check your key in Settings > AI Features or switch to Local AI."
+                else ->
+                    "Temporary AI service interruption. Tapping Retry usually solves this!"
+            }
+            SummaryResult.Error(friendlyMessage)
         }
     }
 

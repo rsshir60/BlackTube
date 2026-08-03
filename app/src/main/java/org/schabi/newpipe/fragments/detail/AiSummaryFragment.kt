@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.schabi.newpipe.R
@@ -46,8 +48,8 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 refreshPromptChip()
-                // Auto-refresh summary when returning from Prompt Library with a new prompt
-                runSummarize(forceRefresh = false)
+                // Auto-refresh summary with forceRefresh=true when returning from Prompt Library with a new prompt
+                runSummarize(forceRefresh = true)
             }
         }
     }
@@ -55,23 +57,36 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
     private var summarizeJob: kotlinx.coroutines.Job? = null
 
     private fun runSummarize(forceRefresh: Boolean = false) {
+        val info = streamInfo ?: run {
+            tvErrorMessage.text = "Video metadata is loading. Please try again in a moment."
+            showState(stateError)
+            return
+        }
+
         summarizeJob?.cancel()
         summarizeJob = lifecycleScope.launch {
+            if (!isAdded || context == null) return@launch
             showState(stateLoading)
-            val context = requireContext()
-            val result = if (org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(context)) {
-                val prompt = "Summarize video: ${streamInfo?.name ?: ""}\nDescription: ${streamInfo?.description ?: ""}"
-                val initialized = org.schabi.newpipe.ai.LocalModelEngine.initialize(context)
+            val ctx = requireContext()
+
+            val result = if (org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)) {
+                val prompt = "Summarize video: ${info.name ?: ""}\nDescription: ${info.description?.content ?: ""}"
+                val initialized = org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
                 if (initialized) {
                     val localText = org.schabi.newpipe.ai.LocalModelEngine.generateSummary(prompt)
                     GeminiSummarizer.SummaryResult.Markdown(localText)
+                } else if (GeminiSummarizer.isConfigured()) {
+                    GeminiSummarizer.summarize(ctx, info, forceRefresh)
                 } else {
-                    GeminiSummarizer.summarize(context, streamInfo!!, forceRefresh)
+                    GeminiSummarizer.SummaryResult.Error("Local AI model failed to initialize. Please check device RAM or configure Gemini API key.")
                 }
+            } else if (GeminiSummarizer.isConfigured()) {
+                GeminiSummarizer.summarize(ctx, info, forceRefresh)
             } else {
-                GeminiSummarizer.summarize(context, streamInfo!!, forceRefresh)
+                GeminiSummarizer.SummaryResult.Error("No AI engine available. Please download the 1-Click Local Model or add a Gemini API key.")
             }
 
+            if (!isAdded || context == null) return@launch
             when (result) {
                 is GeminiSummarizer.SummaryResult.Markdown -> {
                     io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
@@ -86,19 +101,25 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
     }
 
     private fun runCustomQuestion(userQuery: String) {
+        val info = streamInfo ?: return
         summarizeJob?.cancel()
         summarizeJob = lifecycleScope.launch {
+            if (!isAdded || context == null) return@launch
             showState(stateLoading)
-            val context = requireContext()
-            val prompt = "Question about video '${streamInfo?.name ?: ""}': $userQuery"
-            val result = if (org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(context)) {
-                org.schabi.newpipe.ai.LocalModelEngine.initialize(context)
+            val ctx = requireContext()
+            val prompt = "Question about video '${info.name ?: ""}': $userQuery"
+
+            val result = if (org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)) {
+                org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
                 val ans = org.schabi.newpipe.ai.LocalModelEngine.generateSummary(prompt)
                 GeminiSummarizer.SummaryResult.Markdown("💬 **Q: $userQuery**\n\n$ans")
+            } else if (GeminiSummarizer.isConfigured()) {
+                GeminiSummarizer.summarize(ctx, info, forceRefresh = true)
             } else {
-                GeminiSummarizer.summarize(context, streamInfo!!, forceRefresh = true)
+                GeminiSummarizer.SummaryResult.Error("No AI engine configured for custom questions.")
             }
 
+            if (!isAdded || context == null) return@launch
             when (result) {
                 is GeminiSummarizer.SummaryResult.Markdown -> {
                     io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
@@ -146,8 +167,31 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             if (!org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
                 btn.text = "⚡ 1-Click Download ${activeModel.name} (${activeModel.fileSizeMB} MB)"
                 btn.setOnClickListener {
-                    org.schabi.newpipe.ai.ModelDownloaderManager.startModelDownload(requireContext(), activeModel)
-                    android.widget.Toast.makeText(requireContext(), "Downloading ${activeModel.name} in background...", android.widget.Toast.LENGTH_LONG).show()
+                    val downloadId = org.schabi.newpipe.ai.ModelDownloaderManager.startModelDownload(requireContext(), activeModel)
+                    btn.isEnabled = false
+
+                    // Launch real-time progress polling coroutine
+                    lifecycleScope.launch {
+                        while (isActive) {
+                            val progress = org.schabi.newpipe.ai.ModelDownloaderManager.getDownloadProgress(requireContext(), downloadId)
+                            if (progress.status == android.app.DownloadManager.STATUS_RUNNING) {
+                                val downloadedMb = progress.bytesDownloaded / (1024 * 1024)
+                                val totalMb = if (progress.totalBytes > 0) progress.totalBytes / (1024 * 1024) else activeModel.fileSizeMB.toLong()
+                                btn.text = "⏬ Downloading ${activeModel.name}: ${progress.progressPercent}% (${downloadedMb} MB / ${totalMb} MB)"
+                            } else if (progress.status == android.app.DownloadManager.STATUS_SUCCESSFUL || org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
+                                btn.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
+                                btn.text = "✅ ${activeModel.name} Downloaded!"
+                                delay(1000)
+                                checkStateAndLoad()
+                                break
+                            } else if (progress.status == android.app.DownloadManager.STATUS_FAILED) {
+                                btn.isEnabled = true
+                                btn.text = "⚡ Retry 1-Click Download (${activeModel.fileSizeMB} MB)"
+                                break
+                            }
+                            delay(800)
+                        }
+                    }
                 }
             }
         }

@@ -23,11 +23,6 @@ public class MainSettingsFragment extends BasePreferenceFragment {
 
         setHasOptionsMenu(true); // Otherwise onCreateOptionsMenu is not called
 
-        // Hide debug preferences in RELEASE build variant
-        if (!DEBUG) {
-            getPreferenceScreen().removePreference(
-                    requirePreference(R.string.debug_pref_screen_key));
-        }
     }
 
     @Override

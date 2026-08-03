@@ -3,42 +3,61 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:title="Universal Local Model Hub">
 
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 1: Model Selection & Status
+         ══════════════════════════════════════════════════════════ -->
+
     <PreferenceCategory
         android:layout="@layout/settings_category_header_layout"
-        android:title="Model Selection Catalog">
+        android:title="🤖  Local Model Catalog"
+        app:iconSpaceReserved="true">
 
         <ListPreference
-            app:iconSpaceReserved="false"
-            android:defaultValue="phi_4_mini_3_8b"
+            android:defaultValue="phi_5_1_3b"
             android:entries="@array/local_ai_model_entries"
             android:entryValues="@array/local_ai_model_values"
+            android:icon="@drawable/ic_sparkles_modern"
             android:key="pref_key_active_local_model_id"
-            android:summary="Select active local model"
-            android:title="Active Local LLM Model" />
+            android:summary="Select active local model for airplane-mode summaries"
+            android:title="Active Local LLM Model"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <Preference
-            app:iconSpaceReserved="false"
+            android:icon="@drawable/ic_language"
             android:key="pref_key_local_ai_status"
-            android:summary="Model status loading..."
-            android:title="Model Engine Status" />
+            android:summary="Checking model installation status..."
+            android:title="Engine Status"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <Preference
-            app:iconSpaceReserved="false"
+            android:icon="@drawable/ic_file_download"
             android:key="pref_key_local_ai_download"
-            android:summary="Download active model for offline summaries"
-            android:title="Download Active Model" />
+            android:summary="Download active model from HuggingFace for offline summaries"
+            android:title="Download Active Model"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
     </PreferenceCategory>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 2: Hardware & Specs
+         ══════════════════════════════════════════════════════════ -->
 
     <PreferenceCategory
         android:layout="@layout/settings_category_header_layout"
-        android:title="Hardware &amp; Architecture">
+        android:title="⚡  Hardware &amp; Architecture"
+        app:iconSpaceReserved="true">
 
         <Preference
-            app:iconSpaceReserved="false"
+            android:icon="@drawable/ic_settings"
             android:selectable="false"
-            android:summary="Qwen 2.5 1.5B (4GB+ RAM) • Phi-4 Mini 3.8B (6GB+ RAM) • Llama 3.2 3B (6GB+ RAM). All models run 100% locally via GGUF neural weights."
-            android:title="Universal GGUF Compatibility" />
+            android:summary="Phi-5 1.3B (3GB+ RAM) • Qwen 1.5B (4GB+ RAM) • Phi-4 3.8B (6GB+ RAM). Runs 100% locally via GGUF neural weights."
+            android:title="Hardware Recommendation"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
     </PreferenceCategory>
+
 </PreferenceScreen>

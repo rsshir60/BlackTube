@@ -306,24 +306,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean drawerItemSelected(final MenuItem item) {
-        final int groupId = item.getGroupId();
-        if (groupId == R.id.menu_services_group) {
-            changeService(item);
-        } else if (groupId == R.id.menu_tabs_group) {
-            tabSelected(item);
-        } else if (groupId == R.id.menu_kiosks_group) {
-            try {
-                kioskSelected(item);
-            } catch (final Exception e) {
-                ErrorUtil.showUiErrorSnackbar(this, "Selecting drawer kiosk", e);
-            }
-        } else if (groupId == R.id.menu_options_about_group) {
-            optionsAboutSelected(item);
-        } else {
-            return false;
-        }
-
         mainBinding.getRoot().closeDrawers();
+
+        // Smooth transition fix: defer fragment / activity launch until drawer finishes closing
+        mainBinding.getRoot().postDelayed(() -> {
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+            final int groupId = item.getGroupId();
+            if (groupId == R.id.menu_services_group) {
+                changeService(item);
+            } else if (groupId == R.id.menu_tabs_group) {
+                tabSelected(item);
+            } else if (groupId == R.id.menu_kiosks_group) {
+                try {
+                    kioskSelected(item);
+                } catch (final Exception e) {
+                    ErrorUtil.showUiErrorSnackbar(MainActivity.this, "Selecting drawer kiosk", e);
+                }
+            } else if (groupId == R.id.menu_options_about_group) {
+                optionsAboutSelected(item);
+            }
+        }, 120);
+
         return true;
     }
 

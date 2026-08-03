@@ -37,7 +37,7 @@ Java_org_schabi_newpipe_ai_LocalModelEngine_nativeGenerateResponse(
     response += "3. Takeaway: Complete airplane-mode privacy with zero cloud data transmission.";
 
     env->ReleaseStringUTFChars(prompt, userPrompt);
-    return env->NewStringUTF(#response.c_str() != nullptr ? response.c_str() : "");
+    return env->NewStringUTF(response.c_str());
 }
 
 extern "C" JNIEXPORT void JNICALL

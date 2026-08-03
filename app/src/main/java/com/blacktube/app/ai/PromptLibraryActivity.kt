@@ -125,7 +125,7 @@ class PromptLibraryActivity : AppCompatActivity() {
                 val data = Intent().putExtra(RESULT_PROMPT_SELECTED, prompt.id)
                 setResult(Activity.RESULT_OK, data)
                 Toast.makeText(this, getString(R.string.prompt_activated, prompt.title), Toast.LENGTH_SHORT).show()
-                refreshActiveBanner()
+                finish()
             },
             onFavorite = { prompt ->
                 PromptLibrary.toggleFavorite(this, prompt.id)

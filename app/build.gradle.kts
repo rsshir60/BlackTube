@@ -53,6 +53,12 @@ configure<ApplicationExtension> {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+
     signingConfigs {
         // BlackTube: Only create release signing config when the keystore is present.
         // F-Droid's build server signs APKs with its own key — it won't have this file.

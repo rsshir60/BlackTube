@@ -136,7 +136,25 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
 
         // ── Status header card ───────────────────────────────────────────
         val chipStatus = v.findViewById<TextView>(R.id.chip_ai_global_status)
+        val tvModelName = v.findViewById<TextView>(R.id.tv_ai_model_name)
         val tvPromptHeader = v.findViewById<TextView>(R.id.tv_ai_active_prompt_header)
+
+        val activeLocalModel = org.schabi.newpipe.ai.UniversalModelRegistry.getActiveModel(ctx)
+        val isLocalDownloaded = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
+
+        if (tvModelName != null) {
+            when {
+                isLocalDownloaded -> {
+                    tvModelName.text = "⚡ Local ${activeLocalModel.name} (${activeLocalModel.fileSizeMB} MB GGUF)"
+                }
+                isConfigured -> {
+                    tvModelName.text = "☁️ Gemini 3.1 Flash-Lite (Cloud API)"
+                }
+                else -> {
+                    tvModelName.text = "⚠️ No Model (1-Click Download Phi-5 AI)"
+                }
+            }
+        }
 
         if (chipStatus != null) {
             when {
@@ -144,13 +162,17 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
                     chipStatus.text = "⚪ Disabled"
                     chipStatus.setBackgroundResource(R.drawable.bg_ai_status_disabled)
                 }
-                !isConfigured -> {
-                    chipStatus.text = "🔴 Setup Required"
-                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_error)
+                isLocalDownloaded -> {
+                    chipStatus.text = "🟢 Local AI Active"
+                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_active)
+                }
+                isConfigured -> {
+                    chipStatus.text = "🟢 Cloud AI Active"
+                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_active)
                 }
                 else -> {
-                    chipStatus.text = "🟢 Active"
-                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_active)
+                    chipStatus.text = "🔴 Setup Required"
+                    chipStatus.setBackgroundResource(R.drawable.bg_ai_status_error)
                 }
             }
         }

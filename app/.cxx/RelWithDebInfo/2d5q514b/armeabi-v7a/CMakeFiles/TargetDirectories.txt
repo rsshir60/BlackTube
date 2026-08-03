@@ -1,0 +1,3 @@
+C:/Users/SUPRIYA/Desktop/foss/BlackTube/app/.cxx/RelWithDebInfo/2d5q514b/armeabi-v7a/CMakeFiles/blacktube_llama.dir
+C:/Users/SUPRIYA/Desktop/foss/BlackTube/app/.cxx/RelWithDebInfo/2d5q514b/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/SUPRIYA/Desktop/foss/BlackTube/app/.cxx/RelWithDebInfo/2d5q514b/armeabi-v7a/CMakeFiles/rebuild_cache.dir
