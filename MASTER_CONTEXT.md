@@ -376,6 +376,8 @@ res/values/strings.xml          <- all user-facing strings
 | High-Impact UX & Performance Suite | Pre-warmed ViewPager offscreen tabs (0ms tab lag), BlackTubeData- backup export filename, clean BlackTube branding, tactile haptics & 1.05x spring scale animations |
 | AI Summary Top Banner & Modern Icons | Added high-visibility AI Quick Access Card (above the fold) in fragment_video_detail.xml, re-ordered Summarize to position #1, and created ic_sparkles_modern.xml |
 | Quick Settings & Notification Media Controls | Implemented & registered MediaSessionCompat.Callback in MediaSessionPlayerUi.java to handle onPlay, onPause, onSkipToNext, onSkipToPrevious, and onSeekTo |
+| On-Device Local AI Engine (Phi-4 Mini) | Implemented llama_jni.cpp C++ bridge, LocalModelEngine.kt, ModelDownloaderManager.kt, LocalAiModelSettingsFragment.java, and automatic offline fallback |
+| Universal Local Model Hub & Catalog | Created UniversalModelRegistry.kt with 3-model catalog (Qwen 2.5 1.5B, Phi-4 Mini 3.8B, Llama 3.2 3B) & dynamic local GGUF switching |
 
 Add new entries here as bugs are found and fixed.
 
