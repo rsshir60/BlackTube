@@ -66,6 +66,9 @@ public abstract class BaseFragment extends Fragment {
         }
         initViews(rootView, savedInstanceState);
         initListeners();
+        if (getContext() != null) {
+            org.schabi.newpipe.util.FontHelper.applyFontToViewTree(rootView, org.schabi.newpipe.util.FontHelper.getTypeface(requireContext()));
+        }
     }
 
     @Override

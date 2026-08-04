@@ -97,6 +97,17 @@ public class AppearanceSettingsFragment extends BasePreferenceFragment {
         } else if (getString(R.string.pref_key_import_custom_font).equals(preference.getKey())) {
             launchFontPicker();
             return true;
+        } else if (getString(R.string.pref_key_remove_custom_font).equals(preference.getKey())) {
+            if (getContext() != null) {
+                final boolean success = FontHelper.removeCustomFont(getContext());
+                if (success) {
+                    Toast.makeText(getContext(), R.string.custom_font_removed_success, Toast.LENGTH_LONG).show();
+                    if (getActivity() != null) {
+                        ActivityCompat.recreate(getActivity());
+                    }
+                }
+            }
+            return true;
         }
 
         return super.onPreferenceTreeClick(preference);

@@ -39,7 +39,7 @@ object ModelDownloaderManager {
             setTitle("BlackTube AI: ${modelInfo.name}")
             setDescription("Downloading ${modelInfo.name} (${modelInfo.fileSizeMB} MB) for offline summaries")
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            setDestinationUri(Uri.fromFile(modelFile))
+            setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, "BlackTube_AI/${modelInfo.fileName}")
             setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             setAllowedOverMetered(true)
             setAllowedOverRoaming(true)

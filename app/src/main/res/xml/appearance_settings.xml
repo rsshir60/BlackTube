@@ -54,21 +54,36 @@
         app:iconSpaceReserved="false"
         app:singleLineTitle="false" />
 
-    <ListPreference
-        android:defaultValue="jetbrains_mono"
-        android:entries="@array/app_font_type_entries"
-        android:entryValues="@array/app_font_type_values"
-        android:key="@string/pref_key_app_font_type"
-        android:title="@string/app_font_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false"
-        app:useSimpleSummaryProvider="true" />
+    <PreferenceCategory
+        android:title="@string/app_typography_category_title"
+        app:iconSpaceReserved="false">
 
-    <Preference
-        android:key="@string/pref_key_import_custom_font"
-        android:summary="@string/import_custom_font_summary"
-        android:title="@string/import_custom_font_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false" />
+        <ListPreference
+            android:defaultValue="jetbrains_mono"
+            android:entries="@array/app_font_type_entries"
+            android:entryValues="@array/app_font_type_values"
+            android:key="@string/pref_key_app_font_type"
+            android:title="@string/app_font_title"
+            app:singleLineTitle="false"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            android:key="@string/pref_key_import_custom_font"
+            android:summary="@string/import_custom_font_summary"
+            android:title="@string/import_custom_font_title"
+            android:icon="@drawable/ic_file_download"
+            app:singleLineTitle="false"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="@string/pref_key_remove_custom_font"
+            android:summary="@string/remove_custom_font_summary"
+            android:title="@string/remove_custom_font_title"
+            android:icon="@drawable/ic_delete"
+            app:singleLineTitle="false"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

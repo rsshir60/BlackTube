@@ -119,6 +119,22 @@ open class App :
             GeminiSummarizer.configure(geminiApiKey)
         }
 
+        // BlackTube: Register Activity Lifecycle Callbacks to apply custom fonts app-wide
+        registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {}
+            override fun onActivityStarted(activity: android.app.Activity) {}
+            override fun onActivityResumed(activity: android.app.Activity) {
+                org.schabi.newpipe.util.FontHelper.applyFontToActivity(activity)
+                activity.window.decorView.post {
+                    org.schabi.newpipe.util.FontHelper.applyFontToActivity(activity)
+                }
+            }
+            override fun onActivityPaused(activity: android.app.Activity) {}
+            override fun onActivityStopped(activity: android.app.Activity) {}
+            override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {}
+            override fun onActivityDestroyed(activity: android.app.Activity) {}
+        })
+
         // Initialize image loader
         ImageStrategy.setPreferredImageQuality(
             PreferredImageQuality.fromPreferenceKey(

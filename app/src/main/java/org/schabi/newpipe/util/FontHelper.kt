@@ -106,6 +106,26 @@ object FontHelper {
     }
 
     @JvmStatic
+    fun removeCustomFont(context: Context): Boolean {
+        return try {
+            val customFile = getCustomFontFile(context)
+            if (customFile.exists()) {
+                customFile.delete()
+            }
+            resetFontCache()
+            PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putString(KEY_APP_FONT_TYPE, FONT_TYPE_JETBRAINS)
+                .remove(KEY_CUSTOM_FONT_PATH)
+                .apply()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to remove custom font", e)
+            false
+        }
+    }
+
+    @JvmStatic
     fun applyFontToViewTree(view: View?, typeface: Typeface) {
         if (view == null) return
         if (view is TextView) {

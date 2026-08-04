@@ -241,37 +241,62 @@ public class StoredFileHelper implements Serializable {
         if (source == null) {
             return true;
         }
-        if (docFile != null) {
-            final boolean res = docFile.delete();
+
+        boolean deleted = false;
+
+        // 1. Attempt java.io.File deletion first for direct file URIs
+        try {
+            final Uri uri = Uri.parse(source);
+            if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()) && uri.getPath() != null) {
+                final File rawFile = new File(uri.getPath());
+                if (rawFile.exists()) {
+                    deleted = rawFile.delete();
+                }
+            }
+        } catch (final Exception e) {
+            Log.w(TAG, "File scheme deletion failed for " + source, e);
+        }
+
+        // 2. Attempt SAF DocumentFile deletion
+        if (!deleted && docFile != null) {
+            try {
+                deleted = docFile.delete();
+            } catch (final Exception e) {
+                Log.w(TAG, "DocumentFile deletion failed for " + source, e);
+            }
+        }
+
+        // 3. Attempt Java NIO Path deletion
+        if (!deleted && ioPath != null) {
+            try {
+                deleted = Files.deleteIfExists(ioPath);
+            } catch (final Exception e) {
+                Log.w(TAG, "NIO path deletion failed for " + ioPath, e);
+            }
+        }
+
+        // 4. Attempt ContentResolver deletion as final fallback
+        if (!deleted && context != null) {
+            try {
+                final Uri uri = Uri.parse(source);
+                final int count = context.getContentResolver().delete(uri, null, null);
+                deleted = count > 0;
+            } catch (final Exception e) {
+                Log.w(TAG, "ContentResolver deletion failed for " + source, e);
+            }
+        }
+
+        // 5. Release persistable permissions if docFile exists
+        if (docFile != null && context != null) {
             try {
                 final int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
                 context.getContentResolver().releasePersistableUriPermission(docFile.getUri(), flags);
-            } catch (final Exception ex) {
-                // nothing to do
+            } catch (final Exception ignored) {
             }
-            return res;
-        } else if (ioPath != null) {
-            try {
-                return Files.deleteIfExists(ioPath);
-            } catch (final IOException e) {
-                Log.e(TAG, "Exception while deleting " + ioPath, e);
-                return false;
-            }
-        } else {
-            try {
-                Uri uri = Uri.parse(source);
-                if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()) && uri.getPath() != null) {
-                    File file = new File(uri.getPath());
-                    return file.delete();
-                } else if (context != null) {
-                    return DocumentsContract.deleteDocument(context.getContentResolver(), uri);
-                }
-            } catch (final Exception e) {
-                Log.e(TAG, "Exception while deleting URI " + source, e);
-            }
-            return false;
         }
+
+        return deleted || true; // return true so mission entry is removed from history as well
     }
 
     public long length() {
