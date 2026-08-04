@@ -19,11 +19,23 @@ object ModelDownloaderManager {
 
     fun startModelDownload(context: Context, modelInfo: LocalModelInfo): Long {
         val modelFile = UniversalModelRegistry.getModelFile(context, modelInfo)
+        modelFile.parentFile?.mkdirs()
         if (modelFile.exists()) {
-            modelFile.delete()
+            try {
+                modelFile.delete()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to delete pre-existing model file: ${modelFile.absolutePath}", e)
+            }
         }
 
-        val request = DownloadManager.Request(Uri.parse(modelInfo.downloadUrl)).apply {
+        val rawUrl = modelInfo.downloadUrl
+        val downloadUri = if (rawUrl.contains("huggingface.co") && !rawUrl.contains("download=true")) {
+            Uri.parse("$rawUrl?download=true")
+        } else {
+            Uri.parse(rawUrl)
+        }
+
+        val request = DownloadManager.Request(downloadUri).apply {
             setTitle("BlackTube AI: ${modelInfo.name}")
             setDescription("Downloading ${modelInfo.name} (${modelInfo.fileSizeMB} MB) for offline summaries")
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
@@ -32,9 +44,8 @@ object ModelDownloaderManager {
             setAllowedOverMetered(true)
             setAllowedOverRoaming(true)
             
-            // ⚡ MAXIMUM SPEED OPTIMIZATIONS:
-            addRequestHeader("User-Agent", "BlackTube-FastDownloader/1.1 (Android; HighSpeed-CDN)")
-            addRequestHeader("Accept-Encoding", "identity")
+            // ⚡ HuggingFace CDN Compatible Headers:
+            addRequestHeader("User-Agent", "Mozilla/5.0 (Android; Mobile; rv:124.0) Gecko/124.0 Firefox/124.0")
             addRequestHeader("Connection", "keep-alive")
         }
 
@@ -44,7 +55,7 @@ object ModelDownloaderManager {
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit().putLong(PREF_LAST_DOWNLOAD_ID, downloadId).apply()
         
-        Log.i(TAG, "Enqueued model download ID: $downloadId for ${modelInfo.name}")
+        Log.i(TAG, "Enqueued model download ID: $downloadId for ${modelInfo.name} from $downloadUri")
         return downloadId
     }
 

@@ -23,7 +23,7 @@ object UniversalModelRegistry {
             id = "phi_5_1_3b",
             name = "Phi-5 1.3B (Next-Gen SLM / 850 MB)",
             description = "Microsoft's brand-new 1.3B model. Blazing fast (50+ t/s) and runs on 3GB+ RAM.",
-            downloadUrl = "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-GGUF/resolve/main/Phi-3-mini-4k-instruct-q4.gguf",
+            downloadUrl = "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-GGUF/resolve/main/Phi-3-mini-4k-instruct-q4.gguf?download=true",
             fileName = "Phi-5-1.3b-instruct-Q5_K_M.gguf",
             fileSizeMB = 850,
             minRamGB = 3,
@@ -33,7 +33,7 @@ object UniversalModelRegistry {
             id = "qwen_2_5_1_5b",
             name = "Qwen 2.5 1.5B (Ultra-Fast)",
             description = "Lightweight & blazing fast. Ideal for phones with 4GB+ RAM.",
-            downloadUrl = "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+            downloadUrl = "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf?download=true",
             fileName = "qwen2.5-1.5b-instruct-q4_k_m.gguf",
             fileSizeMB = 1100,
             minRamGB = 4,
@@ -43,19 +43,19 @@ object UniversalModelRegistry {
             id = "phi_4_mini_3_8b",
             name = "Phi-4 Mini 3.8B (Balanced Flagship)",
             description = "Microsoft's flagship 3.8B model. Excellent accuracy for long video summaries.",
-            downloadUrl = "https://huggingface.co/microsoft/Phi-4-mini-instruct-GGUF/resolve/main/Phi-4-mini-instruct-Q5_K_M.gguf",
-            fileName = "Phi-4-mini-instruct-Q5_K_M.gguf",
-            fileSizeMB = 2600,
+            downloadUrl = "https://huggingface.co/bartowski/Phi-4-mini-instruct-GGUF/resolve/main/Phi-4-mini-instruct-Q4_K_M.gguf?download=true",
+            fileName = "Phi-4-mini-instruct-Q4_K_M.gguf",
+            fileSizeMB = 2490,
             minRamGB = 6,
-            quantFormat = "Q5_K_M"
+            quantFormat = "Q4_K_M"
         ),
         LocalModelInfo(
             id = "llama_3_2_3b",
             name = "Llama 3.2 3B (Meta Reasoning)",
             description = "Meta's state-of-the-art 3B model. High quality reasoning for complex video topics.",
-            downloadUrl = "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+            downloadUrl = "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf?download=true",
             fileName = "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-            fileSizeMB = 2000,
+            fileSizeMB = 2020,
             minRamGB = 6,
             quantFormat = "Q4_K_M"
         )

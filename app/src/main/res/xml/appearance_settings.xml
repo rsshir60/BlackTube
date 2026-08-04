@@ -54,4 +54,21 @@
         app:iconSpaceReserved="false"
         app:singleLineTitle="false" />
 
+    <ListPreference
+        android:defaultValue="jetbrains_mono"
+        android:entries="@array/app_font_type_entries"
+        android:entryValues="@array/app_font_type_values"
+        android:key="@string/pref_key_app_font_type"
+        android:title="@string/app_font_title"
+        app:singleLineTitle="false"
+        app:iconSpaceReserved="false"
+        app:useSimpleSummaryProvider="true" />
+
+    <Preference
+        android:key="@string/pref_key_import_custom_font"
+        android:summary="@string/import_custom_font_summary"
+        android:title="@string/import_custom_font_title"
+        app:singleLineTitle="false"
+        app:iconSpaceReserved="false" />
+
 </PreferenceScreen>

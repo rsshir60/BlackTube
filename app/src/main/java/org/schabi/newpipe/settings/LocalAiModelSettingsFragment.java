@@ -78,9 +78,11 @@ public class LocalAiModelSettingsFragment extends BasePreferenceFragment {
         }
         if (downloadPref != null) {
             if (isDownloaded) {
+                downloadPref.setIcon(R.drawable.ic_delete);
                 downloadPref.setTitle("Delete Active Model (" + activeModel.getFileSizeMB() + " MB)");
                 downloadPref.setSummary("Remove " + activeModel.getName() + " from device storage.");
             } else {
+                downloadPref.setIcon(R.drawable.ic_file_download);
                 downloadPref.setTitle("Download Active Model (" + activeModel.getFileSizeMB() + " MB)");
                 downloadPref.setSummary("Download " + activeModel.getName() + " from HuggingFace.");
             }

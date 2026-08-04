@@ -111,6 +111,20 @@ public class DownloadManager {
      * Loads finished missions from the data source and forgets finished missions whose file does
      * not exist anymore.
      */
+    public void addFinishedMission(FinishedMission mission) {
+        if (mission == null) return;
+        synchronized (this) {
+            if (!mMissionsFinished.contains(mission)) {
+                mMissionsFinished.add(0, mission);
+                mFinishedMissionStore.addFinishedMission(mission);
+            }
+        }
+    }
+
+    public ArrayList<FinishedMission> getFinishedMissions() {
+        return mMissionsFinished;
+    }
+
     private ArrayList<FinishedMission> loadFinishedMissions() {
         ArrayList<FinishedMission> finishedMissions = mFinishedMissionStore.loadFinishedMissions();
 

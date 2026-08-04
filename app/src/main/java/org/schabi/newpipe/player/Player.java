@@ -326,11 +326,7 @@ public final class Player implements PlaybackListener, Listener {
                 new DefaultBandwidthMeter.Builder(context).build());
         loadController = new LoadController();
 
-        renderFactory = prefs.getBoolean(
-                context.getString(
-                        R.string.always_use_exoplayer_set_output_surface_workaround_key), false)
-                ? new CustomRenderersFactory(context) : new DefaultRenderersFactory(context);
-
+        renderFactory = new CustomRenderersFactory(context);
         renderFactory.setEnableDecoderFallback(true);
 
         videoResolver = new VideoPlaybackResolver(context, dataSource, getQualityResolver());

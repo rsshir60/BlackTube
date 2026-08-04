@@ -11,26 +11,8 @@ import androidx.media3.exoplayer.video.MediaCodecVideoRenderer;
 import androidx.media3.exoplayer.video.VideoRendererEventListener;
 
 /**
- * A {@link MediaCodecVideoRenderer} which always enable the output surface workaround that
- * ExoPlayer enables on several devices which are known to implement
- * {@link android.media.MediaCodec#setOutputSurface(android.view.Surface)
- * MediaCodec.setOutputSurface(Surface)} incorrectly.
- *
- * <p>
- * See {@link MediaCodecVideoRenderer#codecNeedsSetOutputSurfaceWorkaround(String)} for more
- * details.
- * </p>
- *
- * <p>
- * This custom {@link MediaCodecVideoRenderer} may be useful in the case a device is affected by
- * this issue but is not present in ExoPlayer's list.
- * </p>
- *
- * <p>
- * This class has only effect on devices with Android 6 and higher, as the {@code setOutputSurface}
- * method is only implemented in these Android versions and the method used as a workaround is
- * always applied on older Android versions (releasing and re-instantiating video codec instances).
- * </p>
+ * A {@link MediaCodecVideoRenderer} which gracefully catches and recovers from Qualcomm Snapdragon
+ * and vendor hardware decoder buffer ownership exceptions ("client does not own the buffer #0").
  */
 public final class CustomMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
 
@@ -49,8 +31,6 @@ public final class CustomMediaCodecVideoRenderer extends MediaCodecVideoRenderer
 
     @Override
     protected boolean codecNeedsSetOutputSurfaceWorkaround(final String name) {
-        // Do not force true for modern C2 decoders (e.g. c2.qti.vp9.decoder), as releasing
-        // decoders on surface detachment causes "client does not own the buffer" crashes on Android 10+.
         return super.codecNeedsSetOutputSurfaceWorkaround(name);
     }
 
@@ -71,15 +51,14 @@ public final class CustomMediaCodecVideoRenderer extends MediaCodecVideoRenderer
             return super.processOutputBuffer(positionUs, elapsedRealtimeUs, codec, buffer,
                     bufferIndex, flags, sampleCount, sampleTimeUs, isDecodeOnlyBuffer,
                     isLastBuffer, format);
-        } catch (final androidx.media3.exoplayer.ExoPlaybackException e) {
+        } catch (final Exception e) {
             final Throwable cause = e.getCause();
             if (cause instanceof android.media.MediaCodec.CodecException
                     || (e.getMessage() != null && e.getMessage().contains("buffer"))) {
-                // Background playback surface detached buffer error - skip gracefully without crashing
+                // Background/Foreground playback surface detached buffer error - skip gracefully without crashing
                 return true;
             }
             throw e;
         }
     }
 }
-

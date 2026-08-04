@@ -47,44 +47,52 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:checked="true"
-            android:paddingStart="4dp"
-            android:paddingEnd="2dp"
-            android:singleLine="true"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:singleLine="false"
+            android:maxLines="2"
             android:text="@string/video"
-            android:textSize="12.5sp" />
+            android:textSize="11.5sp" />
 
         <RadioButton
             android:id="@+id/audio_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="2dp"
-            android:singleLine="true"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:singleLine="false"
+            android:maxLines="2"
             android:text="@string/audio"
-            android:textSize="12.5sp" />
+            android:textSize="11.5sp" />
 
         <RadioButton
             android:id="@+id/subtitle_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="2dp"
-            android:singleLine="true"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:singleLine="false"
+            android:maxLines="2"
             android:text="@string/caption_setting_title"
-            android:textSize="12.5sp" />
+            android:textSize="11.5sp" />
 
         <RadioButton
             android:id="@+id/summary_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="2dp"
-            android:singleLine="true"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:singleLine="false"
+            android:maxLines="2"
             android:text="Summary"
-            android:textSize="12.5sp" />
+            android:textSize="11.5sp" />
     </RadioGroup>
 
     <Spinner

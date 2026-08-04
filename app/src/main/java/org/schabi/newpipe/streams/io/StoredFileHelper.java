@@ -241,26 +241,37 @@ public class StoredFileHelper implements Serializable {
         if (source == null) {
             return true;
         }
-        if (docFile == null) {
+        if (docFile != null) {
+            final boolean res = docFile.delete();
+            try {
+                final int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                context.getContentResolver().releasePersistableUriPermission(docFile.getUri(), flags);
+            } catch (final Exception ex) {
+                // nothing to do
+            }
+            return res;
+        } else if (ioPath != null) {
             try {
                 return Files.deleteIfExists(ioPath);
             } catch (final IOException e) {
                 Log.e(TAG, "Exception while deleting " + ioPath, e);
                 return false;
             }
+        } else {
+            try {
+                Uri uri = Uri.parse(source);
+                if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()) && uri.getPath() != null) {
+                    File file = new File(uri.getPath());
+                    return file.delete();
+                } else if (context != null) {
+                    return DocumentsContract.deleteDocument(context.getContentResolver(), uri);
+                }
+            } catch (final Exception e) {
+                Log.e(TAG, "Exception while deleting URI " + source, e);
+            }
+            return false;
         }
-
-        final boolean res = docFile.delete();
-
-        try {
-            final int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-            context.getContentResolver().releasePersistableUriPermission(docFile.getUri(), flags);
-        } catch (final Exception ex) {
-            // nothing to do
-        }
-
-        return res;
     }
 
     public long length() {

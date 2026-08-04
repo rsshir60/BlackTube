@@ -116,53 +116,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         }
     }
 
-    private fun runCustomQuestion(userQuery: String) {
-        val info = streamInfo ?: return
-        summarizeJob?.cancel()
-        summarizeJob = lifecycleScope.launch {
-            if (!isAdded || context == null) return@launch
-            showState(stateLoading)
-            val ctx = requireContext()
-            val prompt = "Question about video '${info.name ?: ""}': $userQuery"
-
-            val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)
-            val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
-            val isLocalDownloaded = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
-
-            val useLocal = when (engineMode) {
-                "local" -> true
-                "gemini" -> false
-                else -> isLocalDownloaded
-            }
-
-            val result = if (useLocal) {
-                if (isLocalDownloaded) {
-                    org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
-                    val ans = org.schabi.newpipe.ai.LocalModelEngine.generateSummary(prompt)
-                    GeminiSummarizer.SummaryResult.Markdown("💬 **Q: $userQuery**\n\n$ans")
-                } else {
-                    GeminiSummarizer.SummaryResult.Error("Local AI model is not downloaded yet. Please tap 1-Click Download below.")
-                }
-            } else if (GeminiSummarizer.isConfigured()) {
-                GeminiSummarizer.askQuestion(ctx, info, userQuery)
-            } else {
-                GeminiSummarizer.SummaryResult.Error("No AI engine configured for custom questions.")
-            }
-
-            if (!isAdded || context == null) return@launch
-            when (result) {
-                is GeminiSummarizer.SummaryResult.Markdown -> {
-                    io.noties.markwon.Markwon.create(requireContext()).setMarkdown(tvSummaryContent, result.text)
-                    showState(stateSuccess)
-                }
-                is GeminiSummarizer.SummaryResult.Error -> {
-                    tvErrorMessage.text = result.message
-                    showState(stateError)
-                }
-            }
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -388,5 +341,42 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             Instructions:
             ${activePrompt.promptText}
         """.trimIndent()
+    }
+
+    private fun runCustomQuestion(userQuery: String) {
+        val info = streamInfo ?: return
+        showState(stateLoading)
+
+        lifecycleScope.launch {
+            try {
+                val ctx = requireContext()
+                val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)
+                val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
+                val isLocalReady = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
+
+                val answer: String = if (engineMode == "local" || (engineMode == "auto" && isLocalReady)) {
+                    val promptPayload = buildRichLocalPrompt(info) + "\n\nUser Question: $userQuery"
+                    org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
+                    org.schabi.newpipe.ai.LocalModelEngine.generateSummary(promptPayload)
+                } else {
+                    val geminiRes = GeminiSummarizer.askQuestion(ctx, info, userQuery)
+                    when (geminiRes) {
+                        is GeminiSummarizer.SummaryResult.Markdown -> geminiRes.text
+                        is GeminiSummarizer.SummaryResult.Error -> "⚠️ Could not answer question: ${geminiRes.message}"
+                    }
+                }
+
+                showState(stateSuccess)
+                val existingText = tvSummaryContent.text?.toString() ?: ""
+                val qnaBlock = "\n\n---\n💬 **Question**: $userQuery\n\n$answer"
+                tvSummaryContent.text = if (existingText.isNotEmpty()) existingText + qnaBlock else answer.trim()
+
+                delay(100)
+                view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.ai_summary_scroll_view)?.fullScroll(View.FOCUS_DOWN)
+            } catch (e: Exception) {
+                showState(stateSuccess)
+                Toast.makeText(requireContext(), "⚠️ Q&A response: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 }

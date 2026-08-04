@@ -97,6 +97,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import us.shandian.giga.get.FinishedMission;
+import us.shandian.giga.get.sqlite.FinishedMissionStore;
 import us.shandian.giga.get.MissionRecoveryInfo;
 import us.shandian.giga.postprocessing.Postprocessing;
 import us.shandian.giga.service.DownloadManager;
@@ -1234,6 +1236,24 @@ public class DownloadDialog extends DialogFragment
             MediaScannerConnection.scanFile(context, new String[]{targetFile.getAbsolutePath()}, null, (path, uri) -> {
                 Log.d(TAG, "Scanned summary file into Downloads provider: " + path);
             });
+
+            try {
+                final FinishedMission mission = new FinishedMission();
+                mission.source = currentInfo.getName();
+                mission.length = targetFile.length();
+                mission.timestamp = System.currentTimeMillis();
+                mission.kind = 's';
+                mission.storage = new StoredFileHelper(context, null, Uri.fromFile(targetFile), targetFile.getName());
+
+                final FinishedMissionStore store = new FinishedMissionStore(context);
+                store.addFinishedMission(mission);
+
+                if (downloadManager != null) {
+                    downloadManager.addFinishedMission(mission);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to register summary into internal downloads manager", e);
+            }
         }
     }
 
@@ -1244,10 +1264,10 @@ public class DownloadDialog extends DialogFragment
         PdfDocument.Page page = pdfDoc.startPage(pageInfo);
         Canvas canvas = page.getCanvas();
 
-        // 🎨 Paints for Executive PDF Layout
+        // 🎨 Paints for Flagship Executive PDF Layout
         final Paint headerTitlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         headerTitlePaint.setColor(Color.parseColor("#E50914")); // BlackTube Red Accent
-        headerTitlePaint.setTextSize(17);
+        headerTitlePaint.setTextSize(16);
         headerTitlePaint.setFakeBoldText(true);
 
         final Paint headerSubPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -1256,12 +1276,12 @@ public class DownloadDialog extends DialogFragment
 
         final Paint sectionHeaderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         sectionHeaderPaint.setColor(Color.parseColor("#B20710")); // Dark Crimson
-        sectionHeaderPaint.setTextSize(13);
+        sectionHeaderPaint.setTextSize(12.5f);
         sectionHeaderPaint.setFakeBoldText(true);
 
         final Paint bodyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        bodyPaint.setColor(Color.parseColor("#222222"));
-        bodyPaint.setTextSize(10.5f);
+        bodyPaint.setColor(Color.parseColor("#1F1F1F"));
+        bodyPaint.setTextSize(10f);
 
         final Paint bulletDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bulletDotPaint.setColor(Color.parseColor("#E50914"));
@@ -1274,6 +1294,10 @@ public class DownloadDialog extends DialogFragment
         final Paint cardBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         cardBgPaint.setColor(Color.parseColor("#F4F4F6"));
         cardBgPaint.setStyle(Paint.Style.FILL);
+
+        final Paint footerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        footerPaint.setColor(Color.parseColor("#888888"));
+        footerPaint.setTextSize(8.5f);
 
         // 🖼️ Decode App Logo
         Bitmap logoBitmap = null;
@@ -1288,36 +1312,36 @@ public class DownloadDialog extends DialogFragment
         // 1. Draw Executive Header
         if (logoBitmap != null) {
             final Rect srcRect = new Rect(0, 0, logoBitmap.getWidth(), logoBitmap.getHeight());
-            final RectF dstRect = new RectF(40, 24, 68, 52);
+            final RectF dstRect = new RectF(40, 22, 66, 48);
             canvas.drawBitmap(logoBitmap, srcRect, dstRect, null);
-            canvas.drawText("BLACKTUBE EXECUTIVE AI REPORT", 78, 40, headerTitlePaint);
-            canvas.drawText("On-Device Confidential Video Analysis • BlackTube v1.1.0", 78, 52, headerSubPaint);
+            canvas.drawText("BLACKTUBE EXECUTIVE AI INTELLIGENCE", 74, 37, headerTitlePaint);
+            canvas.drawText("On-Device Confidential Video Analysis • BlackTube v1.1.0 Flagship", 74, 49, headerSubPaint);
         } else {
-            canvas.drawText("BLACKTUBE EXECUTIVE AI REPORT", 40, 40, headerTitlePaint);
-            canvas.drawText("On-Device Confidential Video Analysis • BlackTube v1.1.0", 40, 52, headerSubPaint);
+            canvas.drawText("BLACKTUBE EXECUTIVE AI INTELLIGENCE", 40, 37, headerTitlePaint);
+            canvas.drawText("On-Device Confidential Video Analysis • BlackTube v1.1.0 Flagship", 40, 49, headerSubPaint);
         }
 
         dividerPaint.setColor(Color.parseColor("#E50914"));
         dividerPaint.setStrokeWidth(2f);
-        canvas.drawLine(40, 62, 555, 62, dividerPaint);
+        canvas.drawLine(40, 58, 555, 58, dividerPaint);
 
         // 2. Draw Video Title Card
-        int y = 76;
+        int y = 70;
         final RectF titleCardRect = new RectF(40, y, 555, y + 36);
         canvas.drawRoundRect(titleCardRect, 6, 6, cardBgPaint);
 
         final Paint videoTitlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         videoTitlePaint.setColor(Color.parseColor("#111111"));
-        videoTitlePaint.setTextSize(11.5f);
+        videoTitlePaint.setTextSize(11f);
         videoTitlePaint.setFakeBoldText(true);
 
         final String sanitizedTitle = title != null ? title.trim() : "Untitled Video";
-        final String displayTitle = "📹 " + (sanitizedTitle.length() > 68 ? sanitizedTitle.substring(0, 68) + "..." : sanitizedTitle);
+        final String displayTitle = "📹 " + (sanitizedTitle.length() > 65 ? sanitizedTitle.substring(0, 65) + "..." : sanitizedTitle);
         canvas.drawText(displayTitle, 50, y + 22, videoTitlePaint);
 
-        y += 54;
+        y += 52;
 
-        // 3. Render Clean Markdown Content Lines (Stripping raw syntax symbols)
+        // 3. Render Clean Word-Aware Markdown Content Lines
         final String rawContent = content != null ? content : "";
         final String[] lines = rawContent.split("\n");
 
@@ -1328,7 +1352,9 @@ public class DownloadDialog extends DialogFragment
                 continue;
             }
 
-            if (y > 780) {
+            // Check page overflow before starting new section
+            if (y > 760) {
+                canvas.drawText("Page " + pageNumber + " • BlackTube Executive AI Intelligence", 40, 815, footerPaint);
                 pdfDoc.finishPage(page);
                 pageNumber++;
                 pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
@@ -1336,13 +1362,13 @@ public class DownloadDialog extends DialogFragment
                 canvas = page.getCanvas();
                 y = 45;
 
-                canvas.drawText("BLACKTUBE EXECUTIVE AI REPORT (Cont.)", 40, y, headerTitlePaint);
+                canvas.drawText("BLACKTUBE EXECUTIVE AI INTELLIGENCE (Cont.)", 40, y, headerTitlePaint);
                 canvas.drawLine(40, y + 10, 555, y + 10, dividerPaint);
                 y += 28;
             }
 
-            // Section Headers (### 1. or 1. or #)
-            if (line.startsWith("#") || line.startsWith("1.") || line.startsWith("2.") || line.startsWith("3.") || line.startsWith("🎯") || line.startsWith("💡") || line.startsWith("📌")) {
+            // Section Headers (# or 1. or 2. or 3. or Emojis)
+            if (line.startsWith("#") || line.startsWith("1.") || line.startsWith("2.") || line.startsWith("3.") || line.startsWith("4.") || line.startsWith("5.") || line.startsWith("🎯") || line.startsWith("💡") || line.startsWith("📌") || line.startsWith("🛠️") || line.startsWith("💬")) {
                 String cleanHeader = line.replaceAll("^[#\\s]+", "")
                                          .replace("**", "")
                                          .replace("__", "");
@@ -1356,15 +1382,51 @@ public class DownloadDialog extends DialogFragment
                                          .replace("__", "");
                 canvas.drawCircle(48, y - 3, 2.5f, bulletDotPaint);
 
-                final int maxLineChars = 75;
-                if (cleanBullet.length() > maxLineChars) {
-                    canvas.drawText(cleanBullet.substring(0, maxLineChars), 56, y, bodyPaint);
-                    y += 14;
-                    canvas.drawText(cleanBullet.substring(maxLineChars), 56, y, bodyPaint);
-                } else {
-                    canvas.drawText(cleanBullet, 56, y, bodyPaint);
+                // Word-aware line wrapper for bullets (usable width = 495px)
+                final float startX = 56f;
+                final float maxWidth = 495f;
+                final String[] words = cleanBullet.split("\\s+");
+                StringBuilder currentLine = new StringBuilder();
+
+                for (String word : words) {
+                    String testLine = currentLine.length() == 0 ? word : currentLine + " " + word;
+                    if (bodyPaint.measureText(testLine) > maxWidth) {
+                        if (y > 760) {
+                            canvas.drawText("Page " + pageNumber + " • BlackTube Executive AI Intelligence", 40, 815, footerPaint);
+                            pdfDoc.finishPage(page);
+                            pageNumber++;
+                            pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
+                            page = pdfDoc.startPage(pageInfo);
+                            canvas = page.getCanvas();
+                            y = 45;
+                            canvas.drawText("BLACKTUBE EXECUTIVE AI INTELLIGENCE (Cont.)", 40, y, headerTitlePaint);
+                            canvas.drawLine(40, y + 10, 555, y + 10, dividerPaint);
+                            y += 28;
+                        }
+                        canvas.drawText(currentLine.toString(), startX, y, bodyPaint);
+                        y += 14;
+                        currentLine = new StringBuilder(word);
+                    } else {
+                        currentLine.append(currentLine.length() == 0 ? "" : " ").append(word);
+                    }
                 }
-                y += 15;
+
+                if (currentLine.length() > 0) {
+                    if (y > 760) {
+                        canvas.drawText("Page " + pageNumber + " • BlackTube Executive AI Intelligence", 40, 815, footerPaint);
+                        pdfDoc.finishPage(page);
+                        pageNumber++;
+                        pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
+                        page = pdfDoc.startPage(pageInfo);
+                        canvas = page.getCanvas();
+                        y = 45;
+                        canvas.drawText("BLACKTUBE EXECUTIVE AI INTELLIGENCE (Cont.)", 40, y, headerTitlePaint);
+                        canvas.drawLine(40, y + 10, 555, y + 10, dividerPaint);
+                        y += 28;
+                    }
+                    canvas.drawText(currentLine.toString(), startX, y, bodyPaint);
+                    y += 15;
+                }
             }
             // Horizontal Dividers (---)
             else if (line.startsWith("---") || line.startsWith("___")) {
@@ -1376,23 +1438,57 @@ public class DownloadDialog extends DialogFragment
             // Standard Paragraph Text
             else {
                 String cleanText = line.replace("**", "").replace("__", "").replace("`", "");
-                final int maxLineChars = 80;
-                if (cleanText.length() > maxLineChars) {
-                    canvas.drawText(cleanText.substring(0, maxLineChars), 40, y, bodyPaint);
-                    y += 14;
-                    canvas.drawText(cleanText.substring(maxLineChars), 40, y, bodyPaint);
-                } else {
-                    canvas.drawText(cleanText, 40, y, bodyPaint);
+
+                // Word-aware line wrapper for paragraphs (usable width = 515px)
+                final float startX = 40f;
+                final float maxWidth = 515f;
+                final String[] words = cleanText.split("\\s+");
+                StringBuilder currentLine = new StringBuilder();
+
+                for (String word : words) {
+                    String testLine = currentLine.length() == 0 ? word : currentLine + " " + word;
+                    if (bodyPaint.measureText(testLine) > maxWidth) {
+                        if (y > 760) {
+                            canvas.drawText("Page " + pageNumber + " • BlackTube Executive AI Intelligence", 40, 815, footerPaint);
+                            pdfDoc.finishPage(page);
+                            pageNumber++;
+                            pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
+                            page = pdfDoc.startPage(pageInfo);
+                            canvas = page.getCanvas();
+                            y = 45;
+                            canvas.drawText("BLACKTUBE EXECUTIVE AI INTELLIGENCE (Cont.)", 40, y, headerTitlePaint);
+                            canvas.drawLine(40, y + 10, 555, y + 10, dividerPaint);
+                            y += 28;
+                        }
+                        canvas.drawText(currentLine.toString(), startX, y, bodyPaint);
+                        y += 14;
+                        currentLine = new StringBuilder(word);
+                    } else {
+                        currentLine.append(currentLine.length() == 0 ? "" : " ").append(word);
+                    }
                 }
-                y += 15;
+
+                if (currentLine.length() > 0) {
+                    if (y > 760) {
+                        canvas.drawText("Page " + pageNumber + " • BlackTube Executive AI Intelligence", 40, 815, footerPaint);
+                        pdfDoc.finishPage(page);
+                        pageNumber++;
+                        pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pageNumber).create();
+                        page = pdfDoc.startPage(pageInfo);
+                        canvas = page.getCanvas();
+                        y = 45;
+                        canvas.drawText("BLACKTUBE EXECUTIVE AI INTELLIGENCE (Cont.)", 40, y, headerTitlePaint);
+                        canvas.drawLine(40, y + 10, 555, y + 10, dividerPaint);
+                        y += 28;
+                    }
+                    canvas.drawText(currentLine.toString(), startX, y, bodyPaint);
+                    y += 15;
+                }
             }
         }
 
-        // Footer Metadata
-        final Paint footerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        footerPaint.setColor(Color.parseColor("#999999"));
-        footerPaint.setTextSize(8.5f);
-        canvas.drawText("Page " + pageNumber + " • Confidential On-Device AI Summary Report • BlackTube", 40, 815, footerPaint);
+        // Draw final page footer
+        canvas.drawText("Page " + pageNumber + " • BlackTube Executive AI Intelligence", 40, 815, footerPaint);
 
         pdfDoc.finishPage(page);
         try (FileOutputStream os = new FileOutputStream(outputFile)) {
