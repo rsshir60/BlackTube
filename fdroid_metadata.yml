@@ -24,19 +24,6 @@ Description: |-
   * AMOLED true-black theme for OLED display battery savings
   * Sleep timer
 
-  <b>AI Summary (optional, requires your own Gemini API key):</b>
-  * Generate structured video summaries via Google Gemini — no developer key bundled
-  * Prompt Library: browse, create, activate, and edit custom summary prompts
-  * Summaries cached locally (7-day TTL) to reduce API usage
-  * First-use disclosure shown before any data leaves the device
-  * Fully opt-in and off by default
-
-  BlackTube has no server of its own. All network calls go directly to YouTube
-  (via the extractor), SponsorBlock, Return YouTube Dislike, and optionally
-  Google Gemini using the API key you provide.
-
-  Note: Minimum Android 13 (API 33) is required.
-
 AntiFeatures:
   - NonFreeNet
 
@@ -54,7 +41,7 @@ Builds:
     gradle:
       - release
 
-AutoUpdateMode: Version v%v
+AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 CurrentVersion: 1.1.0-BlackTube
 CurrentVersionCode: 1100
