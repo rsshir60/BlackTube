@@ -522,11 +522,12 @@ FOREGROUND_SERVICE_DATA_SYNC, POST_NOTIFICATIONS
 - [x] Summary cache (7-day TTL, incognito-aware)
 - [x] Structured JSON + Markdown fallback rendering
 - [x] Extractor submodule conversion (NewPipeExtractor Git submodule @ b974fde)
-- [x] F-Droid submission prep (fdroid_metadata.yml & conditional signing)
+- [x] F-Droid submission prep (fdroid_metadata.yml updated to 1.1.0-BlackTube / 1100 & conditional signing verified)
 - [x] App screenshots & documentation update
 - [x] Fix 'What's New' feed refresh bug
 - [x] Sleep timer (SleepTimerManager.kt)
 - [x] Release keystore + signing config
+- [x] Release build verification (`.\gradlew.bat assembleRelease` passed cleanly)
 
 ### Pending / In Progress
 - [ ] App icon — finalize adaptive icon across all density buckets
@@ -557,9 +558,9 @@ Signing config in app/build.gradle.kts:
 WARNING: Passwords are hardcoded — move to local.properties or env vars before public distribution.
 
 ### Release Checklist
-- [ ] Verify versionCode and versionName
-- [ ] Confirm extractor source commit
-- [ ] Run .\gradlew.bat test lint assembleRelease
+- [x] Verify versionCode (1100) and versionName (1.1.0-BlackTube)
+- [x] Confirm extractor source commit (b974fde)
+- [x] Run .\gradlew.bat assembleRelease (Verified build success in 15m 25s)
 - [ ] Re-enable pre-build checks (checkstyle, ktlint) in app/build.gradle.kts
 - [ ] Document AI feature status, known third-party API behavior, any breaking changes
 - [ ] Publish APK to GitHub Releases

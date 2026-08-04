@@ -230,6 +230,7 @@ public abstract class BaseListFragment<I, N> extends BaseStateFragment<I>
     }
 
     @Override
+    @SuppressWarnings("InvalidSetHasFixedSize")
     protected void initViews(final View rootView, final Bundle savedInstanceState) {
         super.initViews(rootView, savedInstanceState);
 
