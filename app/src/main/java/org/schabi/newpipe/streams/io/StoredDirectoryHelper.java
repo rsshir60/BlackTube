@@ -282,6 +282,37 @@ public class StoredDirectoryHelper {
         return docTree == null ? Files.isWritable(ioTree) : docTree.canWrite();
     }
 
+    public StoredDirectoryHelper createOrGetSubDirectory(final String subDirName) {
+        if (subDirName == null) {
+            return this;
+        }
+        final String cleanName = subDirName.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
+        if (cleanName.isEmpty()) {
+            return this;
+        }
+
+        try {
+            if (docTree == null && ioTree != null) {
+                final Path subPath = ioTree.resolve(cleanName);
+                if (!Files.exists(subPath)) {
+                    Files.createDirectories(subPath);
+                }
+                return new StoredDirectoryHelper(context, Uri.fromFile(subPath.toFile()), tag);
+            } else if (docTree != null && context != null) {
+                DocumentFile subDoc = findFileSAFHelper(context, docTree, cleanName);
+                if (subDoc == null || !subDoc.isDirectory()) {
+                    subDoc = docTree.createDirectory(cleanName);
+                }
+                if (subDoc != null) {
+                    return new StoredDirectoryHelper(context, subDoc.getUri(), tag);
+                }
+            }
+        } catch (final Exception e) {
+            Log.w(TAG, "Failed to create or access sub-directory [" + cleanName + "], falling back to parent", e);
+        }
+        return this;
+    }
+
     /**
      * @return {@code false} if the storage is direct, or the SAF storage is valid; {@code true} if
      * SAF access to this SAF storage is denied (e.g. the user clicked on {@code Android settings ->

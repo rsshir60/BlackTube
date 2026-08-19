@@ -335,6 +335,19 @@ public class DownloadDialog extends DialogFragment
         dialogBinding.audioTrackSpinner.setOnItemSelectedListener(this);
         dialogBinding.videoAudioGroup.setOnCheckedChangeListener(this);
 
+        final View.OnClickListener radioClickListener = v -> {
+            final int id = v.getId();
+            dialogBinding.videoButton.setChecked(id == R.id.video_button);
+            dialogBinding.audioButton.setChecked(id == R.id.audio_button);
+            dialogBinding.subtitleButton.setChecked(id == R.id.subtitle_button);
+            dialogBinding.summaryButton.setChecked(id == R.id.summary_button);
+            onCheckedChanged(dialogBinding.videoAudioGroup, id);
+        };
+        dialogBinding.videoButton.setOnClickListener(radioClickListener);
+        dialogBinding.audioButton.setOnClickListener(radioClickListener);
+        dialogBinding.subtitleButton.setOnClickListener(radioClickListener);
+        dialogBinding.summaryButton.setOnClickListener(radioClickListener);
+
         initToolbar(dialogBinding.toolbarLayout.toolbar);
         setupDownloadOptions();
 

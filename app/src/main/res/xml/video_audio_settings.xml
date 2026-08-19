@@ -9,8 +9,9 @@
         android:entryValues="@array/resolution_list_values"
         android:key="@string/default_resolution_key"
         android:title="@string/default_resolution_title"
+        app:icon="@drawable/ic_movie"
+        app:iconSpaceReserved="true"
         app:singleLineTitle="false"
-        app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 
     <ListPreference
@@ -19,8 +20,9 @@
         android:entryValues="@array/resolution_list_values"
         android:key="@string/default_popup_resolution_key"
         android:title="@string/default_popup_resolution_title"
+        app:icon="@drawable/ic_picture_in_picture"
+        app:iconSpaceReserved="true"
         app:singleLineTitle="false"
-        app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 
     <ListPreference
@@ -29,8 +31,9 @@
         android:entryValues="@array/limit_data_usage_values_list"
         android:key="@string/limit_mobile_data_usage_key"
         android:title="@string/limit_mobile_data_usage_title"
+        app:icon="@drawable/ic_tune"
+        app:iconSpaceReserved="true"
         app:singleLineTitle="false"
-        app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 
     <SwitchPreferenceCompat
@@ -38,8 +41,9 @@
         android:key="@string/show_higher_resolutions_key"
         android:summary="@string/show_higher_resolutions_summary"
         android:title="@string/show_higher_resolutions_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false" />
+        app:icon="@drawable/ic_stars"
+        app:iconSpaceReserved="true"
+        app:singleLineTitle="false" />
 
     <ListPreference
         android:defaultValue="@string/default_video_format_value"
@@ -47,8 +51,9 @@
         android:entryValues="@array/video_format_values_list"
         android:key="@string/default_video_format_key"
         android:title="@string/default_video_format_title"
+        app:icon="@drawable/ic_movie"
+        app:iconSpaceReserved="true"
         app:singleLineTitle="false"
-        app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 
     <ListPreference
@@ -57,8 +62,9 @@
         android:entryValues="@array/audio_format_values_list"
         android:key="@string/default_audio_format_key"
         android:title="@string/default_audio_format_title"
+        app:icon="@drawable/ic_headset"
+        app:iconSpaceReserved="true"
         app:singleLineTitle="false"
-        app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 
     <SwitchPreferenceCompat
@@ -66,53 +72,59 @@
         android:key="@string/prefer_original_audio_key"
         android:summary="@string/prefer_original_audio_summary"
         android:title="@string/prefer_original_audio_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false"/>
+        app:icon="@drawable/ic_volume_up"
+        app:iconSpaceReserved="true"
+        app:singleLineTitle="false" />
 
     <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="@string/prefer_descriptive_audio_key"
         android:summary="@string/prefer_descriptive_audio_summary"
         android:title="@string/prefer_descriptive_audio_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false"/>
+        app:icon="@drawable/ic_mic"
+        app:iconSpaceReserved="true"
+        app:singleLineTitle="false" />
 
     <PreferenceScreen
         android:fragment="org.schabi.newpipe.settings.ExoPlayerSettingsFragment"
         android:key="@string/exoplayer_settings_key"
         android:summary="@string/settings_category_exoplayer_summary"
         android:title="@string/settings_category_exoplayer_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false" />
+        app:icon="@drawable/ic_play_arrow"
+        app:iconSpaceReserved="true"
+        app:singleLineTitle="false" />
 
     <PreferenceCategory
         android:layout="@layout/settings_category_header_layout"
         android:title="@string/settings_category_player_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false">
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false">
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/use_external_video_player_key"
             android:summary="@string/use_external_video_player_summary"
             android:title="@string/use_external_video_player_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_share"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/use_external_audio_player_key"
             android:title="@string/use_external_audio_player_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_share"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/show_play_with_kodi_key"
             android:summary="@string/show_play_with_kodi_summary"
             android:title="@string/show_play_with_kodi_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_cast"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:layout_width="wrap_content"
@@ -122,8 +134,9 @@
             android:entryValues="@array/seekbar_preview_thumbnail_type_key"
             android:key="@string/seekbar_preview_thumbnail_key"
             android:title="@string/seekbar_preview_thumbnail_title"
+            app:icon="@drawable/ic_visibility_on"
+            app:iconSpaceReserved="true"
             app:singleLineTitle="false"
-            app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
@@ -131,8 +144,8 @@
     <PreferenceCategory
         android:layout="@layout/settings_category_header_layout"
         android:title="@string/settings_category_player_behavior_title"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false">
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false">
 
         <ListPreference
             android:defaultValue="@string/preferred_open_action_default"
@@ -141,8 +154,9 @@
             android:key="@string/preferred_open_action_key"
             android:summary="@string/preferred_open_action_settings_summary"
             android:title="@string/preferred_open_action_settings_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_smart_display"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:defaultValue="@string/minimize_on_exit_value"
@@ -151,16 +165,18 @@
             android:key="@string/minimize_on_exit_key"
             android:summary="@string/minimize_on_exit_summary"
             android:title="@string/minimize_on_exit_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_picture_in_picture"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/start_main_player_fullscreen_key"
             android:summary="@string/start_main_player_fullscreen_summary"
             android:title="@string/start_main_player_fullscreen_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_fullscreen"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:defaultValue="@string/autoplay_value"
@@ -169,24 +185,27 @@
             android:key="@string/autoplay_key"
             android:summary="@string/autoplay_summary"
             android:title="@string/autoplay_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_repeat"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/auto_queue_key"
             android:summary="@string/auto_queue_summary"
             android:title="@string/auto_queue_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_playlist_play"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/resume_on_audio_focus_gain_key"
             android:summary="@string/resume_on_audio_focus_gain_summary"
             android:title="@string/resume_on_audio_focus_gain_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_volume_up"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:defaultValue="@string/default_left_gesture_control_value"
@@ -195,8 +214,9 @@
             android:key="@string/left_gesture_control_key"
             android:summary="@string/left_gesture_control_summary"
             android:title="@string/left_gesture_control_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_tune"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:defaultValue="@string/default_middle_gesture_control_value"
@@ -205,8 +225,9 @@
             android:key="@string/middle_gesture_control_key"
             android:summary="@string/middle_gesture_control_summary"
             android:title="@string/middle_gesture_control_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_tune"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:defaultValue="@string/default_right_gesture_control_value"
@@ -215,8 +236,9 @@
             android:key="@string/right_gesture_control_key"
             android:summary="@string/right_gesture_control_summary"
             android:title="@string/right_gesture_control_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_tune"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:defaultValue="@string/default_max_playback_speed_value"
@@ -225,34 +247,38 @@
             android:key="@string/max_playback_speed_key"
             android:summary="@string/max_playback_speed_summary"
             android:title="@string/max_playback_speed_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
-      
-       <ListPreference
+            app:icon="@drawable/ic_fast_forward"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
+
+        <ListPreference
             android:defaultValue="@string/default_middle_gesture_area_width_value"
             android:entries="@array/middle_gesture_area_width_description_list"
             android:entryValues="@array/middle_gesture_area_width_values_list"
             android:key="@string/middle_gesture_area_width_key"
             android:summary="@string/middle_gesture_width_summary"
             android:title="@string/middle_gesture_width_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_tune"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="@string/popup_remember_size_pos_key"
             android:summary="@string/popup_remember_size_pos_summary"
             android:title="@string/popup_remember_size_pos_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_picture_in_picture"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/use_inexact_seek_key"
             android:summary="@string/use_inexact_seek_summary"
             android:title="@string/use_inexact_seek_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_replay"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <ListPreference
             android:defaultValue="@string/seek_duration_default_value"
@@ -260,8 +286,9 @@
             android:entryValues="@array/seek_duration_value"
             android:key="@string/seek_duration_key"
             android:title="@string/seek_duration_title"
+            app:icon="@drawable/ic_replay"
+            app:iconSpaceReserved="true"
             app:singleLineTitle="false"
-            app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
@@ -269,23 +296,26 @@
             android:key="@string/clear_queue_confirmation_key"
             android:summary="@string/clear_queue_confirmation_summary"
             android:title="@string/clear_queue_confirmation_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_delete"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/ignore_hardware_media_buttons_key"
             android:summary="@string/ignore_hardware_media_buttons_summary"
             android:title="@string/ignore_hardware_media_buttons_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_headset"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/seek_on_media_button_events_key"
             android:summary="@string/seek_on_media_button_events_summary"
             android:title="@string/seek_on_media_button_events_title"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
+            app:icon="@drawable/ic_replay"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
     </PreferenceCategory>
 </PreferenceScreen>

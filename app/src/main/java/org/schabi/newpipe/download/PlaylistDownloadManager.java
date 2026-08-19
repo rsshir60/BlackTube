@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -31,6 +32,7 @@ import org.schabi.newpipe.streams.io.StoredFileHelper;
 import org.schabi.newpipe.util.ExtractorHelper;
 import org.schabi.newpipe.util.FilenameUtils;
 import org.schabi.newpipe.util.ListHelper;
+import org.schabi.newpipe.settings.NewPipeSettings;
 import org.schabi.newpipe.util.SecondaryStreamHelper;
 import us.shandian.giga.get.MissionRecoveryInfo;
 import us.shandian.giga.postprocessing.Postprocessing;
@@ -283,17 +285,24 @@ public class PlaylistDownloadManager {
             }
         }
 
-        StoredFileHelper storage;
-        if (mainStorage != null) {
-            storage = mainStorage.createFile(filename, mime);
-        } else {
-            storage = new StoredFileHelper(null, filename, mime, tag);
-            if (!storage.existsAsFile()) {
-                storage.create();
+        if (mainStorage == null) {
+            final String defaultDirectory = isAudioOnly
+                    ? Environment.DIRECTORY_MUSIC : Environment.DIRECTORY_MOVIES;
+            mainStorage = new StoredDirectoryHelper(
+                    context,
+                    Uri.fromFile(NewPipeSettings.getDir(defaultDirectory)),
+                    tag);
+            if (!mainStorage.mkdirs()) {
+                throw new IllegalStateException("Unable to create default download directory");
             }
         }
 
-        if (storage == null) {
+        final String folderName = (currentPlaylistTitle != null && !currentPlaylistTitle.isEmpty())
+                ? currentPlaylistTitle : "Playlist";
+        final StoredDirectoryHelper playlistStorage = mainStorage.createOrGetSubDirectory(folderName);
+        final StoredFileHelper storage = playlistStorage.createFile(filename, mime);
+
+        if (storage == null || !storage.canWrite()) {
             throw new IllegalStateException("Failed to create target storage file: " + filename);
         }
 
@@ -337,18 +346,26 @@ public class PlaylistDownloadManager {
                 } catch (final Exception ignored) { }
             }
 
-            final String m3u8Filename = FilenameUtils.createFilename(context, playlistTitle) + ".m3u8";
-            StoredFileHelper storage;
-            if (mainStorage != null) {
-                storage = mainStorage.createFile(m3u8Filename, "audio/x-mpegurl");
-            } else {
-                storage = new StoredFileHelper(null, m3u8Filename, "audio/x-mpegurl", tag);
-                if (!storage.existsAsFile()) {
-                    storage.create();
+            if (mainStorage == null) {
+                final String defaultDirectory = isAudioOnly
+                        ? Environment.DIRECTORY_MUSIC : Environment.DIRECTORY_MOVIES;
+                mainStorage = new StoredDirectoryHelper(
+                        context,
+                        Uri.fromFile(NewPipeSettings.getDir(defaultDirectory)),
+                        tag);
+                if (!mainStorage.mkdirs()) {
+                    throw new IllegalStateException("Unable to create default download directory");
                 }
             }
 
-            if (storage != null) {
+            final String folderName = (playlistTitle != null && !playlistTitle.isEmpty())
+                    ? playlistTitle : "Playlist";
+            final StoredDirectoryHelper playlistStorage = mainStorage.createOrGetSubDirectory(folderName);
+            final String m3u8Filename = FilenameUtils.createFilename(context, playlistTitle) + ".m3u8";
+            final StoredFileHelper storage = playlistStorage.createFile(
+                    m3u8Filename, "audio/x-mpegurl");
+
+            if (storage != null && storage.canWrite()) {
                 try (SharpStream stream = storage.openAndTruncateStream()) {
                     stream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
                 }
