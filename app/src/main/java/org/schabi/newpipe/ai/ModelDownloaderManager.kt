@@ -1,9 +1,13 @@
 package org.schabi.newpipe.ai
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
-import android.os.Environment
+import android.content.Intent
+import android.os.Build
 import android.util.Log
-import androidx.preference.PreferenceManager
+import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.schabi.newpipe.MainActivity
+import org.schabi.newpipe.R
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -30,10 +36,13 @@ data class ModelDownloadProgress(
 
 object ModelDownloaderManager {
     private const val TAG = "ModelDownloaderManager"
-    private const val DOWNLOAD_DIR = "BlackTube_AI"
     private const val BUFFER_SIZE = 8192 // 8KB buffer
     private const val MAX_RETRIES = 3
     private const val RETRY_DELAY_MS = 3000L
+
+    private const val NOTIFICATION_ID = 9002
+    private const val CHANNEL_ID = "ai_model_download_channel"
+    private const val CHANNEL_NAME = "AI Model Downloads"
 
     const val STATUS_PENDING = 1
     const val STATUS_RUNNING = 2
@@ -66,8 +75,18 @@ object ModelDownloaderManager {
 
     @JvmStatic
     fun startModelDownload(context: Context, modelInfo: LocalModelInfo): Long {
-        cancelDownload()
+        cancelDownload(context)
         val downloadId = System.currentTimeMillis()
+        val appContext = context.applicationContext
+
+        createNotificationChannel(appContext)
+        showNotification(
+            context = appContext,
+            title = "Downloading ${modelInfo.name}",
+            content = "Connecting to high-speed AI CDN...",
+            progress = 0,
+            ongoing = true
+        )
 
         downloadJob = CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -83,20 +102,20 @@ object ModelDownloaderManager {
                 val finalUrl = ensureHuggingFaceDownloadParam(rawUrl)
                 Log.d(TAG, "Starting streaming model download: $finalUrl")
 
-                val targetFile = UniversalModelRegistry.getModelFile(context, modelInfo)
+                val targetFile = UniversalModelRegistry.getModelFile(appContext, modelInfo)
                 targetFile.parentFile?.mkdirs()
 
                 var lastException: Exception? = null
                 for (attempt in 1..MAX_RETRIES) {
                     if (isCancelled) {
                         Log.d(TAG, "Download cancelled by user")
-                        updateError(downloadId, "Download cancelled")
+                        updateError(appContext, downloadId, "Download cancelled")
                         return@launch
                     }
 
                     try {
                         Log.d(TAG, "Download attempt $attempt of $MAX_RETRIES")
-                        executeStreamingDownload(finalUrl, targetFile, downloadId)
+                        executeStreamingDownload(appContext, finalUrl, targetFile, downloadId, modelInfo.name)
 
                         _downloadProgress.value = _downloadProgress.value.copy(
                             status = STATUS_SUCCESSFUL,
@@ -107,11 +126,25 @@ object ModelDownloaderManager {
                         )
 
                         Log.d(TAG, "Download completed: ${targetFile.absolutePath} (${targetFile.length() / (1024 * 1024)} MB)")
+                        showNotification(
+                            context = appContext,
+                            title = "✅ ${modelInfo.name} Downloaded",
+                            content = "Offline AI model is ready for instant private video summaries.",
+                            progress = 100,
+                            ongoing = false
+                        )
                         return@launch
                     } catch (e: IOException) {
                         lastException = e
                         Log.e(TAG, "Download attempt $attempt failed: ${e.message}", e)
                         if (attempt < MAX_RETRIES) {
+                            showNotification(
+                                context = appContext,
+                                title = "Reconnecting download...",
+                                content = "Attempt $attempt of $MAX_RETRIES failed: ${e.message}",
+                                progress = _downloadProgress.value.progressPercent,
+                                ongoing = true
+                            )
                             delay(RETRY_DELAY_MS * attempt)
                         }
                     } catch (e: Exception) {
@@ -123,14 +156,14 @@ object ModelDownloaderManager {
 
                 val errorMsg = lastException?.let { extractUserFriendlyError(it) } ?: "Download failed"
                 Log.e(TAG, "All download attempts failed: $errorMsg")
-                updateError(downloadId, errorMsg)
+                updateError(appContext, downloadId, errorMsg)
 
             } catch (e: CancellationException) {
                 Log.d(TAG, "Download job cancelled")
-                updateError(downloadId, "Download cancelled")
+                updateError(appContext, downloadId, "Download cancelled")
             } catch (e: Exception) {
                 Log.e(TAG, "Fatal download error: ${e.message}", e)
-                updateError(downloadId, "Fatal error: ${e.message}")
+                updateError(appContext, downloadId, "Fatal error: ${e.message}")
             }
         }
 
@@ -138,9 +171,11 @@ object ModelDownloaderManager {
     }
 
     private suspend fun executeStreamingDownload(
+        context: Context,
         url: String,
         targetFile: File,
-        downloadId: Long
+        downloadId: Long,
+        modelName: String
     ) {
         val request = Request.Builder()
             .url(url)
@@ -198,6 +233,23 @@ object ModelDownloaderManager {
                                 speedBytesPerSec = speedBytesPerSec
                             )
 
+                            val speedMb = speedBytesPerSec / (1024.0 * 1024.0)
+                            val downloadedMb = downloadedBytes / (1024 * 1024)
+                            val totalMb = contentLength / (1024 * 1024)
+                            val statusText = if (totalMb > 0) {
+                                "$downloadedMb MB / $totalMb MB (%.1f MB/s)".format(speedMb)
+                            } else {
+                                "$downloadedMb MB downloaded"
+                            }
+
+                            showNotification(
+                                context = context,
+                                title = "Downloading $modelName ($progress%)",
+                                content = statusText,
+                                progress = progress,
+                                ongoing = true
+                            )
+
                             lastUpdateTime = currentTime
                             lastUpdateBytes = downloadedBytes
                         }
@@ -223,6 +275,69 @@ object ModelDownloaderManager {
         }
     }
 
+    private fun createNotificationChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Shows AI model download progress and status"
+                setShowBadge(false)
+            }
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            notificationManager?.createNotificationChannel(channel)
+        }
+    }
+
+    private fun showNotification(
+        context: Context,
+        title: String,
+        content: String,
+        progress: Int,
+        ongoing: Boolean
+    ) {
+        try {
+            val notificationIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setSmallIcon(R.drawable.ic_file_download)
+                .setContentIntent(pendingIntent)
+                .setOngoing(ongoing)
+                .setSilent(true)
+
+            if (ongoing) {
+                builder.setProgress(100, progress, false)
+            } else {
+                builder.setProgress(0, 0, false)
+            }
+
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            notificationManager?.notify(NOTIFICATION_ID, builder.build())
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not post notification: ${e.message}")
+        }
+    }
+
+    private fun cancelNotification(context: Context) {
+        try {
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            notificationManager?.cancel(NOTIFICATION_ID)
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not cancel notification: ${e.message}")
+        }
+    }
+
     private fun ensureHuggingFaceDownloadParam(url: String): String {
         return when {
             url.contains("huggingface.co") && !url.contains("?download=true") && !url.contains("&download=true") -> {
@@ -233,10 +348,13 @@ object ModelDownloaderManager {
     }
 
     @JvmStatic
-    fun cancelDownload() {
+    fun cancelDownload(context: Context? = null) {
         isCancelled = true
         downloadJob?.cancel()
         downloadJob = null
+        if (context != null) {
+            cancelNotification(context)
+        }
     }
 
     @JvmStatic
@@ -252,24 +370,32 @@ object ModelDownloaderManager {
     private fun extractUserFriendlyError(e: Exception): String {
         return when {
             e is CancellationException -> "Download cancelled"
-            e.message?.contains("HTTP 404") == true -> "Model file not found on server. Please try again later."
-            e.message?.contains("HTTP 429") == true -> "Server rate limit reached. Please wait a few minutes and try again."
+            e.message?.contains("HTTP 401") == true -> "Server authorization error (401). Please verify model link."
+            e.message?.contains("HTTP 404") == true -> "Model file not found on server (404)."
+            e.message?.contains("HTTP 429") == true -> "Server rate limit reached. Please wait a few minutes."
             e.message?.contains("Not enough storage") == true -> e.message ?: "Not enough storage space"
-            e.message?.contains("timeout", ignoreCase = true) == true -> "Download timed out. Check your internet connection and try again."
-            e.message?.contains("connect", ignoreCase = true) == true -> "Cannot connect to model host. Check your internet connection."
+            e.message?.contains("timeout", ignoreCase = true) == true -> "Download timed out. Check connection."
+            e.message?.contains("connect", ignoreCase = true) == true -> "Cannot connect to model host."
             e.message?.contains("File size mismatch") == true -> "Download corrupted. Please try again."
             e is IOException -> "Network error: ${e.message}"
             else -> "Download failed: ${e.message}"
         }
     }
 
-    private fun updateError(downloadId: Long, message: String) {
+    private fun updateError(context: Context, downloadId: Long, message: String) {
         _downloadProgress.value = _downloadProgress.value.copy(
             downloadId = downloadId,
             status = STATUS_FAILED,
             isDownloading = false,
             isCompleted = false,
             error = message
+        )
+        showNotification(
+            context = context,
+            title = "❌ AI Model Download Failed",
+            content = message,
+            progress = 0,
+            ongoing = false
         )
     }
 }

@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -97,10 +96,14 @@ public class PlaylistDownloadDialog extends DialogFragment {
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final Toolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(v -> dismiss());
-        if (playlistTitle != null && !playlistTitle.isEmpty()) {
-            toolbar.setTitle(playlistTitle);
+        final View closeButton = view.findViewById(R.id.close_button);
+        if (closeButton != null) {
+            closeButton.setOnClickListener(v -> dismiss());
+        }
+
+        final TextView dialogTitleView = view.findViewById(R.id.dialog_title);
+        if (dialogTitleView != null && playlistTitle != null && !playlistTitle.isEmpty()) {
+            dialogTitleView.setText(playlistTitle);
         }
 
         selectAllCheckBox = view.findViewById(R.id.select_all_checkbox);
