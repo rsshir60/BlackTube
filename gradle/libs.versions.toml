@@ -41,7 +41,7 @@ phoenix = "3.0.0"
 preference = "1.2.1"
 prettytime = "5.0.8.Final"
 recyclerview = "1.4.0"
-room = "2.7.2" # Newer versions require minSdk >= 23
+room = "2.8.4" # Newer versions require minSdk >= 23
 runner = "1.7.0"
 rxandroid = "3.0.2"
 rxbinding = "4.0.0"
