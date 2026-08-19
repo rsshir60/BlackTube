@@ -3,10 +3,12 @@ package org.schabi.newpipe.streams.io;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -243,12 +245,14 @@ public class StoredFileHelper implements Serializable {
         }
 
         boolean deleted = false;
+        String physicalPath = null;
 
         // 1. Attempt java.io.File deletion first for direct file URIs
         try {
             final Uri uri = Uri.parse(source);
             if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()) && uri.getPath() != null) {
                 final File rawFile = new File(uri.getPath());
+                physicalPath = rawFile.getAbsolutePath();
                 if (rawFile.exists()) {
                     deleted = rawFile.delete();
                 }
@@ -269,24 +273,50 @@ public class StoredFileHelper implements Serializable {
         // 3. Attempt Java NIO Path deletion
         if (!deleted && ioPath != null) {
             try {
+                physicalPath = ioPath.toAbsolutePath().toString();
                 deleted = Files.deleteIfExists(ioPath);
             } catch (final Exception e) {
                 Log.w(TAG, "NIO path deletion failed for " + ioPath, e);
             }
         }
 
-        // 4. Attempt ContentResolver deletion as final fallback
-        if (!deleted && context != null) {
+        // 4. MediaStore-Aware ContentResolver Deletion (Purges from system media provider)
+        if (context != null) {
             try {
                 final Uri uri = Uri.parse(source);
-                final int count = context.getContentResolver().delete(uri, null, null);
-                deleted = count > 0;
+                if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+                    final int count = context.getContentResolver().delete(uri, null, null);
+                    if (count > 0) {
+                        deleted = true;
+                    }
+                }
+
+                // If we have a physical file path or displayName, purge from MediaStore.Files
+                if (physicalPath != null) {
+                    final Uri filesUri = MediaStore.Files.getContentUri("external");
+                    final String where = MediaStore.MediaColumns.DATA + "=?";
+                    final String[] selectionArgs = new String[]{ physicalPath };
+                    context.getContentResolver().delete(filesUri, where, selectionArgs);
+                } else if (srcName != null) {
+                    final Uri filesUri = MediaStore.Files.getContentUri("external");
+                    final String where = MediaStore.MediaColumns.DISPLAY_NAME + "=?";
+                    final String[] selectionArgs = new String[]{ srcName };
+                    context.getContentResolver().delete(filesUri, where, selectionArgs);
+                }
             } catch (final Exception e) {
-                Log.w(TAG, "ContentResolver deletion failed for " + source, e);
+                Log.w(TAG, "MediaStore/ContentResolver deletion failed for " + source, e);
             }
         }
 
-        // 5. Release persistable permissions if docFile exists
+        // 5. Invalidate MediaScanner index so galleries/players purge orphaned entries
+        if (context != null && physicalPath != null) {
+            try {
+                MediaScannerConnection.scanFile(context, new String[]{ physicalPath }, null, null);
+            } catch (final Exception ignored) {
+            }
+        }
+
+        // 6. Release persistable permissions if docFile exists
         if (docFile != null && context != null) {
             try {
                 final int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
