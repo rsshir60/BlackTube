@@ -2,6 +2,9 @@ package org.schabi.newpipe.download;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StatFs;
+import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +28,7 @@ import org.schabi.newpipe.R;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.util.ThemeHelper;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +53,8 @@ public class PlaylistDownloadDialog extends DialogFragment {
     private PlaylistDownloadAdapter adapter;
     private CheckBox selectAllCheckBox;
     private TextView selectedCountText;
+    private TextView storageEstimateText;
+    private TextView storageAvailableText;
     private Spinner qualitySpinner;
     private MaterialButton downloadButton;
 
@@ -99,6 +105,8 @@ public class PlaylistDownloadDialog extends DialogFragment {
 
         selectAllCheckBox = view.findViewById(R.id.select_all_checkbox);
         selectedCountText = view.findViewById(R.id.selected_count_text);
+        storageEstimateText = view.findViewById(R.id.storage_estimate_text);
+        storageAvailableText = view.findViewById(R.id.storage_available_text);
         qualitySpinner = view.findViewById(R.id.quality_spinner);
         downloadButton = view.findViewById(R.id.download_button);
 
@@ -172,6 +180,9 @@ public class PlaylistDownloadDialog extends DialogFragment {
                         selectedQualityMode = PlaylistDownloadManager.QualityMode.AUDIO_ONLY;
                         break;
                 }
+                if (adapter != null) {
+                    updateSelectionUI(adapter.getSelectedCount(), streamItems.size());
+                }
             }
 
             @Override
@@ -186,9 +197,64 @@ public class PlaylistDownloadDialog extends DialogFragment {
         if (selectAllCheckBox != null) {
             selectAllCheckBox.setChecked(selectedCount == totalCount && totalCount > 0);
         }
+
+        // Storage estimation
+        final long totalSeconds = adapter != null ? adapter.getSelectedTotalDurationSeconds() : 0;
+        final long estimatedBytes = calculateEstimatedBytes(totalSeconds, selectedQualityMode);
+        final long availableBytes = getAvailableStorageBytes();
+
+        if (storageEstimateText != null && getContext() != null) {
+            final String formattedEst = Formatter.formatFileSize(getContext(), estimatedBytes);
+            storageEstimateText.setText(getString(R.string.playlist_download_est_size, formattedEst));
+        }
+
+        if (storageAvailableText != null && getContext() != null) {
+            final String formattedAvail = Formatter.formatFileSize(getContext(), availableBytes);
+            storageAvailableText.setText(getString(R.string.playlist_download_available_space, formattedAvail));
+        }
+
         if (downloadButton != null) {
-            downloadButton.setText(getString(R.string.playlist_download_btn, selectedCount));
-            downloadButton.setEnabled(selectedCount > 0);
+            if (estimatedBytes > 0 && availableBytes > 0 && estimatedBytes > availableBytes) {
+                downloadButton.setText(R.string.playlist_download_insufficient_storage);
+                downloadButton.setEnabled(false);
+            } else {
+                downloadButton.setText(getString(R.string.playlist_download_btn, selectedCount));
+                downloadButton.setEnabled(selectedCount > 0);
+            }
+        }
+    }
+
+    private long calculateEstimatedBytes(final long totalSeconds, final PlaylistDownloadManager.QualityMode mode) {
+        final double minutes = totalSeconds / 60.0;
+        final double mbPerMinute;
+        switch (mode) {
+            case BEST_VIDEO:
+                mbPerMinute = 15.0; // ~1080p
+                break;
+            case VIDEO_720P:
+                mbPerMinute = 8.0;
+                break;
+            case VIDEO_480P:
+                mbPerMinute = 4.0;
+                break;
+            case VIDEO_360P:
+                mbPerMinute = 2.5;
+                break;
+            case AUDIO_ONLY:
+            default:
+                mbPerMinute = 1.0;
+                break;
+        }
+        return (long) (minutes * mbPerMinute * 1024 * 1024);
+    }
+
+    private long getAvailableStorageBytes() {
+        try {
+            final File path = Environment.getExternalStorageDirectory();
+            final StatFs stat = new StatFs(path.getPath());
+            return stat.getAvailableBytes();
+        } catch (final Exception e) {
+            return 0L;
         }
     }
 }

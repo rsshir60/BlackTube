@@ -103,6 +103,21 @@ public class PlaylistDownloadAdapter extends RecyclerView.Adapter<PlaylistDownlo
         return count;
     }
 
+    public long getSelectedTotalDurationSeconds() {
+        long totalSeconds = 0;
+        for (int i = 0; i < items.size(); i++) {
+            if (selectedArray[i]) {
+                final long dur = items.get(i).getDuration();
+                if (dur > 0) {
+                    totalSeconds += dur;
+                } else {
+                    totalSeconds += 240; // Assume 4 min average if duration missing
+                }
+            }
+        }
+        return totalSeconds;
+    }
+
     private void notifySelectionChanged() {
         if (listener != null) {
             listener.onSelectionChanged(getSelectedCount(), items.size());

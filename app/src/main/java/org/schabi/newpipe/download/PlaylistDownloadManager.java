@@ -25,6 +25,7 @@ import org.schabi.newpipe.extractor.stream.Stream;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.extractor.stream.VideoStream;
+import org.schabi.newpipe.streams.io.SharpStream;
 import org.schabi.newpipe.streams.io.StoredDirectoryHelper;
 import org.schabi.newpipe.streams.io.StoredFileHelper;
 import org.schabi.newpipe.util.ExtractorHelper;
@@ -36,6 +37,7 @@ import us.shandian.giga.postprocessing.Postprocessing;
 import us.shandian.giga.service.DownloadManager;
 import us.shandian.giga.service.DownloadManagerService;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -70,6 +72,7 @@ public class PlaylistDownloadManager {
     private final CompositeDisposable disposables = new CompositeDisposable();
     private boolean isProcessing = false;
     private final List<PlaylistDownloadEntry> queue = Collections.synchronizedList(new ArrayList<>());
+    private final List<PlaylistDownloadEntry> completedBatch = Collections.synchronizedList(new ArrayList<>());
     private QualityMode currentQualityMode = QualityMode.BEST_VIDEO;
     private String currentPlaylistTitle = "Playlist";
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -93,6 +96,7 @@ public class PlaylistDownloadManager {
         }
 
         synchronized (queue) {
+            completedBatch.clear();
             for (final StreamInfoItem item : items) {
                 queue.add(new PlaylistDownloadEntry(item));
             }
@@ -122,9 +126,11 @@ public class PlaylistDownloadManager {
 
             if (nextEntry == null) {
                 isProcessing = false;
-                final int completedCount = queue.size();
+                final int completedCount = completedBatch.size();
+                generateM3u8Playlist(context, new ArrayList<>(completedBatch), currentPlaylistTitle);
                 showCompletionNotification(context, completedCount);
                 queue.clear();
+                completedBatch.clear();
                 disposables.clear();
                 return;
             }
@@ -161,6 +167,7 @@ public class PlaylistDownloadManager {
                             try {
                                 enqueueStreamDownload(context, currentEntry, info, currentIdx);
                                 currentEntry.setState(PlaylistDownloadEntry.State.COMPLETED);
+                                completedBatch.add(currentEntry);
                             } catch (final Exception e) {
                                 Log.e(TAG, "Failed to enqueue stream for " + item.getName(), e);
                                 currentEntry.setState(PlaylistDownloadEntry.State.ERROR);
@@ -292,6 +299,67 @@ public class PlaylistDownloadManager {
 
         DownloadManagerService.startMission(context, urls, storage, kind, threads,
                 info, psName, psArgs, nearLength, new ArrayList<>(recoveryInfo));
+    }
+
+    private void generateM3u8Playlist(final Context context, final List<PlaylistDownloadEntry> entries, final String playlistTitle) {
+        if (entries == null || entries.isEmpty()) return;
+
+        try {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("#EXTM3U\n");
+            sb.append("#PLAYLIST:").append(playlistTitle).append("\n\n");
+
+            final boolean isAudioOnly = currentQualityMode == QualityMode.AUDIO_ONLY;
+            final String ext = isAudioOnly ? "m4a" : "mp4";
+
+            for (int i = 0; i < entries.size(); i++) {
+                final PlaylistDownloadEntry entry = entries.get(i);
+                final StreamInfoItem item = entry.getStreamItem();
+                final int trackIdx = i + 1;
+                final String indexPrefix = String.format(Locale.US, "%02d - ", trackIdx);
+                final String cleanTitle = FilenameUtils.createFilename(context, item.getName());
+                final String filename = indexPrefix + cleanTitle + "." + ext;
+                final long duration = item.getDuration() > 0 ? item.getDuration() : -1;
+
+                sb.append("#EXTINF:").append(duration).append(",").append(item.getName()).append("\n");
+                sb.append(filename).append("\n");
+            }
+
+            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            final String tag = isAudioOnly ? DownloadManager.TAG_AUDIO : DownloadManager.TAG_VIDEO;
+            final int prefKey = isAudioOnly ? R.string.download_path_audio_key : R.string.download_path_video_key;
+            final String savedPath = prefs.getString(context.getString(prefKey), null);
+
+            StoredDirectoryHelper mainStorage = null;
+            if (savedPath != null && !savedPath.isEmpty()) {
+                try {
+                    mainStorage = new StoredDirectoryHelper(context, Uri.parse(savedPath), tag);
+                } catch (final Exception ignored) { }
+            }
+
+            final String m3u8Filename = FilenameUtils.createFilename(context, playlistTitle) + ".m3u8";
+            StoredFileHelper storage;
+            if (mainStorage != null) {
+                storage = mainStorage.createFile(m3u8Filename, "audio/x-mpegurl");
+            } else {
+                storage = new StoredFileHelper(null, m3u8Filename, "audio/x-mpegurl", tag);
+                if (!storage.existsAsFile()) {
+                    storage.create();
+                }
+            }
+
+            if (storage != null) {
+                try (SharpStream stream = storage.openAndTruncateStream()) {
+                    stream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+                }
+                Log.i(TAG, "Successfully generated .m3u8 playlist file: " + m3u8Filename);
+                mainHandler.post(() -> Toast.makeText(context,
+                        context.getString(R.string.playlist_download_m3u8_created),
+                        Toast.LENGTH_SHORT).show());
+            }
+        } catch (final Exception e) {
+            Log.w(TAG, "Failed to generate .m3u8 playlist file", e);
+        }
     }
 
     private VideoStream findClosestResolution(final List<VideoStream> streams, final String targetRes) {

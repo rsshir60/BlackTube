@@ -1143,5 +1143,10 @@
     <string name="no_videos_selected">No videos selected</string>
     <string name="download_playlist">Download Playlist</string>
     <string name="download_all">Download All</string>
+    <string name="playlist_download_est_size">📦 Est. Size: ~%1$s</string>
+    <string name="playlist_download_available_space">💾 %1$s free</string>
+    <string name="playlist_download_insufficient_storage">⚠️ Insufficient Storage</string>
+    <string name="playlist_download_m3u8_created">🎶 Playlist .m3u8 generated successfully</string>
+    <string name="playlist_download_already_downloaded">✅ Already Downloaded</string>
 </resources>
 

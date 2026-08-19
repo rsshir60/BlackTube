@@ -67,6 +67,32 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Storage Footprint Pre-Flight Estimation Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <org.schabi.newpipe.views.NewPipeTextView
+                android:id="@+id/storage_estimate_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                tools:text="📦 Est. Size: ~450 MB" />
+
+            <org.schabi.newpipe.views.NewPipeTextView
+                android:id="@+id/storage_available_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorAccent"
+                android:textSize="12sp"
+                tools:text="💾 18.5 GB free" />
+        </LinearLayout>
+
         <org.schabi.newpipe.views.NewPipeTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
