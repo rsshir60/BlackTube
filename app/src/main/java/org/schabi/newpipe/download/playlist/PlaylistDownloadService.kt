@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -11,12 +12,11 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import androidx.lifecycle.LifecycleService
 import org.schabi.newpipe.MainActivity
 import org.schabi.newpipe.R
 import org.schabi.newpipe.database.playlistdownload.BatchProgress
 
-class PlaylistDownloadService : LifecycleService() {
+class PlaylistDownloadService : Service() {
 
     companion object {
         private const val NOTIFICATION_ID = 9001
@@ -92,8 +92,6 @@ class PlaylistDownloadService : LifecycleService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-
         try {
             val initialProgress = BatchProgress(0, 0, 0, 0, 0)
             val notification = buildNotification(this, initialProgress)
@@ -110,8 +108,7 @@ class PlaylistDownloadService : LifecycleService() {
         return START_NOT_STICKY
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        super.onBind(intent)
+    override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 }

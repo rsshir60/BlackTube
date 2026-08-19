@@ -39,6 +39,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
@@ -1260,7 +1267,7 @@ public class DownloadDialog extends DialogFragment
     private void createPdfDocument(final File outputFile, final String title, final String content) {
         try {
             final String channelName = currentInfo != null && currentInfo.getUploaderName() != null ? currentInfo.getUploaderName() : "Unknown Channel";
-            final String durationStr = currentInfo != null && currentInfo.getDuration() > 0 ? Localization.getDurationString(currentInfo.getDuration()) : "";
+            final String durationStr = currentInfo != null && currentInfo.getDuration() > 0 ? org.schabi.newpipe.util.Localization.getDurationString(currentInfo.getDuration()) : "";
             final String videoUrl = currentInfo != null && currentInfo.getUrl() != null ? currentInfo.getUrl() : "";
             final String dateStr = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault()).format(new Date());
 
