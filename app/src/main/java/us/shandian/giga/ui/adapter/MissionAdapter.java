@@ -199,6 +199,7 @@ public class MissionAdapter extends Adapter<ViewHolder> implements Handler.Callb
         Utility.FileType type = Utility.getFileType(item.mission.kind, item.mission.storage.getName());
 
         h.icon.setImageResource(Utility.getIconForFileType(type));
+        h.icon.setColorFilter(Utility.getForegroundForFileType(mContext, type));
         h.name.setText(item.mission.storage.getName());
 
         h.progress.setColors(Utility.getBackgroundForFileType(mContext, type), Utility.getForegroundForFileType(mContext, type));

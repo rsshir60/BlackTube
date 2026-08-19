@@ -1249,7 +1249,7 @@ public class DownloadDialog extends DialogFragment
                 mission.source = currentInfo.getName();
                 mission.length = targetFile.length();
                 mission.timestamp = System.currentTimeMillis();
-                mission.kind = 's';
+                mission.kind = 'd';
                 mission.storage = new StoredFileHelper(context, null, Uri.fromFile(targetFile), targetFile.getName());
 
                 final FinishedMissionStore store = new FinishedMissionStore(context);

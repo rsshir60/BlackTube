@@ -37,6 +37,8 @@ public class Utility {
         VIDEO,
         MUSIC,
         SUBTITLE,
+        SUMMARY,
+        MODEL,
         UNKNOWN
     }
 
@@ -56,7 +58,7 @@ public class Utility {
     public static String formatSpeed(double speed) {
         Locale locale = Locale.getDefault();
         if (speed < 1024) {
-            return String.format(locale, "%.2f B/s", speed);
+            return String.format(locale, "%d B/s", (long) speed);
         } else if (speed < 1024 * 1024) {
             return String.format(locale, "%.2f kB/s", speed / 1024);
         } else if (speed < 1024 * 1024 * 1024) {
@@ -122,16 +124,28 @@ public class Utility {
                 return FileType.MUSIC;
             case 's':
                 return FileType.SUBTITLE;
-            //default '?':
+            case 'd':
+                return FileType.SUMMARY;
+            case 'm':
+                return FileType.MODEL;
         }
 
-        if (file.endsWith(".srt") || file.endsWith(".vtt") || file.endsWith(".ssa")) {
-            return FileType.SUBTITLE;
-        } else if (file.endsWith(".mp3") || file.endsWith(".wav") || file.endsWith(".flac") || file.endsWith(".m4a") || file.endsWith(".opus")) {
-            return FileType.MUSIC;
-        } else if (file.endsWith(".mp4") || file.endsWith(".mpeg") || file.endsWith(".rm") || file.endsWith(".rmvb")
-                || file.endsWith(".flv") || file.endsWith(".webp") || file.endsWith(".webm")) {
-            return FileType.VIDEO;
+        if (file != null) {
+            String lower = file.toLowerCase(Locale.ROOT);
+            if (lower.endsWith(".srt") || lower.endsWith(".vtt") || lower.endsWith(".ssa")) {
+                return FileType.SUBTITLE;
+            } else if (lower.endsWith(".mp3") || lower.endsWith(".wav") || lower.endsWith(".flac")
+                    || lower.endsWith(".m4a") || lower.endsWith(".opus") || lower.endsWith(".ogg")) {
+                return FileType.MUSIC;
+            } else if (lower.endsWith(".pdf") || lower.endsWith(".md") || lower.endsWith(".txt") || lower.contains("summary")) {
+                return FileType.SUMMARY;
+            } else if (lower.endsWith(".gguf") || lower.endsWith(".bin")) {
+                return FileType.MODEL;
+            } else if (lower.endsWith(".mp4") || lower.endsWith(".mpeg") || lower.endsWith(".rm") || lower.endsWith(".rmvb")
+                    || lower.endsWith(".flv") || lower.endsWith(".webp") || lower.endsWith(".webm")
+                    || lower.endsWith(".mkv") || lower.endsWith(".3gp")) {
+                return FileType.VIDEO;
+            }
         }
 
         return FileType.UNKNOWN;
@@ -141,14 +155,20 @@ public class Utility {
     public static int getBackgroundForFileType(Context ctx, FileType type) {
         int colorRes;
         switch (type) {
-            case MUSIC:
-                colorRes = R.color.audio_left_to_load_color;
-                break;
             case VIDEO:
                 colorRes = R.color.video_left_to_load_color;
                 break;
+            case MUSIC:
+                colorRes = R.color.audio_left_to_load_color;
+                break;
             case SUBTITLE:
                 colorRes = R.color.subtitle_left_to_load_color;
+                break;
+            case SUMMARY:
+                colorRes = R.color.summary_left_to_load_color;
+                break;
+            case MODEL:
+                colorRes = R.color.model_left_to_load_color;
                 break;
             default:
                 colorRes = R.color.gray;
@@ -161,14 +181,20 @@ public class Utility {
     public static int getForegroundForFileType(Context ctx, FileType type) {
         int colorRes;
         switch (type) {
-            case MUSIC:
-                colorRes = R.color.audio_already_load_color;
-                break;
             case VIDEO:
                 colorRes = R.color.video_already_load_color;
                 break;
+            case MUSIC:
+                colorRes = R.color.audio_already_load_color;
+                break;
             case SUBTITLE:
                 colorRes = R.color.subtitle_already_load_color;
+                break;
+            case SUMMARY:
+                colorRes = R.color.summary_already_load_color;
+                break;
+            case MODEL:
+                colorRes = R.color.model_already_load_color;
                 break;
             default:
                 colorRes = R.color.gray;
@@ -183,11 +209,15 @@ public class Utility {
         switch (type) {
             case MUSIC:
                 return R.drawable.ic_headset;
-            default:
-            case VIDEO:
-                return R.drawable.ic_movie;
             case SUBTITLE:
                 return R.drawable.ic_subtitles;
+            case SUMMARY:
+                return R.drawable.ic_description;
+            case MODEL:
+                return R.drawable.ic_auto_awesome;
+            case VIDEO:
+            default:
+                return R.drawable.ic_movie;
         }
     }
 
