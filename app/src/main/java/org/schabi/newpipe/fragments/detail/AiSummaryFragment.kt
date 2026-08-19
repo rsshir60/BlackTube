@@ -156,29 +156,25 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             if (!org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
                 btn.text = "⚡ 1-Click Download ${activeModel.name} (${activeModel.fileSizeMB} MB)"
                 btn.setOnClickListener {
-                    val downloadId = org.schabi.newpipe.ai.ModelDownloaderManager.startModelDownload(requireContext(), activeModel)
+                    org.schabi.newpipe.ai.ModelDownloaderManager.startModelDownload(requireContext(), activeModel)
                     btn.isEnabled = false
 
-                    // Launch real-time progress polling coroutine
                     lifecycleScope.launch {
-                        while (isActive) {
-                            val progress = org.schabi.newpipe.ai.ModelDownloaderManager.getDownloadProgress(requireContext(), downloadId)
-                            if (progress.status == android.app.DownloadManager.STATUS_RUNNING) {
+                        org.schabi.newpipe.ai.ModelDownloaderManager.downloadProgress.collect { progress ->
+                            if (progress.isDownloading) {
                                 val downloadedMb = progress.bytesDownloaded / (1024 * 1024)
                                 val totalMb = if (progress.totalBytes > 0) progress.totalBytes / (1024 * 1024) else activeModel.fileSizeMB.toLong()
-                                btn.text = "⏬ Downloading ${activeModel.name}: ${progress.progressPercent}% (${downloadedMb} MB / ${totalMb} MB)"
-                            } else if (progress.status == android.app.DownloadManager.STATUS_SUCCESSFUL || org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
+                                val speedMb = progress.speedBytesPerSec / (1024.0 * 1024.0)
+                                btn.text = String.format(java.util.Locale.US, "⏬ %d%% (%d/%d MB) • %.1f MB/s", progress.progressPercent, downloadedMb, totalMb, speedMb)
+                            } else if (progress.isCompleted || org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
                                 btn.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
                                 btn.text = "✅ ${activeModel.name} Downloaded!"
                                 delay(1000)
                                 checkStateAndLoad()
-                                break
-                            } else if (progress.status == android.app.DownloadManager.STATUS_FAILED) {
+                            } else if (progress.error != null) {
                                 btn.isEnabled = true
-                                btn.text = "⚡ Retry 1-Click Download (${activeModel.fileSizeMB} MB)"
-                                break
+                                btn.text = "⚠️ " + progress.error
                             }
-                            delay(800)
                         }
                     }
                 }

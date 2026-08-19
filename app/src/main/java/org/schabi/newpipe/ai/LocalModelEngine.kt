@@ -8,6 +8,8 @@ import java.io.File
 
 object LocalModelEngine {
     private const val TAG = "LocalModelEngine"
+    private const val MAX_CONTEXT_TOKENS = 3500
+    private const val CHUNK_SIZE = 2000
 
     private var nativeHandle: Long = 0L
     private var isInitialized = false
@@ -83,6 +85,53 @@ object LocalModelEngine {
             Log.e(TAG, "Error generating local AI response gracefully", e)
             return@withContext "Local AI engine encountered a temporary hiccup. Tapping Retry will re-initialize the model engine."
         }
+    }
+
+    suspend fun generateSummaryWithChunking(
+        videoTitle: String,
+        transcript: String,
+        promptTemplate: String
+    ): String = withContext(Dispatchers.IO) {
+        val estimatedTokens = transcript.length / 4
+        if (estimatedTokens <= MAX_CONTEXT_TOKENS) {
+            val prompt = """
+                Analyze this YouTube video transcript.
+                VIDEO: $videoTitle
+
+                TRANSCRIPT:
+                ${transcript.take(MAX_CONTEXT_TOKENS * 4)}
+
+                INSTRUCTIONS:
+                $promptTemplate
+            """.trimIndent()
+            return@withContext generateSummary(prompt)
+        }
+
+        // Two-pass chunking for long videos
+        val chunks = transcript.chunked(CHUNK_SIZE)
+        val chunkSummaries = mutableListOf<String>()
+        for ((index, chunk) in chunks.withIndex()) {
+            val chunkPrompt = """
+                Summarize this portion of a YouTube video transcript in 2-3 sentences.
+                VIDEO: $videoTitle
+                PORTION ${index + 1} of ${chunks.size}:
+                $chunk
+            """.trimIndent()
+            val chunkSummary = generateSummary(chunkPrompt)
+            chunkSummaries.add(chunkSummary)
+        }
+
+        val combinedPrompt = """
+            Combine these partial summaries into one cohesive video summary.
+            VIDEO: $videoTitle
+
+            PARTIAL SUMMARIES:
+            ${chunkSummaries.mapIndexed { i, s -> "Part ${i + 1}: $s" }.joinToString("\n")}
+
+            INSTRUCTIONS:
+            $promptTemplate
+        """.trimIndent()
+        return@withContext generateSummary(combinedPrompt)
     }
 
     fun release() {

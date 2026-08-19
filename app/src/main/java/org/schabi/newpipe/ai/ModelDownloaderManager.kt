@@ -1,86 +1,275 @@
 package org.schabi.newpipe.ai
 
-import android.app.DownloadManager
 import android.content.Context
-import android.net.Uri
+import android.os.Environment
 import android.util.Log
+import androidx.preference.PreferenceManager
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 data class ModelDownloadProgress(
-    val downloadId: Long,
-    val status: Int,
-    val progressPercent: Int,
-    val bytesDownloaded: Long,
-    val totalBytes: Long
+    val downloadId: Long = 0L,
+    val status: Int = 0,
+    val progressPercent: Int = 0,
+    val bytesDownloaded: Long = 0L,
+    val totalBytes: Long = 0L,
+    val speedBytesPerSec: Long = 0L,
+    val error: String? = null,
+    val isCompleted: Boolean = false,
+    val isDownloading: Boolean = false
 )
 
 object ModelDownloaderManager {
     private const val TAG = "ModelDownloaderManager"
-    const val PREF_LAST_DOWNLOAD_ID = "pref_key_last_model_download_id"
+    private const val DOWNLOAD_DIR = "BlackTube_AI"
+    private const val BUFFER_SIZE = 8192 // 8KB buffer
+    private const val MAX_RETRIES = 3
+    private const val RETRY_DELAY_MS = 3000L
 
+    const val STATUS_PENDING = 1
+    const val STATUS_RUNNING = 2
+    const val STATUS_PAUSED = 4
+    const val STATUS_SUCCESSFUL = 8
+    const val STATUS_FAILED = 16
+
+    private val _downloadProgress = MutableStateFlow(ModelDownloadProgress())
+    val downloadProgress: StateFlow<ModelDownloadProgress> = _downloadProgress.asStateFlow()
+
+    private var downloadJob: Job? = null
+    private var isCancelled = false
+
+    private val downloadClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.MINUTES)
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .followRedirects(true)
+        .followSslRedirects(true)
+        .retryOnConnectionFailure(true)
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header("User-Agent", "BlackTube/1.3.0 (Android)")
+                .header("Accept", "*/*")
+                .header("Accept-Encoding", "identity")
+                .build()
+            chain.proceed(request)
+        }
+        .build()
+
+    @JvmStatic
     fun startModelDownload(context: Context, modelInfo: LocalModelInfo): Long {
-        val modelFile = UniversalModelRegistry.getModelFile(context, modelInfo)
-        modelFile.parentFile?.mkdirs()
-        if (modelFile.exists()) {
+        cancelDownload()
+        val downloadId = System.currentTimeMillis()
+
+        downloadJob = CoroutineScope(Dispatchers.IO).launch {
             try {
-                modelFile.delete()
+                isCancelled = false
+                _downloadProgress.value = ModelDownloadProgress(
+                    downloadId = downloadId,
+                    status = STATUS_RUNNING,
+                    isDownloading = true,
+                    progressPercent = 0
+                )
+
+                val rawUrl = modelInfo.downloadUrl
+                val finalUrl = ensureHuggingFaceDownloadParam(rawUrl)
+                Log.d(TAG, "Starting streaming model download: $finalUrl")
+
+                val targetFile = UniversalModelRegistry.getModelFile(context, modelInfo)
+                targetFile.parentFile?.mkdirs()
+
+                var lastException: Exception? = null
+                for (attempt in 1..MAX_RETRIES) {
+                    if (isCancelled) {
+                        Log.d(TAG, "Download cancelled by user")
+                        updateError(downloadId, "Download cancelled")
+                        return@launch
+                    }
+
+                    try {
+                        Log.d(TAG, "Download attempt $attempt of $MAX_RETRIES")
+                        executeStreamingDownload(finalUrl, targetFile, downloadId)
+
+                        _downloadProgress.value = _downloadProgress.value.copy(
+                            status = STATUS_SUCCESSFUL,
+                            isDownloading = false,
+                            isCompleted = true,
+                            progressPercent = 100,
+                            error = null
+                        )
+
+                        Log.d(TAG, "Download completed: ${targetFile.absolutePath} (${targetFile.length() / (1024 * 1024)} MB)")
+                        return@launch
+                    } catch (e: IOException) {
+                        lastException = e
+                        Log.e(TAG, "Download attempt $attempt failed: ${e.message}", e)
+                        if (attempt < MAX_RETRIES) {
+                            delay(RETRY_DELAY_MS * attempt)
+                        }
+                    } catch (e: Exception) {
+                        lastException = e
+                        Log.e(TAG, "Unexpected error on attempt $attempt: ${e.message}", e)
+                        break
+                    }
+                }
+
+                val errorMsg = lastException?.let { extractUserFriendlyError(it) } ?: "Download failed"
+                Log.e(TAG, "All download attempts failed: $errorMsg")
+                updateError(downloadId, errorMsg)
+
+            } catch (e: CancellationException) {
+                Log.d(TAG, "Download job cancelled")
+                updateError(downloadId, "Download cancelled")
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to delete pre-existing model file: ${modelFile.absolutePath}", e)
+                Log.e(TAG, "Fatal download error: ${e.message}", e)
+                updateError(downloadId, "Fatal error: ${e.message}")
             }
         }
 
-        val rawUrl = modelInfo.downloadUrl
-        val downloadUri = if (rawUrl.contains("huggingface.co") && !rawUrl.contains("download=true")) {
-            Uri.parse("$rawUrl?download=true")
-        } else {
-            Uri.parse(rawUrl)
-        }
-
-        val request = DownloadManager.Request(downloadUri).apply {
-            setTitle("BlackTube AI: ${modelInfo.name}")
-            setDescription("Downloading ${modelInfo.name} (${modelInfo.fileSizeMB} MB) for offline summaries")
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, "BlackTube_AI/${modelInfo.fileName}")
-            setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-            setAllowedOverMetered(true)
-            setAllowedOverRoaming(true)
-            
-            // ⚡ HuggingFace CDN Compatible Headers:
-            addRequestHeader("User-Agent", "Mozilla/5.0 (Android; Mobile; rv:124.0) Gecko/124.0 Firefox/124.0")
-            addRequestHeader("Connection", "keep-alive")
-        }
-
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadId = downloadManager.enqueue(request)
-        
-        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.edit().putLong(PREF_LAST_DOWNLOAD_ID, downloadId).apply()
-        
-        Log.i(TAG, "Enqueued model download ID: $downloadId for ${modelInfo.name} from $downloadUri")
         return downloadId
     }
 
-    fun getDownloadProgress(context: Context, downloadId: Long): ModelDownloadProgress {
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val query = DownloadManager.Query().setFilterById(downloadId)
-        val cursor = downloadManager.query(query)
-        if (cursor != null && cursor.moveToFirst()) {
-            val statusIdx = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-            val downloadedIdx = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-            val totalIdx = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+    private suspend fun executeStreamingDownload(
+        url: String,
+        targetFile: File,
+        downloadId: Long
+    ) {
+        val request = Request.Builder()
+            .url(url)
+            .build()
 
-            val status = if (statusIdx != -1) cursor.getInt(statusIdx) else DownloadManager.STATUS_FAILED
-            val downloaded = if (downloadedIdx != -1) cursor.getLong(downloadedIdx) else 0L
-            val total = if (totalIdx != -1) cursor.getLong(totalIdx) else 0L
-
-            val percent = if (total > 0) ((downloaded * 100) / total).toInt() else 0
-            cursor.close()
-            return ModelDownloadProgress(downloadId, status, percent, downloaded, total)
+        val response: Response = downloadClient.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw IOException("HTTP ${response.code}: ${response.message}")
         }
-        cursor?.close()
-        return ModelDownloadProgress(downloadId, DownloadManager.STATUS_FAILED, 0, 0, 0)
+
+        val responseBody = response.body ?: throw IOException("Empty response body")
+        val contentLength = responseBody.contentLength()
+
+        val availableSpace = targetFile.parentFile?.freeSpace ?: 0L
+        if (contentLength > 0 && availableSpace > 0 && availableSpace < contentLength * 1.1) {
+            throw IOException("Not enough storage space. Need ${contentLength / (1024 * 1024)} MB, have ${availableSpace / (1024 * 1024)} MB")
+        }
+
+        var downloadedBytes = 0L
+        var lastUpdateTime = System.currentTimeMillis()
+        var lastUpdateBytes = 0L
+        var speedBytesPerSec = 0L
+
+        val tempFile = File(targetFile.parentFile, "${targetFile.name}.tmp")
+
+        try {
+            responseBody.byteStream().use { input ->
+                FileOutputStream(tempFile).use { output ->
+                    val buffer = ByteArray(BUFFER_SIZE)
+                    var bytesRead: Int
+
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        if (isCancelled) {
+                            throw CancellationException("User cancelled download")
+                        }
+
+                        output.write(buffer, 0, bytesRead)
+                        downloadedBytes += bytesRead
+
+                        val currentTime = System.currentTimeMillis()
+                        if (currentTime - lastUpdateTime >= 500) {
+                            val progress = if (contentLength > 0) ((downloadedBytes * 100) / contentLength).toInt() else 0
+                            val elapsed = (currentTime - lastUpdateTime) / 1000.0
+                            if (elapsed > 0) {
+                                speedBytesPerSec = ((downloadedBytes - lastUpdateBytes) / elapsed).toLong()
+                            }
+
+                            _downloadProgress.value = ModelDownloadProgress(
+                                downloadId = downloadId,
+                                status = STATUS_RUNNING,
+                                isDownloading = true,
+                                progressPercent = progress,
+                                bytesDownloaded = downloadedBytes,
+                                totalBytes = contentLength,
+                                speedBytesPerSec = speedBytesPerSec
+                            )
+
+                            lastUpdateTime = currentTime
+                            lastUpdateBytes = downloadedBytes
+                        }
+                    }
+
+                    output.flush()
+                }
+            }
+
+            if (contentLength > 0 && tempFile.length() != contentLength) {
+                tempFile.delete()
+                throw IOException("File size mismatch. Expected ${contentLength / (1024 * 1024)} MB, got ${tempFile.length() / (1024 * 1024)} MB")
+            }
+
+            if (targetFile.exists()) targetFile.delete()
+            if (!tempFile.renameTo(targetFile)) {
+                throw IOException("Failed to rename temporary file to final target")
+            }
+
+        } catch (e: Exception) {
+            tempFile.delete()
+            throw e
+        }
     }
 
+    private fun ensureHuggingFaceDownloadParam(url: String): String {
+        return when {
+            url.contains("huggingface.co") && !url.contains("?download=true") && !url.contains("&download=true") -> {
+                if (url.contains("?")) "$url&download=true" else "$url?download=true"
+            }
+            else -> url
+        }
+    }
+
+    @JvmStatic
+    fun cancelDownload() {
+        isCancelled = true
+        downloadJob?.cancel()
+        downloadJob = null
+    }
+
+    @JvmStatic
+    fun getDownloadProgress(context: Context, downloadId: Long): ModelDownloadProgress {
+        return _downloadProgress.value
+    }
+
+    @JvmStatic
     fun getDownloadStatus(context: Context, downloadId: Long): Int {
-        return getDownloadProgress(context, downloadId).status
+        return _downloadProgress.value.status
+    }
+
+    private fun extractUserFriendlyError(e: Exception): String {
+        return when {
+            e is CancellationException -> "Download cancelled"
+            e.message?.contains("HTTP 404") == true -> "Model file not found on server. Please try again later."
+            e.message?.contains("HTTP 429") == true -> "Server rate limit reached. Please wait a few minutes and try again."
+            e.message?.contains("Not enough storage") == true -> e.message ?: "Not enough storage space"
+            e.message?.contains("timeout", ignoreCase = true) == true -> "Download timed out. Check your internet connection and try again."
+            e.message?.contains("connect", ignoreCase = true) == true -> "Cannot connect to model host. Check your internet connection."
+            e.message?.contains("File size mismatch") == true -> "Download corrupted. Please try again."
+            e is IOException -> "Network error: ${e.message}"
+            else -> "Download failed: ${e.message}"
+        }
+    }
+
+    private fun updateError(downloadId: Long, message: String) {
+        _downloadProgress.value = _downloadProgress.value.copy(
+            downloadId = downloadId,
+            status = STATUS_FAILED,
+            isDownloading = false,
+            isCompleted = false,
+            error = message
+        )
     }
 }

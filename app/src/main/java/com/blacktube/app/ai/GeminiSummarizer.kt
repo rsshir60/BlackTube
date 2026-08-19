@@ -7,6 +7,10 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.generationConfig
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.schabi.newpipe.extractor.stream.StreamInfo
@@ -47,7 +51,6 @@ object GeminiSummarizer {
             generationConfig = generationConfig {
                 temperature = 0.2f
                 maxOutputTokens = 4096
-                // Removed responseMimeType = "application/json" to allow raw markdown
             }
         )
     }
@@ -65,6 +68,23 @@ object GeminiSummarizer {
     sealed class SummaryResult {
         data class Markdown(val text: String, val cachedAt: Long = 0) : SummaryResult()
         data class Error(val message: String) : SummaryResult()
+    }
+
+    @JvmStatic
+    fun generateSummaryStream(context: Context, video: StreamInfo): Flow<String> {
+        val currentModel = model ?: throw IllegalStateException("Gemini API key not configured")
+        val summaryPrompt = PromptLibrary.getSummaryPrompt(context)
+
+        return flow {
+            TokenUsageTracker.recordApiCall(context)
+            val transcript = buildTranscriptText(video)
+            val prompt = buildPrompt(video, transcript, summaryPrompt)
+
+            currentModel.generateContentStream(prompt).collect { chunk ->
+                val chunkText = chunk.text ?: ""
+                emit(chunkText)
+            }
+        }.flowOn(Dispatchers.IO)
     }
 
     @JvmStatic
@@ -88,6 +108,7 @@ object GeminiSummarizer {
             ?: return@withContext SummaryResult.Error("Gemini API key not configured. Add your key in Settings > AI Features.")
 
         try {
+            TokenUsageTracker.recordApiCall(context)
             val transcript = buildTranscriptText(video)
             val prompt = buildPrompt(video, transcript, summaryPrompt)
 
@@ -97,7 +118,6 @@ object GeminiSummarizer {
 
             val result = SummaryResult.Markdown(text, System.currentTimeMillis())
             cacheSummary(cacheKey, text)
-            
             result
         } catch (e: Exception) {
             Log.e(TAG, "AI Summarization failed gracefully", e)
@@ -123,6 +143,7 @@ object GeminiSummarizer {
             ?: return@withContext SummaryResult.Error("Gemini API key not configured. Add your key in Settings > AI Features or switch to Local AI.")
 
         try {
+            TokenUsageTracker.recordApiCall(context)
             val transcript = buildTranscriptText(video)
             val title = video.name ?: "Untitled"
             val desc = video.description?.content?.take(500) ?: ""
@@ -176,7 +197,8 @@ object GeminiSummarizer {
         }
     }
 
-    private fun cacheSummary(cacheKey: String, content: String) {
+    @JvmStatic
+    fun cacheSummary(cacheKey: String, content: String) {
         if (defaultPrefs.getBoolean("enable_incognito", false)) {
             return
         }
@@ -187,6 +209,11 @@ object GeminiSummarizer {
     }
 
     private suspend fun buildTranscriptText(video: StreamInfo): String = withContext(Dispatchers.IO) {
+        val cached = TranscriptCache.get(video.id)
+        if (cached != null && cached.isNotEmpty()) {
+            return@withContext cleanTranscript(cached)
+        }
+
         val subtitles = video.subtitles
         if (subtitles.isNullOrEmpty()) {
             return@withContext ""
@@ -196,11 +223,23 @@ object GeminiSummarizer {
             val downloader = org.schabi.newpipe.extractor.NewPipe.getDownloader()
             val response = downloader.get(subtitle.content)
             val rawText = response.responseBody()
-            rawText.take(MAX_TRANSCRIPT_LENGTH)
+            val cleaned = cleanTranscript(rawText)
+            TranscriptCache.put(video.id, cleaned)
+            cleaned
         } catch (e: Exception) {
             Log.e(TAG, "Failed to download subtitle", e)
             ""
         }
+    }
+
+    fun cleanTranscript(raw: String): String {
+        return raw
+            .replace(Regex("\\s+"), " ")
+            .replace(Regex("\\[.*?\\]"), "")
+            .replace(Regex("\\(.*?\\)"), "")
+            .replace(Regex("^\\d+:\\d+\\s*", RegexOption.MULTILINE), "")
+            .trim()
+            .take(MAX_TRANSCRIPT_LENGTH)
     }
 
     private fun buildPrompt(video: StreamInfo, transcript: String, summaryPrompt: BuiltInPrompt): String {
