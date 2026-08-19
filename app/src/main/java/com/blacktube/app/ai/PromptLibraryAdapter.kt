@@ -142,9 +142,9 @@ class PromptLibraryAdapter(
             chipBuiltin.visibility = if (p.isBuiltIn && !isDefault) View.VISIBLE else View.GONE
 
             btnFav.setImageResource(
-                if (item.isFav) R.drawable.ic_stars else R.drawable.ic_stars
+                if (item.isFav) R.drawable.ic_favorite else R.drawable.ic_favorite_border
             )
-            btnFav.alpha = if (item.isFav) 1f else 0.3f
+            btnFav.alpha = if (item.isFav) 1f else 0.4f
             btnFav.setOnClickListener { onFavorite(p) }
 
             btnUse.setOnClickListener { onUse(p) }

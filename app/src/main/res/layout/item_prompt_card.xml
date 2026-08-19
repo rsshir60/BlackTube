@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:padding="16dp">
 
         <!-- Top row: emoji + title + active badge + fav star -->
         <LinearLayout
@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="4dp">
+            android:layout_marginBottom="8dp">
 
             <!-- Category emoji circle -->
             <TextView
@@ -31,7 +31,7 @@
                 android:layout_height="36dp"
                 android:gravity="center"
                 android:textSize="18sp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="12dp"
                 android:background="@drawable/bg_emoji_circle" />
 
             <!-- Title + chips -->
@@ -53,7 +53,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="2dp">
+                    android:layout_marginTop="4dp">
 
                     <TextView
                         android:id="@+id/chip_default"
@@ -62,8 +62,7 @@
                         android:background="@drawable/bg_bt_default_badge"
                         android:gravity="center"
                         android:minWidth="0dp"
-                        android:paddingStart="9dp"
-                        android:paddingEnd="9dp"
+                        android:paddingHorizontal="8dp"
                         android:text="Default"
                         android:textColor="#FFFFFF"
                         android:textSize="10sp"
@@ -78,8 +77,7 @@
                         android:background="@drawable/bg_ai_chip_active"
                         android:gravity="center"
                         android:minWidth="0dp"
-                        android:paddingStart="9dp"
-                        android:paddingEnd="9dp"
+                        android:paddingHorizontal="8dp"
                         android:text="Active"
                         android:textColor="#FFFFFF"
                         android:textSize="10sp"
@@ -93,8 +91,7 @@
                         android:background="@drawable/bg_ai_chip"
                         android:gravity="center"
                         android:minWidth="0dp"
-                        android:paddingStart="9dp"
-                        android:paddingEnd="9dp"
+                        android:paddingHorizontal="8dp"
                         android:text="Built-in"
                         android:textColor="?android:attr/textColorPrimary"
                         android:textSize="10sp"
@@ -103,16 +100,17 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Favorite toggle -->
+            <!-- Favorite toggle (48x48dp touch target) -->
             <ImageButton
                 android:id="@+id/btn_favorite"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_stars"
-                android:contentDescription="Favorite"
+                android:src="@drawable/ic_favorite_border"
+                android:contentDescription="Toggle favorite prompt"
                 app:tint="?attr/colorAccent"
-                android:alpha="0.3" />
+                android:alpha="0.4" />
 
         </LinearLayout>
 
@@ -124,7 +122,7 @@
             android:textSize="11sp"
             android:textStyle="bold"
             android:textColor="?attr/colorAccent"
-            android:layout_marginStart="46dp"
+            android:layout_marginStart="48dp"
             android:layout_marginBottom="4dp"
             android:letterSpacing="0.08" />
 
@@ -134,8 +132,8 @@
             android:layout_height="wrap_content"
             android:textSize="13sp"
             android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginStart="46dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginBottom="8dp"
             android:maxLines="2"
             android:ellipsize="end" />
 
@@ -145,43 +143,52 @@
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginStart="46dp"
+            android:layout_marginStart="48dp"
             android:layout_marginBottom="12dp"
             android:maxLines="2"
             android:ellipsize="end" />
 
-        <!-- Action buttons -->
+        <!-- Action buttons (8dp grid, semantic icons) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginStart="46dp">
+            android:layout_marginStart="48dp">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_use"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:background="@drawable/bg_bt_ai_action_button"
+                android:drawableStart="@drawable/ic_done"
+                android:drawablePadding="6dp"
+                android:drawableTint="?android:attr/textColorPrimary"
+                android:gravity="center"
                 android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
+                android:minHeight="36dp"
+                android:paddingHorizontal="14dp"
                 android:text="@string/prompt_library_use"
+                android:contentDescription="Use this prompt"
                 android:textAllCaps="false"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_duplicate"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_ai_chip"
+                android:drawableStart="@drawable/ic_content_copy"
+                android:drawablePadding="6dp"
+                android:drawableTint="?android:attr/textColorPrimary"
+                android:gravity="center"
                 android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
+                android:minHeight="36dp"
+                android:paddingHorizontal="12dp"
                 android:text="@string/prompt_library_duplicate"
+                android:contentDescription="Duplicate prompt"
                 android:textAllCaps="false"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="12sp"
@@ -190,14 +197,18 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_edit"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_ai_chip"
+                android:drawableStart="@drawable/ic_edit"
+                android:drawablePadding="6dp"
+                android:drawableTint="?android:attr/textColorPrimary"
+                android:gravity="center"
                 android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
+                android:minHeight="36dp"
+                android:paddingHorizontal="12dp"
                 android:text="@string/prompt_library_edit"
+                android:contentDescription="Edit prompt"
                 android:textAllCaps="false"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="12sp"
@@ -206,16 +217,20 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_delete"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_ai_chip"
+                android:drawableStart="@drawable/ic_delete"
+                android:drawablePadding="6dp"
+                android:drawableTint="#EF5350"
+                android:gravity="center"
                 android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
+                android:minHeight="36dp"
+                android:paddingHorizontal="12dp"
                 android:text="@string/prompt_library_delete"
+                android:contentDescription="Delete prompt"
                 android:textAllCaps="false"
-                android:textColor="#B71C1C"
+                android:textColor="#EF5350"
                 android:textSize="12sp"
                 android:visibility="gone" />
 

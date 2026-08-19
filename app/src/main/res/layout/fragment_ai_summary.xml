@@ -14,9 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
-        <!-- HEADER CARD / TITLE -->
+        <!-- HEADER CARD / TITLE (8dp grid aligned) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,9 +27,10 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_stars"
+                android:src="@drawable/ic_auto_awesome"
                 app:tint="?attr/colorAccent"
-                android:layout_marginEnd="10dp" />
+                android:contentDescription="@string/summary_title"
+                android:layout_marginEnd="8dp" />
 
             <org.schabi.newpipe.views.NewPipeTextView
                 android:layout_width="wrap_content"
@@ -70,10 +71,9 @@
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_open_settings"
                     android:layout_width="wrap_content"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:background="@drawable/bg_bt_ai_action_button"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
+                    android:paddingHorizontal="24dp"
                     android:text="@string/settings"
                     android:textAllCaps="false"
                     android:textColor="@color/bt_ai_button_text_selector"
@@ -89,7 +89,7 @@
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
                 android:layout_gravity="top|center_horizontal"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:visibility="visible"
                 tools:visibility="visible">
 
@@ -104,17 +104,16 @@
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/chip_active_prompt"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="36dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/bg_bt_ai_prompt_chip"
-                        android:drawableStart="@drawable/ic_stars_16"
+                        android:drawableStart="@drawable/ic_tune"
                         android:drawablePadding="6dp"
                         android:drawableTint="@color/bt_switch_on_color"
                         android:gravity="center"
                         android:minWidth="0dp"
                         android:minHeight="0dp"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
+                        android:paddingHorizontal="16dp"
                         android:text="@string/prompt_library_default"
                         android:textAllCaps="false"
                         android:textColor="@color/bt_ai_button_text_selector"
@@ -123,7 +122,7 @@
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/chip_engine_selector"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="36dp"
                         android:background="@drawable/bg_bt_ai_prompt_chip"
                         android:drawableStart="@drawable/ic_settings"
                         android:drawablePadding="6dp"
@@ -131,8 +130,7 @@
                         android:gravity="center"
                         android:minWidth="0dp"
                         android:minHeight="0dp"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
+                        android:paddingHorizontal="16dp"
                         android:text="✨ Auto ▾"
                         android:textAllCaps="false"
                         android:textColor="@color/bt_ai_button_text_selector"
@@ -144,12 +142,15 @@
                     android:id="@+id/btn_summarize"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginHorizontal="8dp"
                     android:background="@drawable/bg_bt_ai_primary_button"
+                    android:drawableStart="@drawable/ic_auto_awesome"
+                    android:drawablePadding="8dp"
+                    android:drawableTint="#FFFFFF"
+                    android:gravity="center"
                     android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:paddingStart="28dp"
-                    android:paddingEnd="28dp"
+                    android:minHeight="48dp"
+                    android:paddingHorizontal="24dp"
                     android:text="@string/summarize_button"
                     android:textAllCaps="false"
                     android:textColor="#FFFFFF"
@@ -171,8 +172,8 @@
                 tools:visibility="gone">
 
                 <ProgressBar
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:indeterminateTint="?attr/colorAccent"
                     android:layout_marginBottom="16dp" />
 
@@ -218,12 +219,15 @@
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_retry"
                     android:layout_width="wrap_content"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:background="@drawable/bg_bt_ai_action_button"
+                    android:drawableStart="@drawable/ic_refresh"
+                    android:drawablePadding="8dp"
+                    android:drawableTint="@color/bt_switch_on_color"
+                    android:gravity="center"
                     android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
+                    android:minHeight="48dp"
+                    android:paddingHorizontal="24dp"
                     android:text="@string/retry"
                     android:textAllCaps="false"
                     android:textColor="@color/bt_ai_button_text_selector"
@@ -240,13 +244,13 @@
                 android:visibility="gone"
                 tools:visibility="gone">
 
-                <!-- Summary Bullets Card -->
+                <!-- Summary Bullets Card (12dp corner radius) -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardElevation="0dp"
-                    app:cardCornerRadius="8dp">
+                    app:cardCornerRadius="12dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -278,14 +282,18 @@
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/btn_copy_summary"
                         android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:layout_marginEnd="10dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="8dp"
                         android:background="@drawable/bg_bt_ai_action_button"
+                        android:drawableStart="@drawable/ic_content_copy"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="#FFFFFF"
+                        android:gravity="center"
                         android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:text="Copy Summary"
+                        android:minHeight="48dp"
+                        android:paddingHorizontal="16dp"
+                        android:text="Copy"
+                        android:contentDescription="Copy summary to clipboard"
                         android:textAllCaps="false"
                         android:textColor="@color/bt_ai_button_text_selector"
                         android:textSize="13sp"
@@ -294,13 +302,17 @@
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/btn_re_summarize"
                         android:layout_width="wrap_content"
-                        android:layout_height="42dp"
+                        android:layout_height="48dp"
                         android:background="@drawable/bg_bt_ai_action_button"
+                        android:drawableStart="@drawable/ic_refresh"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="#FFFFFF"
+                        android:gravity="center"
                         android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:text="Refresh Summary"
+                        android:minHeight="48dp"
+                        android:paddingHorizontal="16dp"
+                        android:text="Refresh"
+                        android:contentDescription="Refresh and regenerate summary"
                         android:textAllCaps="false"
                         android:textColor="@color/bt_ai_button_text_selector"
                         android:textSize="13sp"
@@ -312,7 +324,7 @@
 
         </FrameLayout>
 
-        <!-- TALK TO VIDEO Q&A BAR (ALWAYS VISIBLE) -->
+        <!-- TALK TO VIDEO Q&A BAR (ALWAYS VISIBLE, 8DP GRID ALIGNED) -->
         <LinearLayout
             android:id="@+id/layout_ask_video"
             android:layout_width="match_parent"
@@ -326,7 +338,7 @@
             <EditText
                 android:id="@+id/et_ask_video"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:hint="Ask AI about this video..."
@@ -341,14 +353,20 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_send_ask"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="48dp"
                 android:background="@drawable/bg_bt_ai_action_button"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:text="Ask ➔"
+                android:drawableStart="@drawable/ic_send"
+                android:drawablePadding="6dp"
+                android:drawableTint="?attr/colorAccent"
+                android:gravity="center"
+                android:minWidth="0dp"
+                android:minHeight="48dp"
+                android:paddingHorizontal="16dp"
+                android:text="Ask"
+                android:contentDescription="Send question to AI"
                 android:textAllCaps="false"
                 android:textColor="@color/bt_ai_button_text_selector"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
