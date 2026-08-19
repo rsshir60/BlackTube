@@ -13,9 +13,9 @@
 
         <Preference
             android:fragment="org.schabi.newpipe.settings.AiFeaturesSettingsFragment"
-            android:icon="@drawable/ic_stars"
+            android:icon="@drawable/ic_auto_awesome"
             android:key="ai_features"
-            android:summary="Configure Gemini API, prompt templates, and AI summaries"
+            android:summary="Configure Gemini API, offline local models, and AI summaries"
             android:title="@string/ai_features_title"
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />
@@ -54,6 +54,14 @@
             app:singleLineTitle="false" />
 
         <PreferenceScreen
+            android:fragment="org.schabi.newpipe.settings.ContentSettingsFragment"
+            android:icon="@drawable/ic_language"
+            android:summary="Content region, preferred language, and age restrictions"
+            android:title="@string/content"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
+
+        <PreferenceScreen
             android:fragment="org.schabi.newpipe.settings.HistorySettingsFragment"
             android:icon="@drawable/ic_history"
             android:summary="Playback history, search history, and watch state"
@@ -86,13 +94,14 @@
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />
 
-        <PreferenceScreen
-            android:fragment="org.schabi.newpipe.settings.ContentSettingsFragment"
-            android:icon="@drawable/ic_language"
-            android:summary="Content region, preferred language, and age restrictions"
-            android:title="@string/content"
-            app:iconSpaceReserved="true"
-            app:singleLineTitle="false" />
+    </PreferenceCategory>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SECTION 4: System & Data
+         ══════════════════════════════════════════════════════════ -->
+    <PreferenceCategory
+        android:title="⚙️  System &amp; Data"
+        app:iconSpaceReserved="true">
 
         <PreferenceScreen
             android:fragment="org.schabi.newpipe.settings.NotificationsSettingsFragment"
@@ -101,15 +110,6 @@
             android:title="@string/notifications"
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />
-
-    </PreferenceCategory>
-
-    <!-- ══════════════════════════════════════════════════════════
-         SECTION 4: System & Backup
-         ══════════════════════════════════════════════════════════ -->
-    <PreferenceCategory
-        android:title="⚙️  System &amp; Data"
-        app:iconSpaceReserved="true">
 
         <PreferenceScreen
             android:fragment="org.schabi.newpipe.settings.BackupRestoreSettingsFragment"
@@ -122,7 +122,7 @@
         <Preference
             android:icon="@drawable/ic_info_outline"
             android:key="@string/about_settings_key"
-            android:summary="BlackTube v1.1.0, open-source licenses, and credits"
+            android:summary="BlackTube v1.3.3, open-source licenses, and credits"
             android:title="@string/about_title"
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />

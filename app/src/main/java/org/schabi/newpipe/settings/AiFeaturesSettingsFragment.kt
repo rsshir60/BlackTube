@@ -1,15 +1,20 @@
 package org.schabi.newpipe.settings
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
+import android.text.format.Formatter
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
@@ -17,16 +22,11 @@ import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
 import org.schabi.newpipe.R
+import org.schabi.newpipe.ai.LocalModelEngine
+import org.schabi.newpipe.ai.UniversalModelRegistry
 
 /**
- * BlackTube AI Features Settings — full redesign.
- *
- * Sections:
- *   ✨ Status header card   — overall AI readiness
- *   ✨ AI Summary           — enable/disable switch
- *   🤖 AI Provider         — API key + connection status + test button
- *   📚 Prompt System       — active prompt display + Prompt Library entry
- *   💾 Storage             — clear AI cache
+ * BlackTube AI Features Settings — Big-Tech Grade Design & Privacy.
  */
 class AiFeaturesSettingsFragment : BasePreferenceFragment() {
 
@@ -51,8 +51,36 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
         hookPromptLibrary()
     }
 
+    private fun hookApiKeyPref() {
+        val apiKeyPref = findPreference<EditTextPreference>(getString(R.string.gemini_api_key_key))
+        apiKeyPref?.setSummaryProvider { pref ->
+            val key = (pref as EditTextPreference).text.orEmpty().trim()
+            if (key.isBlank()) {
+                "Not configured — tap to add your Gemini API key"
+            } else {
+                maskKey(key)
+            }
+        }
+
+        apiKeyPref?.setOnBindEditTextListener { editText ->
+            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            editText.hint = "AIzaSy..."
+        }
+
+        apiKeyPref?.setOnPreferenceChangeListener { _, newValue ->
+            GeminiSummarizer.configure(newValue as String)
+            view?.post { refreshCustomViews() }
+            true
+        }
+    }
+
+    private fun maskKey(key: String): String {
+        if (key.length <= 10) return "••••••••••"
+        return key.take(7) + "•".repeat(14) + key.takeLast(4)
+    }
+
     private fun hookEngineModePref() {
-        findPreference<androidx.preference.ListPreference>("pref_key_ai_engine_mode")
+        findPreference<ListPreference>("pref_key_ai_engine_mode")
             ?.setOnPreferenceChangeListener { _, _ ->
                 view?.post { refreshCustomViews() }
                 true
@@ -61,7 +89,6 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Slight delay to ensure custom preference views are inflated
         view.post { refreshCustomViews() }
     }
 
@@ -71,24 +98,27 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
         hookToggleDependencies()
     }
 
-    // ── Preference hookups ─────────────────────────────────────────────────
-
-    private fun hookApiKeyPref() {
-        findPreference<EditTextPreference>(getString(R.string.gemini_api_key_key))
-            ?.setOnPreferenceChangeListener { _, newValue ->
-                GeminiSummarizer.configure(newValue as String)
-                view?.post { refreshCustomViews() }
-                true
-            }
-    }
-
     private fun hookClearCache() {
         findPreference<Preference>(getString(R.string.clear_ai_cache_key))
             ?.setOnPreferenceClickListener {
-                requireContext().getSharedPreferences("blacktube_ai_cache", android.content.Context.MODE_PRIVATE)
-                    .edit().clear().apply()
-                Toast.makeText(requireContext(), R.string.ai_cache_cleared, Toast.LENGTH_SHORT).show()
-                view?.post { refreshCustomViews() }
+                val ctx = requireContext()
+                val cachePrefs = ctx.getSharedPreferences("blacktube_ai_cache", Context.MODE_PRIVATE)
+                val entries = cachePrefs.all
+                if (entries.isEmpty()) {
+                    Toast.makeText(ctx, "Cache is already empty", Toast.LENGTH_SHORT).show()
+                    return@setOnPreferenceClickListener true
+                }
+
+                AlertDialog.Builder(ctx)
+                    .setTitle(R.string.clear_ai_cache_title)
+                    .setMessage("Are you sure you want to clear all cached AI summaries from device storage?")
+                    .setPositiveButton(R.string.clear) { _, _ ->
+                        cachePrefs.edit().clear().apply()
+                        Toast.makeText(ctx, R.string.ai_cache_cleared, Toast.LENGTH_SHORT).show()
+                        refreshCustomViews()
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
                 true
             }
     }
@@ -104,35 +134,31 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
     private fun hookToggleDependencies() {
         val enablePref = findPreference<SwitchPreferenceCompat>(getString(R.string.gemini_enable_key))
         val apiKeyPref = findPreference<EditTextPreference>(getString(R.string.gemini_api_key_key))
+        val enginePref = findPreference<ListPreference>("pref_key_ai_engine_mode")
+        val modelPref = findPreference<Preference>("pref_key_local_ai_screen")
         val libraryPref = findPreference<Preference>(getString(R.string.prompt_library_key))
         val cachePref = findPreference<Preference>(getString(R.string.clear_ai_cache_key))
 
         val enabled = enablePref?.isChecked ?: true
         apiKeyPref?.isEnabled = enabled
+        enginePref?.isEnabled = enabled
+        modelPref?.isEnabled = enabled
         libraryPref?.isEnabled = enabled
         cachePref?.isEnabled = enabled
 
-        // Dynamic summary based on toggle state
-        enablePref?.summary = if (enabled)
-            getString(R.string.gemini_enable_summary_on)
-        else
-            getString(R.string.gemini_enable_summary_off)
-
-        enablePref?.setOnPreferenceChangeListener { pref, newValue ->
+        enablePref?.setOnPreferenceChangeListener { _, newValue ->
             val isOn = newValue as Boolean
             apiKeyPref?.isEnabled = isOn
+            enginePref?.isEnabled = isOn
+            modelPref?.isEnabled = isOn
             libraryPref?.isEnabled = isOn
             cachePref?.isEnabled = isOn
-            pref.summary = if (isOn)
-                getString(R.string.gemini_enable_summary_on)
-            else
-                getString(R.string.gemini_enable_summary_off)
             view?.post { refreshCustomViews() }
             true
         }
     }
 
-    // ── Custom view refresh ────────────────────────────────────────────────
+    // ── Custom view & dynamic row refresh ──────────────────────────────────
 
     private fun refreshCustomViews() {
         val v = view ?: return
@@ -142,17 +168,70 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
             .getBoolean(getString(R.string.gemini_enable_key), true)
         val isConfigured = GeminiSummarizer.isConfigured()
         val activePrompt = PromptLibrary.getActivePrompt(ctx)
+        val activeLocalModel = UniversalModelRegistry.getActiveModel(ctx)
+        val isLocalDownloaded = LocalModelEngine.isModelDownloaded(ctx)
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
+        val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
+
+        // ── Dynamic Engine Provider Icon & Summary ────────────────────────
+        val enginePref = findPreference<ListPreference>("pref_key_ai_engine_mode")
+        if (enginePref != null) {
+            when (engineMode) {
+                "local" -> enginePref.setIcon(R.drawable.ic_memory)
+                "gemini" -> enginePref.setIcon(R.drawable.ic_cloud)
+                else -> enginePref.setIcon(R.drawable.ic_auto_mode)
+            }
+        }
+
+        // ── Engine-Aware Master Toggle Summary ────────────────────────────
+        val enablePref = findPreference<SwitchPreferenceCompat>(getString(R.string.gemini_enable_key))
+        if (enablePref != null) {
+            enablePref.summary = when {
+                !isEnabled -> "AI summaries are disabled"
+                engineMode == "local" || (engineMode == "auto" && isLocalDownloaded) ->
+                    "Local ${activeLocalModel.name} is active ✓ (100% offline)"
+                isConfigured -> "Cloud Gemini 3.1 Flash-Lite is active ✓"
+                else -> "Enable AI video summaries, chapter insights, and Q&A"
+            }
+        }
+
+        // ── Dynamic Local Model Hub Row Summary ───────────────────────────
+        val localModelPref = findPreference<Preference>("pref_key_local_ai_screen")
+        if (localModelPref != null) {
+            localModelPref.summary = if (isLocalDownloaded) {
+                "${activeLocalModel.name} ready • ${activeLocalModel.fileSizeMB} MB on disk"
+            } else {
+                "No offline model downloaded — tap to download 2.4GB Phi-4 Mini GGUF"
+            }
+        }
+
+        // ── Dynamic Cache Size Calculation ────────────────────────────────
+        val cachePref = findPreference<Preference>(getString(R.string.clear_ai_cache_key))
+        val cachePrefs = ctx.getSharedPreferences("blacktube_ai_cache", Context.MODE_PRIVATE)
+        val cacheEntries = cachePrefs.all
+        var totalCacheBytes = 0L
+        for ((_, value) in cacheEntries) {
+            if (value is String) {
+                totalCacheBytes += value.toByteArray().size
+            }
+        }
+
+        if (cachePref != null) {
+            if (cacheEntries.isEmpty() || totalCacheBytes == 0L) {
+                cachePref.summary = "No cached summaries stored on device"
+                cachePref.isEnabled = false
+            } else {
+                val formattedSize = Formatter.formatFileSize(ctx, totalCacheBytes)
+                cachePref.summary = "Delete $formattedSize of cached summaries (${cacheEntries.size} items)"
+                cachePref.isEnabled = isEnabled
+            }
+        }
 
         // ── Status header card ───────────────────────────────────────────
         val chipStatus = v.findViewById<TextView>(R.id.chip_ai_global_status)
         val tvModelName = v.findViewById<TextView>(R.id.tv_ai_model_name)
         val tvPromptHeader = v.findViewById<TextView>(R.id.tv_ai_active_prompt_header)
-
-        val activeLocalModel = org.schabi.newpipe.ai.UniversalModelRegistry.getActiveModel(ctx)
-        val isLocalDownloaded = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
-
-        val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-        val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
 
         if (tvModelName != null) {
             when (engineMode) {
@@ -214,7 +293,7 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
         else
             "⚠ Not configured"
         tvConnectionStatus?.setTextColor(
-            if (isConfigured) 0xFF2E7D32.toInt() else 0xFFB71C1C.toInt()
+            if (isConfigured) 0xFF4CAF50.toInt() else 0xFFEF5350.toInt()
         )
 
         val btnTest = v.findViewById<Button>(R.id.btn_test_connection)
@@ -240,14 +319,5 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
                 Toast.makeText(ctx, getString(R.string.prompt_library_default_restored), Toast.LENGTH_SHORT).show()
             }
         }
-
-        // ── Cache size ───────────────────────────────────────────────────
-        val cachePref = findPreference<Preference>(getString(R.string.clear_ai_cache_key))
-        val cachePrefs = ctx.getSharedPreferences("blacktube_ai_cache", android.content.Context.MODE_PRIVATE)
-        val cachedCount = cachePrefs.all.size
-        cachePref?.summary = if (cachedCount > 0)
-            getString(R.string.clear_ai_cache_summary_count, cachedCount)
-        else
-            getString(R.string.clear_ai_cache_summary)
     }
 }

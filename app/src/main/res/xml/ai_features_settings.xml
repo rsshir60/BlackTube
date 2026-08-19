@@ -24,7 +24,7 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="true"
-            android:icon="@drawable/ic_sparkles_modern"
+            android:icon="@drawable/ic_auto_awesome"
             android:key="@string/gemini_enable_key"
             android:summary="Enable AI video summaries, chapter insights, and Q&amp;A"
             android:title="Enable AI Summaries"
@@ -35,13 +35,12 @@
             android:defaultValue="auto"
             android:entries="@array/ai_engine_mode_entries"
             android:entryValues="@array/ai_engine_mode_values"
-            android:icon="@drawable/ic_settings"
+            android:icon="@drawable/ic_auto_mode"
             android:key="pref_key_ai_engine_mode"
             android:summary="Choose active engine provider for summaries and chat"
             android:title="Preferred AI Engine Provider"
             app:iconSpaceReserved="true"
-            app:singleLineTitle="false"
-            app:useSimpleSummaryProvider="true" />
+            app:singleLineTitle="false" />
 
     </PreferenceCategory>
 
@@ -55,18 +54,26 @@
         app:iconSpaceReserved="true">
 
         <EditTextPreference
-            android:icon="@drawable/ic_language"
+            android:icon="@drawable/ic_vpn_key"
             android:key="@string/gemini_api_key_key"
             android:summary="Enter your Gemini API key for fast cloud summaries"
             android:title="Gemini API Key"
             app:iconSpaceReserved="true"
-            app:singleLineTitle="false"
-            app:useSimpleSummaryProvider="true" />
+            app:singleLineTitle="false" />
 
         <Preference
             android:key="ai_connection_status"
             android:layout="@layout/preference_ai_connection_status"
             android:selectable="false" />
+
+        <Preference
+            android:icon="@drawable/ic_lock"
+            android:key="pref_key_ai_privacy_footnote"
+            android:selectable="false"
+            android:summary="Your API key never leaves this device. Requests go directly from your phone to Google AI Studio — no BlackTube servers exist in between."
+            android:title="Privacy &amp; Data Security"
+            app:iconSpaceReserved="true"
+            app:singleLineTitle="false" />
 
     </PreferenceCategory>
 
@@ -81,7 +88,7 @@
 
         <PreferenceScreen
             android:fragment="org.schabi.newpipe.settings.LocalAiModelSettingsFragment"
-            android:icon="@drawable/ic_sparkles_modern"
+            android:icon="@drawable/ic_memory"
             android:key="pref_key_local_ai_screen"
             android:summary="Manage local 1.3B/3.8B GGUF models for 100% offline summaries"
             android:title="Universal Local Model Hub"
@@ -105,7 +112,7 @@
             android:selectable="false" />
 
         <Preference
-            android:icon="@drawable/ic_bookmark"
+            android:icon="@drawable/ic_tune"
             android:key="@string/prompt_library_key"
             android:summary="Customize AI summary templates and tone presets"
             android:title="Prompt Library"
