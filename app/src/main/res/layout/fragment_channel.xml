@@ -125,9 +125,14 @@
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/channel_subscribe_button"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
+                    android:minWidth="100dp"
+                    android:paddingHorizontal="16dp"
+                    android:background="@drawable/bg_bt_ai_primary_button"
                     android:text="@string/subscribe_button_title"
-                    android:textSize="@dimen/channel_rss_title_size"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/channel_banner_image" />
@@ -148,10 +153,11 @@
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
             app:tabGravity="fill"
-            app:tabIndicatorColor="@color/white"
+            app:tabIndicatorColor="#E50914"
+            app:tabSelectedTextColor="#E50914"
+            app:tabTextColor="#B3FFFFFF"
             app:tabMode="scrollable"
-            app:tabRippleColor="@color/white"
-            app:tabTextColor="@color/white" />
+            app:tabRippleColor="#33E50914" />
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager"

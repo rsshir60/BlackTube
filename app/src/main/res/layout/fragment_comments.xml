@@ -46,7 +46,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/empty_view_no_comments"
-            android:textSize="24sp" />
+            android:textSize="20sp" />
+
+        <org.schabi.newpipe.views.NewPipeTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:text="Comments are disabled or unavailable for this video"
+            android:textColor="#66FFFFFF"
+            android:textSize="12sp" />
 
     </LinearLayout>
 

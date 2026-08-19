@@ -39,7 +39,7 @@
     <string name="tab_choose">Choose Tab</string>
     <string name="controls_background_title">Background</string>
     <string name="controls_popup_title">Popup</string>
-    <string name="controls_add_to_playlist_title">Add To</string>
+    <string name="controls_add_to_playlist_title">Playlist</string>
     <string name="download_path_title">Video download folder</string>
     <string name="download_path_summary">Downloaded video files are stored here</string>
     <string name="download_path_dialog_title">Choose download folder for video files</string>
@@ -373,7 +373,7 @@
     <string name="rename">Rename</string>
     <!-- Msg -->
     <string name="msg_name">Filename</string>
-    <string name="msg_threads">Threads</string>
+    <string name="msg_threads">Parallel connections</string>
     <string name="msg_error">Error</string>
     <string name="msg_running">Tubular Downloading</string>
     <string name="msg_running_detail">Tap for details</string>
@@ -832,7 +832,7 @@
     <string name="you_successfully_subscribed">You now subscribed to this channel</string>
     <string name="enumeration_comma">,</string>
     <string name="toggle_all">Toggle all</string>
-    <string name="streams_not_yet_supported_removed">Streams which are not yet supported by the downloader are not shown</string>
+    <string name="streams_not_yet_supported_removed">Only downloadable formats are listed</string>
     <string name="audio_track_present_in_video">An audio track should be already present in this stream</string>
     <string name="selected_stream_external_player_not_supported">The selected stream is not supported by external players</string>
     <string name="no_audio_streams_available_for_external_players">No audio streams are available for external players</string>

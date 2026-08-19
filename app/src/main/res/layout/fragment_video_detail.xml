@@ -455,33 +455,36 @@
                             app:tint="?android:attr/textColorSecondary" />
                     </LinearLayout>
 
-                    <!-- CONTROLS -->
+                    <!-- PRIMARY CONTROLS (UNIFIED 5-ITEM ROW) -->
                     <LinearLayout
                         android:id="@+id/detail_control_panel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:padding="@dimen/detail_control_padding">
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="@dimen/detail_control_padding">
 
                         <org.schabi.newpipe.views.NewPipeTextView
-                            android:id="@+id/detail_controls_ai_summarize"
-                            android:layout_width="@dimen/detail_control_width"
+                            android:id="@+id/detail_controls_share"
+                            android:layout_width="0dp"
                             android:layout_height="@dimen/detail_control_height"
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:clickable="true"
-                            android:contentDescription="Summarize with AI"
-                            android:drawableTop="@drawable/ic_sparkles_modern"
+                            android:contentDescription="@string/share"
+                            android:drawableTop="@drawable/ic_share"
                             android:focusable="true"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:paddingVertical="@dimen/detail_control_padding"
-                            android:text="Summarize (AI)"
-                            android:textSize="@dimen/detail_control_text_size" />
+                            android:text="@string/share"
+                            android:textSize="11.5sp" />
 
                         <org.schabi.newpipe.views.NewPipeTextView
                             android:id="@+id/detail_controls_background"
-                            android:layout_width="@dimen/detail_control_width"
+                            android:layout_width="0dp"
                             android:layout_height="@dimen/detail_control_height"
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1"
@@ -491,13 +494,15 @@
                             android:drawableTop="@drawable/ic_headset"
                             android:focusable="true"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:paddingVertical="@dimen/detail_control_padding"
                             android:text="@string/controls_background_title"
-                            android:textSize="@dimen/detail_control_text_size" />
+                            android:textSize="11.5sp" />
 
                         <org.schabi.newpipe.views.NewPipeTextView
                             android:id="@+id/detail_controls_popup"
-                            android:layout_width="@dimen/detail_control_width"
+                            android:layout_width="0dp"
                             android:layout_height="@dimen/detail_control_height"
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1"
@@ -507,13 +512,15 @@
                             android:drawableTop="@drawable/ic_picture_in_picture"
                             android:focusable="true"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:paddingVertical="@dimen/detail_control_padding"
                             android:text="@string/controls_popup_title"
-                            android:textSize="@dimen/detail_control_text_size" />
+                            android:textSize="11.5sp" />
 
                         <org.schabi.newpipe.views.NewPipeTextView
                             android:id="@+id/detail_controls_download"
-                            android:layout_width="@dimen/detail_control_width"
+                            android:layout_width="0dp"
                             android:layout_height="@dimen/detail_control_height"
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1"
@@ -523,13 +530,15 @@
                             android:drawableTop="@drawable/ic_file_download"
                             android:focusable="true"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:paddingVertical="@dimen/detail_control_padding"
                             android:text="@string/download"
-                            android:textSize="@dimen/detail_control_text_size" />
+                            android:textSize="11.5sp" />
 
                         <org.schabi.newpipe.views.NewPipeTextView
                             android:id="@+id/detail_controls_playlist_append"
-                            android:layout_width="@dimen/detail_control_width"
+                            android:layout_width="0dp"
                             android:layout_height="@dimen/detail_control_height"
                             android:layout_gravity="center_vertical"
                             android:layout_weight="1"
@@ -539,9 +548,11 @@
                             android:drawableTop="@drawable/ic_playlist_add"
                             android:focusable="true"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:paddingVertical="@dimen/detail_control_padding"
                             android:text="@string/controls_add_to_playlist_title"
-                            android:textSize="@dimen/detail_control_text_size" />
+                            android:textSize="11.5sp" />
 
                     </LinearLayout>
 
@@ -555,22 +566,6 @@
                         android:paddingBottom="@dimen/detail_control_padding"
                         android:visibility="gone"
                         tools:visibility="visible">
-
-                        <org.schabi.newpipe.views.NewPipeTextView
-                            android:id="@+id/detail_controls_share"
-                            android:layout_width="@dimen/detail_control_width"
-                            android:layout_height="@dimen/detail_control_height"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:clickable="true"
-                            android:contentDescription="@string/share"
-                            android:drawableTop="@drawable/ic_share"
-                            android:focusable="true"
-                            android:gravity="center"
-                            android:paddingVertical="@dimen/detail_control_padding"
-                            android:text="@string/share"
-                            android:textSize="@dimen/detail_control_text_size" />
 
                         <org.schabi.newpipe.views.NewPipeTextView
                             android:id="@+id/detail_controls_open_in_browser"
