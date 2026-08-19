@@ -4,30 +4,35 @@
     android:title="@string/sponsor_block">
 
     <Preference
-        app:iconSpaceReserved="false"
+        app:icon="@drawable/ic_public"
+        app:iconSpaceReserved="true"
         android:key="@string/sponsor_block_home_page_key"
         android:summary="@string/sponsor_block_home_page_summary"
         android:title="@string/sponsor_block_home_page_title"/>
 
     <Preference
-        app:iconSpaceReserved="false"
+        app:icon="@drawable/ic_lock"
+        app:iconSpaceReserved="true"
         android:key="@string/sponsor_block_privacy_key"
         android:summary="@string/sponsor_block_privacy_summary"
         android:title="@string/sponsor_block_privacy_title"/>
 
     <PreferenceCategory
         android:layout="@layout/settings_category_header_layout"
+        app:iconSpaceReserved="false"
         android:title="@string/settings">
 
         <SwitchPreference
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_sponsor_block_enable"
+            app:iconSpaceReserved="true"
             android:defaultValue="true"
             android:key="@string/sponsor_block_enable_key"
             android:summary="@string/sponsor_block_enable_summary"
             android:title="@string/sponsor_block_enable_title"/>
 
         <org.schabi.newpipe.settings.custom.SponsorBlockApiUrlPreference
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_language"
+            app:iconSpaceReserved="true"
             android:dependency="@string/sponsor_block_enable_key"
             android:defaultValue="@string/sponsor_block_default_api_url"
             android:key="@string/sponsor_block_api_url_key"
@@ -35,7 +40,8 @@
             android:title="@string/sponsor_block_api_url_title"/>
 
         <SwitchPreference
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_fast_forward"
+            app:iconSpaceReserved="true"
             android:dependency="@string/sponsor_block_enable_key"
             android:defaultValue="true"
             android:key="@string/sponsor_block_show_manual_skip_key"
@@ -43,7 +49,8 @@
             android:title="@string/sponsor_block_show_manual_skip_title"/>
 
         <SwitchPreference
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_replay"
+            app:iconSpaceReserved="true"
             android:dependency="@string/sponsor_block_enable_key"
             android:defaultValue="true"
             android:key="@string/sponsor_block_graced_rewind_key"
@@ -51,7 +58,8 @@
             android:title="@string/sponsor_block_graced_rewind_title"/>
 
         <SwitchPreference
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_notifications"
+            app:iconSpaceReserved="true"
             android:dependency="@string/sponsor_block_enable_key"
             android:defaultValue="true"
             android:key="@string/sponsor_block_notifications_key"
@@ -59,7 +67,8 @@
             android:title="@string/sponsor_block_notifications_title"/>
 
         <PreferenceScreen
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_tune"
+            app:iconSpaceReserved="true"
             android:dependency="@string/sponsor_block_enable_key"
             android:fragment="org.schabi.newpipe.settings.SponsorBlockCategoriesSettingsFragment"
             android:key="@string/sponsor_block_categories_key"
@@ -67,7 +76,8 @@
             android:summary="@string/settings_category_sponsor_block_categories_summary"/>
 
         <SwitchPreference
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_file_download"
+            app:iconSpaceReserved="true"
             android:dependency="@string/sponsor_block_enable_key"
             android:defaultValue="false"
             android:key="pref_key_sponsor_block_cut_downloads"
@@ -75,7 +85,8 @@
             android:title="Always cut sponsors on download"/>
 
         <Preference
-            app:iconSpaceReserved="false"
+            app:icon="@drawable/ic_delete"
+            app:iconSpaceReserved="true"
             android:dependency="@string/sponsor_block_enable_key"
             android:key="@string/sponsor_block_clear_whitelist_key"
             android:summary="@string/sponsor_block_clear_whitelist_summary"

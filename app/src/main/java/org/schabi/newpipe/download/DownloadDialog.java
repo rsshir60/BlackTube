@@ -1221,41 +1221,42 @@ public class DownloadDialog extends DialogFragment
         }
 
         final String sanitizedTitle = videoTitle.replaceAll("[^a-zA-Z0-9._-]", "_");
-        
-        SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
-        String customSummaryPath = prefs.getString(context.getString(R.string.download_path_summary_key), null);
-        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        if (customSummaryPath != null && !customSummaryPath.isEmpty()) {
-            try {
-                Uri uri = Uri.parse(customSummaryPath);
-                if (ContentResolver.SCHEME_FILE.equals(uri.getScheme()) && uri.getPath() != null) {
-                    File customFile = new File(uri.getPath());
-                    if (customFile.exists() || customFile.mkdirs()) {
-                        downloadsDir = customFile;
-                    }
-                }
-            } catch (Exception ignored) {}
+
+        File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (downloadsDir == null) {
+            downloadsDir = new File(context.getFilesDir(), "summaries");
         }
+        downloadsDir.mkdirs();
 
         File targetFile = null;
-        if (formatIndex == 0) {
-            // 1. PDF Document (.pdf)
-            final String fileName = sanitizedTitle + "_Summary.pdf";
-            targetFile = new File(downloadsDir, fileName);
-            createPdfDocument(targetFile, videoTitle, summaryText);
-            Toast.makeText(context, "✅ AI Summary PDF saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
-        } else if (formatIndex == 1) {
-            // 2. Markdown File (.md)
-            final String fileName = sanitizedTitle + "_Summary.md";
-            targetFile = new File(downloadsDir, fileName);
-            writeTextToFile(targetFile, "# " + videoTitle + "\n\n" + summaryText);
-            Toast.makeText(context, "✅ AI Summary Markdown saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
-        } else {
-            // 3. Plain Text File (.txt)
-            final String fileName = sanitizedTitle + "_Summary.txt";
-            targetFile = new File(downloadsDir, fileName);
-            writeTextToFile(targetFile, videoTitle + "\n\n" + summaryText);
-            Toast.makeText(context, "✅ AI Summary Text saved to Downloads: " + fileName, Toast.LENGTH_LONG).show();
+        String mime = "application/pdf";
+        try {
+            if (formatIndex == 0) {
+                // 1. PDF Document (.pdf)
+                final String fileName = sanitizedTitle + "_Summary.pdf";
+                mime = "application/pdf";
+                targetFile = new File(downloadsDir, fileName);
+                createPdfDocument(targetFile, videoTitle, summaryText);
+                Toast.makeText(context, "✅ AI Summary PDF saved: " + fileName, Toast.LENGTH_LONG).show();
+            } else if (formatIndex == 1) {
+                // 2. Markdown File (.md)
+                final String fileName = sanitizedTitle + "_Summary.md";
+                mime = "text/markdown";
+                targetFile = new File(downloadsDir, fileName);
+                writeTextToFile(targetFile, "# " + videoTitle + "\n\n" + summaryText);
+                Toast.makeText(context, "✅ AI Summary Markdown saved: " + fileName, Toast.LENGTH_LONG).show();
+            } else {
+                // 3. Plain Text File (.txt)
+                final String fileName = sanitizedTitle + "_Summary.txt";
+                mime = "text/plain";
+                targetFile = new File(downloadsDir, fileName);
+                writeTextToFile(targetFile, videoTitle + "\n\n" + summaryText);
+                Toast.makeText(context, "✅ AI Summary Text saved: " + fileName, Toast.LENGTH_LONG).show();
+            }
+        } catch (final Exception e) {
+            Log.e(TAG, "Error generating summary file", e);
+            Toast.makeText(context, "⚠️ Failed to save summary file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
         }
 
         if (targetFile != null && targetFile.exists()) {
@@ -1269,7 +1270,7 @@ public class DownloadDialog extends DialogFragment
                 mission.length = targetFile.length();
                 mission.timestamp = System.currentTimeMillis();
                 mission.kind = 'd';
-                mission.storage = new StoredFileHelper(context, null, Uri.fromFile(targetFile), targetFile.getName());
+                mission.storage = new StoredFileHelper(context, Uri.fromFile(targetFile), mime);
 
                 final FinishedMissionStore store = new FinishedMissionStore(context);
                 store.addFinishedMission(mission);
@@ -1277,7 +1278,7 @@ public class DownloadDialog extends DialogFragment
                 if (downloadManager != null) {
                     downloadManager.addFinishedMission(mission);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.e(TAG, "Failed to register summary into internal downloads manager", e);
             }
         }
