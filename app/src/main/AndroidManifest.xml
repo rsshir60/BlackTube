@@ -120,6 +120,11 @@
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
+        <service
+            android:name=".download.playlist.PlaylistDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <activity
             android:name=".PanicResponderActivity"
             android:exported="true"
