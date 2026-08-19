@@ -44,6 +44,7 @@ import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.fragments.list.BaseListInfoFragment;
 import org.schabi.newpipe.info_list.dialog.InfoItemDialog;
 import org.schabi.newpipe.info_list.dialog.StreamDialogDefaultEntry;
+import org.schabi.newpipe.download.PlaylistDownloadDialog;
 import org.schabi.newpipe.local.dialog.PlaylistDialog;
 import org.schabi.newpipe.local.playlist.RemotePlaylistManager;
 import org.schabi.newpipe.player.playqueue.PlayQueue;
@@ -256,11 +257,28 @@ public class PlaylistFragment extends BaseListInfoFragment<StreamInfoItem, Playl
             }
         } else if (itemId == R.id.menu_item_playlist_shuffle_all) {
             NavigationHelper.playOnMainPlayer(activity, getShuffledQueue());
+        } else if (itemId == R.id.menu_item_download_playlist) {
+            openPlaylistDownloadDialog();
         } else {
             return super.onOptionsItemSelected(item);
         }
         return true;
     }
+
+    private void openPlaylistDownloadDialog() {
+        if (infoListAdapter == null) return;
+        final List<StreamInfoItem> items = new ArrayList<>();
+        for (final InfoItem i : infoListAdapter.getItemsList()) {
+            if (i instanceof StreamInfoItem) {
+                items.add((StreamInfoItem) i);
+            }
+        }
+        if (items.isEmpty()) return;
+        final String playlistTitle = currentInfo != null ? currentInfo.getName() : "";
+        PlaylistDownloadDialog.newInstance(items, playlistTitle)
+                .show(getChildFragmentManager(), "PlaylistDownloadDialog");
+    }
+
 
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -367,6 +385,9 @@ public class PlaylistFragment extends BaseListInfoFragment<StreamInfoItem, Playl
                 .subscribe(getPlaylistBookmarkSubscriber());
 
         PlayButtonHelper.initPlaylistControlClickListener(activity, playlistControlBinding, this);
+        if (playlistControlBinding.playlistCtrlDownloadAllButton != null) {
+            playlistControlBinding.playlistCtrlDownloadAllButton.setOnClickListener(v -> openPlaylistDownloadDialog());
+        }
     }
 
     public PlayQueue getPlayQueue() {

@@ -1136,4 +1136,23 @@
         <item>custom</item>
     </string-array>
 
+    <!-- Playlist Batch Download (IDM Style) -->
+    <string name="playlist_download_title">Download Playlist</string>
+    <string name="playlist_download_select_all">Select All</string>
+    <string name="playlist_download_deselect_all">Deselect All</string>
+    <string name="playlist_download_btn">Download (%1$d)</string>
+    <string name="playlist_download_quality_best">Best Quality (Video)</string>
+    <string name="playlist_download_quality_720p">720p HD</string>
+    <string name="playlist_download_quality_480p">480p SD</string>
+    <string name="playlist_download_quality_360p">360p Low</string>
+    <string name="playlist_download_quality_audio">Audio Only (Best MP3/M4A)</string>
+    <string name="playlist_download_resolving">Resolving streams… (%1$d/%2$d)</string>
+    <string name="playlist_download_starting">Starting download queue…</string>
+    <string name="playlist_download_progress">Downloading %1$d of %2$d items</string>
+    <string name="playlist_download_completed">✅ Playlist download complete!</string>
+    <string name="playlist_download_failed">❌ Batch download failed: %1$s</string>
+    <string name="no_videos_selected">No videos selected</string>
+    <string name="download_playlist">Download Playlist</string>
+    <string name="download_all">Download All</string>
 </resources>
+
