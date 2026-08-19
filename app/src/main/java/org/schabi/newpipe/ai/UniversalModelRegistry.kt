@@ -41,24 +41,27 @@ object UniversalModelRegistry {
     }
 
     fun getModelFile(context: Context, modelInfo: LocalModelInfo = DEFAULT_MODEL): File {
-        // 1. Check public DIRECTORY_DOWNLOADS/BlackTube_AI/ first (written by system DownloadManager)
-        val publicDir = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "BlackTube_AI")
-        val publicFile = File(publicDir, modelInfo.fileName)
-        if (publicFile.exists() && publicFile.length() > 50 * 1024 * 1024L) {
-            return publicFile
+        // 1. App-specific storage directory (Permission-free on all Android versions)
+        val baseDir = context.getExternalFilesDir("models") ?: File(context.filesDir, "models")
+        if (!baseDir.exists()) {
+            baseDir.mkdirs()
+        }
+        val appFile = File(baseDir, modelInfo.fileName)
+        if (appFile.exists() && appFile.length() > 50 * 1024 * 1024L) {
+            return appFile
         }
 
-        // 2. Check app private files directory fallback
-        val privateDir = File(context.getExternalFilesDir(null), "models")
-        if (!privateDir.exists()) {
-            privateDir.mkdirs()
-        }
-        val privateFile = File(privateDir, modelInfo.fileName)
-        if (privateFile.exists() && privateFile.length() > 50 * 1024 * 1024L) {
-            return privateFile
-        }
+        // 2. Check public DIRECTORY_DOWNLOADS/BlackTube_AI/ fallback (if already downloaded there)
+        try {
+            val publicDir = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "BlackTube_AI")
+            val publicFile = File(publicDir, modelInfo.fileName)
+            if (publicFile.exists() && publicFile.length() > 50 * 1024 * 1024L) {
+                return publicFile
+            }
+        } catch (ignored: Throwable) {}
 
-        return publicFile
+        // Default write destination for new downloads is the permission-free appFile
+        return appFile
     }
 
     fun isModelDownloaded(context: Context, modelInfo: LocalModelInfo = DEFAULT_MODEL): Boolean {

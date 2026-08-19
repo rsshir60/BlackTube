@@ -20,7 +20,11 @@ import org.schabi.newpipe.R
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLException
 
 data class ModelDownloadProgress(
     val downloadId: Long = 0L,
@@ -36,9 +40,9 @@ data class ModelDownloadProgress(
 
 object ModelDownloaderManager {
     private const val TAG = "ModelDownloaderManager"
-    private const val BUFFER_SIZE = 8192 // 8KB buffer
-    private const val MAX_RETRIES = 3
-    private const val RETRY_DELAY_MS = 3000L
+    private const val BUFFER_SIZE = 16384 // 16KB high-throughput buffer
+    private const val MAX_RETRIES = 5
+    private const val RETRY_DELAY_MS = 2000L
 
     private const val NOTIFICATION_ID = 9002
     private const val CHANNEL_ID = "ai_model_download_channel"
@@ -57,17 +61,16 @@ object ModelDownloaderManager {
     private var isCancelled = false
 
     private val downloadClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.MINUTES)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.MINUTES)
         .writeTimeout(60, TimeUnit.SECONDS)
         .followRedirects(true)
         .followSslRedirects(true)
         .retryOnConnectionFailure(true)
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
-                .header("User-Agent", "BlackTube/1.3.0 (Android)")
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 BlackTube/1.3.3")
                 .header("Accept", "*/*")
-                .header("Accept-Encoding", "identity")
                 .build()
             chain.proceed(request)
         }
@@ -134,23 +137,26 @@ object ModelDownloaderManager {
                             ongoing = false
                         )
                         return@launch
-                    } catch (e: IOException) {
+                    } catch (e: Exception) {
+                        if (e is CancellationException || isCancelled) {
+                            Log.d(TAG, "Download cancelled during execution")
+                            updateError(appContext, downloadId, "Download cancelled")
+                            return@launch
+                        }
+
                         lastException = e
                         Log.e(TAG, "Download attempt $attempt failed: ${e.message}", e)
                         if (attempt < MAX_RETRIES) {
+                            val retryMsg = "Retrying (${attempt}/$MAX_RETRIES): ${extractUserFriendlyError(e)}"
                             showNotification(
                                 context = appContext,
                                 title = "Reconnecting download...",
-                                content = "Attempt $attempt of $MAX_RETRIES failed: ${e.message}",
+                                content = retryMsg,
                                 progress = _downloadProgress.value.progressPercent,
                                 ongoing = true
                             )
                             delay(RETRY_DELAY_MS * attempt)
                         }
-                    } catch (e: Exception) {
-                        lastException = e
-                        Log.e(TAG, "Unexpected error on attempt $attempt: ${e.message}", e)
-                        break
                     }
                 }
 
@@ -177,33 +183,66 @@ object ModelDownloaderManager {
         downloadId: Long,
         modelName: String
     ) {
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        val tempFile = File(targetFile.parentFile, "${targetFile.name}.tmp")
+        var existingBytes = if (tempFile.exists()) tempFile.length() else 0L
 
-        val response: Response = downloadClient.newCall(request).execute()
-        if (!response.isSuccessful) {
+        val requestBuilder = Request.Builder().url(url)
+        if (existingBytes > 0) {
+            requestBuilder.header("Range", "bytes=$existingBytes-")
+            Log.d(TAG, "Resuming download from $existingBytes bytes")
+        }
+
+        val response: Response = downloadClient.newCall(requestBuilder.build()).execute()
+        val isResume = (response.code == 206)
+        if (!response.isSuccessful && !isResume) {
+            if (response.code == 416) {
+                // Requested range not satisfiable -> start fresh
+                tempFile.delete()
+                existingBytes = 0L
+                val freshResponse = downloadClient.newCall(Request.Builder().url(url).build()).execute()
+                if (!freshResponse.isSuccessful) {
+                    throw IOException("HTTP ${freshResponse.code}: ${freshResponse.message}")
+                }
+                processDownloadStream(context, freshResponse, tempFile, targetFile, downloadId, modelName, 0L)
+                return
+            }
             throw IOException("HTTP ${response.code}: ${response.message}")
         }
 
-        val responseBody = response.body ?: throw IOException("Empty response body")
-        val contentLength = responseBody.contentLength()
-
-        val availableSpace = targetFile.parentFile?.freeSpace ?: 0L
-        if (contentLength > 0 && availableSpace > 0 && availableSpace < contentLength * 1.1) {
-            throw IOException("Not enough storage space. Need ${contentLength / (1024 * 1024)} MB, have ${availableSpace / (1024 * 1024)} MB")
+        val offset = if (isResume) existingBytes else {
+            tempFile.delete()
+            0L
         }
 
-        var downloadedBytes = 0L
+        processDownloadStream(context, response, tempFile, targetFile, downloadId, modelName, offset)
+    }
+
+    private fun processDownloadStream(
+        context: Context,
+        response: Response,
+        tempFile: File,
+        targetFile: File,
+        downloadId: Long,
+        modelName: String,
+        initialOffset: Long
+    ) {
+        val responseBody = response.body ?: throw IOException("Empty response body from server")
+        val streamLength = responseBody.contentLength()
+        val totalLength = if (streamLength > 0) streamLength + initialOffset else -1L
+
+        val availableSpace = targetFile.parentFile?.freeSpace ?: 0L
+        if (totalLength > 0 && availableSpace > 0 && availableSpace < (totalLength - initialOffset) * 1.05) {
+            throw IOException("Not enough storage space. Need ${(totalLength - initialOffset) / (1024 * 1024)} MB, have ${availableSpace / (1024 * 1024)} MB")
+        }
+
+        var downloadedBytes = initialOffset
         var lastUpdateTime = System.currentTimeMillis()
-        var lastUpdateBytes = 0L
+        var lastUpdateBytes = downloadedBytes
         var speedBytesPerSec = 0L
 
-        val tempFile = File(targetFile.parentFile, "${targetFile.name}.tmp")
-
         try {
-            responseBody.byteStream().use { input ->
-                FileOutputStream(tempFile).use { output ->
+            responseBody.byteStream().use { input: InputStream ->
+                FileOutputStream(tempFile, initialOffset > 0).use { output ->
                     val buffer = ByteArray(BUFFER_SIZE)
                     var bytesRead: Int
 
@@ -217,7 +256,7 @@ object ModelDownloaderManager {
 
                         val currentTime = System.currentTimeMillis()
                         if (currentTime - lastUpdateTime >= 500) {
-                            val progress = if (contentLength > 0) ((downloadedBytes * 100) / contentLength).toInt() else 0
+                            val progress = if (totalLength > 0) ((downloadedBytes * 100) / totalLength).toInt().coerceIn(0, 100) else 0
                             val elapsed = (currentTime - lastUpdateTime) / 1000.0
                             if (elapsed > 0) {
                                 speedBytesPerSec = ((downloadedBytes - lastUpdateBytes) / elapsed).toLong()
@@ -229,17 +268,17 @@ object ModelDownloaderManager {
                                 isDownloading = true,
                                 progressPercent = progress,
                                 bytesDownloaded = downloadedBytes,
-                                totalBytes = contentLength,
+                                totalBytes = totalLength,
                                 speedBytesPerSec = speedBytesPerSec
                             )
 
                             val speedMb = speedBytesPerSec / (1024.0 * 1024.0)
                             val downloadedMb = downloadedBytes / (1024 * 1024)
-                            val totalMb = contentLength / (1024 * 1024)
+                            val totalMb = totalLength / (1024 * 1024)
                             val statusText = if (totalMb > 0) {
                                 "$downloadedMb MB / $totalMb MB (%.1f MB/s)".format(speedMb)
                             } else {
-                                "$downloadedMb MB downloaded"
+                                "$downloadedMb MB (%.1f MB/s)".format(speedMb)
                             }
 
                             showNotification(
@@ -259,18 +298,18 @@ object ModelDownloaderManager {
                 }
             }
 
-            if (contentLength > 0 && tempFile.length() != contentLength) {
-                tempFile.delete()
-                throw IOException("File size mismatch. Expected ${contentLength / (1024 * 1024)} MB, got ${tempFile.length() / (1024 * 1024)} MB")
+            if (totalLength > 0 && tempFile.length() < totalLength) {
+                throw IOException("Incomplete download (${tempFile.length() / (1024 * 1024)} MB of ${totalLength / (1024 * 1024)} MB)")
             }
 
             if (targetFile.exists()) targetFile.delete()
             if (!tempFile.renameTo(targetFile)) {
-                throw IOException("Failed to rename temporary file to final target")
+                // Fallback copy if atomic rename fails across partitions
+                tempFile.copyTo(targetFile, overwrite = true)
+                tempFile.delete()
             }
 
         } catch (e: Exception) {
-            tempFile.delete()
             throw e
         }
     }
@@ -370,15 +409,17 @@ object ModelDownloaderManager {
     private fun extractUserFriendlyError(e: Exception): String {
         return when {
             e is CancellationException -> "Download cancelled"
+            e is UnknownHostException -> "No internet / DNS error. Cannot reach HuggingFace."
+            e is SocketTimeoutException -> "Connection timed out. Retrying..."
+            e is SSLException -> "Secure connection (SSL) error: ${e.localizedMessage}"
             e.message?.contains("HTTP 401") == true -> "Server authorization error (401). Please verify model link."
+            e.message?.contains("HTTP 403") == true -> "Access forbidden (403). Host denied access."
             e.message?.contains("HTTP 404") == true -> "Model file not found on server (404)."
             e.message?.contains("HTTP 429") == true -> "Server rate limit reached. Please wait a few minutes."
             e.message?.contains("Not enough storage") == true -> e.message ?: "Not enough storage space"
-            e.message?.contains("timeout", ignoreCase = true) == true -> "Download timed out. Check connection."
-            e.message?.contains("connect", ignoreCase = true) == true -> "Cannot connect to model host."
-            e.message?.contains("File size mismatch") == true -> "Download corrupted. Please try again."
-            e is IOException -> "Network error: ${e.message}"
-            else -> "Download failed: ${e.message}"
+            e.message?.contains("Permission denied", ignoreCase = true) == true -> "Storage permission error. App directory used."
+            e is IOException -> "Network error: ${e.localizedMessage ?: e.message}"
+            else -> "Download error: ${e.localizedMessage ?: e.message}"
         }
     }
 
