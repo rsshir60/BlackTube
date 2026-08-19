@@ -4,28 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@android:color/black"
     android:orientation="vertical">
 
-    <!-- Bulletproof Header Bar (Compatible with Dialog Themes) -->
+    <!-- Header Bar -->
     <LinearLayout
         android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="?android:attr/colorBackground"
+        android:background="@android:color/black"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp">
 
         <ImageView
             android:id="@+id/close_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/close"
-            android:padding="6dp"
+            android:padding="8dp"
             android:src="@drawable/ic_close"
-            app:tint="?android:attr/textColorPrimary" />
+            app:tint="#FFFFFF" />
 
         <org.schabi.newpipe.views.NewPipeTextView
             android:id="@+id/dialog_title"
@@ -35,127 +35,304 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@string/playlist_download_title"
-            android:textColor="?android:attr/textColorPrimary"
+            android:text="Download playlist"
+            android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <View
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/separator_color" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-    <!-- Control Header Row: Select All & Deselect All -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp">
+
+            <!-- 12dp Info Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_ai_panel"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/playlist_card_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="🎬 Psychology Explainer — Watch Later" />
+
+                <TextView
+                    android:id="@+id/playlist_card_stats"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="13sp"
+                    tools:text="24 videos • 2h 14m • ~1.8 GB" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_marginEnd="6dp"
+                        android:contentDescription="Storage space"
+                        android:src="@drawable/ic_sd_storage"
+                        app:tint="#4CAF50" />
+
+                    <TextView
+                        android:id="@+id/storage_available_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#4CAF50"
+                        android:textSize="12sp"
+                        tools:text="Free space: 12.4 GB" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Quality Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="Quality"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <!-- 2x2 Quality Radio Tiles Grid -->
+            <RadioGroup
+                android:id="@+id/quality_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radio_quality_1080p"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:checked="true"
+                        android:buttonTint="#E50914"
+                        android:drawableStart="@drawable/ic_movie"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:text="1080p"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/radio_quality_720p"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:buttonTint="#E50914"
+                        android:drawableStart="@drawable/ic_movie"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:text="720p"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radio_quality_480p"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:buttonTint="#E50914"
+                        android:drawableStart="@drawable/ic_movie"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:text="480p"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/radio_quality_audio"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:buttonTint="#E50914"
+                        android:drawableStart="@drawable/ic_headset"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:text="Audio Only"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </RadioGroup>
+
+            <!-- Toggles -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/switch_skip_downloaded_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Skip already downloaded"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_skip_downloaded"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    app:thumbTint="#E50914"
+                    app:trackTint="#66E50914" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Wi-Fi only"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_wifi_only"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    app:thumbTint="#E50914"
+                    app:trackTint="#66E50914" />
+            </LinearLayout>
+
+            <!-- Video Items Section Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/select_all_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:buttonTint="#E50914"
+                    android:text="@string/playlist_download_select_all"
+                    android:textColor="#FFFFFF" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/selected_count_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#E50914"
+                    android:textSize="13sp"
+                    tools:text="15 of 15 selected" />
+            </LinearLayout>
+
+            <!-- Video List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/items_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="6dp"
+                android:nestedScrollingEnabled="true"
+                tools:listitem="@layout/list_playlist_download_item" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Action Row: Cancel + Filled Red Pill CTA -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorBackground"
+        android:background="#0A0A0A"
+        android:elevation="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp">
+        android:paddingVertical="12dp">
 
-        <CheckBox
-            android:id="@+id/select_all_checkbox"
+        <Button
+            android:id="@+id/btn_cancel_download"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/playlist_download_select_all"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:text="Cancel"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp" />
 
         <View
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_weight="1" />
 
-        <org.schabi.newpipe.views.NewPipeTextView
-            android:id="@+id/selected_count_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="?attr/colorAccent"
-            android:textSize="14sp"
-            tools:text="15 of 15 selected" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/separator_color" />
-
-    <!-- Playlist Video Items List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/items_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:scrollbars="vertical"
-        tools:listitem="@layout/list_playlist_download_item" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/separator_color" />
-
-    <!-- Bottom Controls: Quality Spinner + Download Button -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/colorBackground"
-        android:elevation="8dp"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <!-- Storage Footprint Pre-Flight Estimation Row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <org.schabi.newpipe.views.NewPipeTextView
-                android:id="@+id/storage_estimate_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="12sp"
-                tools:text="📦 Est. Size: ~450 MB" />
-
-            <org.schabi.newpipe.views.NewPipeTextView
-                android:id="@+id/storage_available_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/colorAccent"
-                android:textSize="12sp"
-                tools:text="💾 18.5 GB free" />
-        </LinearLayout>
-
-        <org.schabi.newpipe.views.NewPipeTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="@string/default_resolution_title"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
-
-        <Spinner
-            android:id="@+id/quality_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="12dp" />
-
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/download_button"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="@string/download_playlist"
-            android:textSize="16sp"
-            app:cornerRadius="12dp"
-            app:icon="@drawable/ic_file_download"
-            app:iconGravity="textStart" />
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:minWidth="160dp"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/bg_bt_ai_primary_button"
+            android:text="Download 15 videos"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

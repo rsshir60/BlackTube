@@ -8,10 +8,10 @@ import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.Spinner;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,14 +21,12 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
-
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
+import org.schabi.newpipe.util.Localization;
 import org.schabi.newpipe.util.ThemeHelper;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,10 +50,11 @@ public class PlaylistDownloadDialog extends DialogFragment {
     private PlaylistDownloadAdapter adapter;
     private CheckBox selectAllCheckBox;
     private TextView selectedCountText;
-    private TextView storageEstimateText;
+    private TextView playlistCardTitle;
+    private TextView playlistCardStats;
     private TextView storageAvailableText;
-    private Spinner qualitySpinner;
-    private MaterialButton downloadButton;
+    private RadioGroup qualityRadioGroup;
+    private Button downloadButton;
 
     private PlaylistDownloadManager.QualityMode selectedQualityMode = PlaylistDownloadManager.QualityMode.BEST_VIDEO;
 
@@ -101,16 +100,22 @@ public class PlaylistDownloadDialog extends DialogFragment {
             closeButton.setOnClickListener(v -> dismiss());
         }
 
-        final TextView dialogTitleView = view.findViewById(R.id.dialog_title);
-        if (dialogTitleView != null && playlistTitle != null && !playlistTitle.isEmpty()) {
-            dialogTitleView.setText(playlistTitle);
+        final View cancelButton = view.findViewById(R.id.btn_cancel_download);
+        if (cancelButton != null) {
+            cancelButton.setOnClickListener(v -> dismiss());
+        }
+
+        playlistCardTitle = view.findViewById(R.id.playlist_card_title);
+        playlistCardStats = view.findViewById(R.id.playlist_card_stats);
+        if (playlistCardTitle != null) {
+            final String title = (playlistTitle != null && !playlistTitle.isEmpty()) ? playlistTitle : "Playlist";
+            playlistCardTitle.setText("🎬 " + title);
         }
 
         selectAllCheckBox = view.findViewById(R.id.select_all_checkbox);
         selectedCountText = view.findViewById(R.id.selected_count_text);
-        storageEstimateText = view.findViewById(R.id.storage_estimate_text);
         storageAvailableText = view.findViewById(R.id.storage_available_text);
-        qualitySpinner = view.findViewById(R.id.quality_spinner);
+        qualityRadioGroup = view.findViewById(R.id.quality_radio_group);
         downloadButton = view.findViewById(R.id.download_button);
 
         final RecyclerView recyclerView = view.findViewById(R.id.items_recycler_view);
@@ -125,7 +130,7 @@ public class PlaylistDownloadDialog extends DialogFragment {
             adapter.setSelectAll(selectAllCheckBox.isChecked());
         });
 
-        setupQualitySpinner();
+        setupQualityRadios(view);
         updateSelectionUI(adapter.getSelectedCount(), streamItems.size());
 
         downloadButton.setOnClickListener(v -> {
@@ -146,51 +151,37 @@ public class PlaylistDownloadDialog extends DialogFragment {
         });
     }
 
-    private void setupQualitySpinner() {
-        final String[] qualityOptions = new String[]{
-                getString(R.string.playlist_download_quality_best),
-                getString(R.string.playlist_download_quality_720p),
-                getString(R.string.playlist_download_quality_480p),
-                getString(R.string.playlist_download_quality_360p),
-                getString(R.string.playlist_download_quality_audio)
-        };
+    private void setupQualityRadios(final View view) {
+        final RadioButton r1080 = view.findViewById(R.id.radio_quality_1080p);
+        final RadioButton r720 = view.findViewById(R.id.radio_quality_720p);
+        final RadioButton r480 = view.findViewById(R.id.radio_quality_480p);
+        final RadioButton rAudio = view.findViewById(R.id.radio_quality_audio);
 
-        final ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                qualityOptions
-        );
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        qualitySpinner.setAdapter(spinnerAdapter);
+        final View.OnClickListener radioListener = v -> {
+            r1080.setChecked(v == r1080);
+            r720.setChecked(v == r720);
+            r480.setChecked(v == r480);
+            rAudio.setChecked(v == rAudio);
 
-        qualitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
-                switch (position) {
-                    case 0:
-                        selectedQualityMode = PlaylistDownloadManager.QualityMode.BEST_VIDEO;
-                        break;
-                    case 1:
-                        selectedQualityMode = PlaylistDownloadManager.QualityMode.VIDEO_720P;
-                        break;
-                    case 2:
-                        selectedQualityMode = PlaylistDownloadManager.QualityMode.VIDEO_480P;
-                        break;
-                    case 3:
-                        selectedQualityMode = PlaylistDownloadManager.QualityMode.VIDEO_360P;
-                        break;
-                    case 4:
-                        selectedQualityMode = PlaylistDownloadManager.QualityMode.AUDIO_ONLY;
-                        break;
-                }
-                if (adapter != null) {
-                    updateSelectionUI(adapter.getSelectedCount(), streamItems.size());
-                }
+            if (v == r1080) {
+                selectedQualityMode = PlaylistDownloadManager.QualityMode.BEST_VIDEO;
+            } else if (v == r720) {
+                selectedQualityMode = PlaylistDownloadManager.QualityMode.VIDEO_720P;
+            } else if (v == r480) {
+                selectedQualityMode = PlaylistDownloadManager.QualityMode.VIDEO_480P;
+            } else if (v == rAudio) {
+                selectedQualityMode = PlaylistDownloadManager.QualityMode.AUDIO_ONLY;
             }
 
-            @Override
-            public void onNothingSelected(final AdapterView<?> parent) { }
-        });
+            if (adapter != null) {
+                updateSelectionUI(adapter.getSelectedCount(), streamItems.size());
+            }
+        };
+
+        r1080.setOnClickListener(radioListener);
+        r720.setOnClickListener(radioListener);
+        r480.setOnClickListener(radioListener);
+        rAudio.setOnClickListener(radioListener);
     }
 
     private void updateSelectionUI(final int selectedCount, final int totalCount) {
@@ -206,14 +197,25 @@ public class PlaylistDownloadDialog extends DialogFragment {
         final long estimatedBytes = calculateEstimatedBytes(totalSeconds, selectedQualityMode);
         final long availableBytes = getAvailableStorageBytes();
 
-        if (storageEstimateText != null && getContext() != null) {
+        if (playlistCardStats != null && getContext() != null) {
             final String formattedEst = Formatter.formatFileSize(getContext(), estimatedBytes);
-            storageEstimateText.setText(getString(R.string.playlist_download_est_size, formattedEst));
+            final String durationStr = Localization.getDurationString(totalSeconds);
+            playlistCardStats.setText(String.format(java.util.Locale.getDefault(),
+                    "%d videos • %s • ~%s", selectedCount, durationStr, formattedEst));
         }
 
         if (storageAvailableText != null && getContext() != null) {
             final String formattedAvail = Formatter.formatFileSize(getContext(), availableBytes);
-            storageAvailableText.setText(getString(R.string.playlist_download_available_space, formattedAvail));
+            if (estimatedBytes > 0 && availableBytes > 0 && estimatedBytes > availableBytes) {
+                final String formattedEst = Formatter.formatFileSize(getContext(), estimatedBytes);
+                storageAvailableText.setText(String.format(java.util.Locale.getDefault(),
+                        "Not enough space. Need %s, have %s", formattedEst, formattedAvail));
+                storageAvailableText.setTextColor(0xFFFFC107); // Warning Amber
+            } else {
+                storageAvailableText.setText(String.format(java.util.Locale.getDefault(),
+                        "Free space: %s", formattedAvail));
+                storageAvailableText.setTextColor(0xFF4CAF50); // Success Green
+            }
         }
 
         if (downloadButton != null) {
@@ -221,7 +223,12 @@ public class PlaylistDownloadDialog extends DialogFragment {
                 downloadButton.setText(R.string.playlist_download_insufficient_storage);
                 downloadButton.setEnabled(false);
             } else {
-                downloadButton.setText(getString(R.string.playlist_download_btn, selectedCount));
+                if (selectedCount == 1) {
+                    downloadButton.setText("Download 1 video");
+                } else {
+                    downloadButton.setText(String.format(java.util.Locale.getDefault(),
+                            "Download %d videos", selectedCount));
+                }
                 downloadButton.setEnabled(selectedCount > 0);
             }
         }
