@@ -214,6 +214,55 @@
                     android:progress="3" />
             </LinearLayout>
 
+            <!-- Clean Video / Cut Sponsors Option -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_prompt_input_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="12dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_sponsor_block_enable"
+                    app:tint="#00E676" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <org.schabi.newpipe.views.NewPipeTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Clean Video (Cut Sponsors)"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <org.schabi.newpipe.views.NewPipeTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Automatically cuts sponsor segments losslessly"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_cut_sponsors"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    app:thumbTint="#00E676"
+                    app:trackTint="#6600E676" />
+            </LinearLayout>
+
             <org.schabi.newpipe.views.NewPipeTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

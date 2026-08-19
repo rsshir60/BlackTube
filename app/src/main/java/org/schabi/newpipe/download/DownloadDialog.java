@@ -353,6 +353,12 @@ public class DownloadDialog extends DialogFragment
 
         prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
 
+        final boolean defaultCutSponsors = prefs.getBoolean("pref_key_sponsor_block_cut_downloads", false);
+        dialogBinding.switchCutSponsors.setChecked(defaultCutSponsors);
+        dialogBinding.switchCutSponsors.setOnCheckedChangeListener((btn, isChecked) -> {
+            prefs.edit().putBoolean("pref_key_sponsor_block_cut_downloads", isChecked).apply();
+        });
+
         final int threads = prefs.getInt(getString(R.string.default_download_threads), 3);
         dialogBinding.threadsCount.setText(String.valueOf(threads));
         dialogBinding.threads.setProgress(threads - 1);

@@ -15,9 +15,11 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -131,6 +133,17 @@ public class PlaylistDownloadDialog extends DialogFragment {
         });
 
         setupQualityRadios(view);
+
+        final androidx.appcompat.widget.SwitchCompat switchCutSponsors = view.findViewById(R.id.switch_cut_sponsors_playlist);
+        if (switchCutSponsors != null) {
+            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            final boolean defaultCut = prefs.getBoolean("pref_key_sponsor_block_cut_downloads", false);
+            switchCutSponsors.setChecked(defaultCut);
+            switchCutSponsors.setOnCheckedChangeListener((btn, isChecked) -> {
+                prefs.edit().putBoolean("pref_key_sponsor_block_cut_downloads", isChecked).apply();
+            });
+        }
+
         updateSelectionUI(adapter.getSelectedCount(), streamItems.size());
 
         downloadButton.setOnClickListener(v -> {

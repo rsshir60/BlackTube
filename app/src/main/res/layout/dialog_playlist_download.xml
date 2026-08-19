@@ -254,6 +254,29 @@
                     app:trackTint="#66E50914" />
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Clean Video (Cut Sponsors)"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_cut_sponsors_playlist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    app:thumbTint="#00E676"
+                    app:trackTint="#6600E676" />
+            </LinearLayout>
+
             <!-- Video Items Section Header -->
             <LinearLayout
                 android:layout_width="match_parent"

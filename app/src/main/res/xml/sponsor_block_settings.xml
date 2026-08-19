@@ -66,6 +66,14 @@
             android:title="@string/settings_category_sponsor_block_categories_title"
             android:summary="@string/settings_category_sponsor_block_categories_summary"/>
 
+        <SwitchPreference
+            app:iconSpaceReserved="false"
+            android:dependency="@string/sponsor_block_enable_key"
+            android:defaultValue="false"
+            android:key="pref_key_sponsor_block_cut_downloads"
+            android:summary="Automatically trim sponsored segments from downloaded video files losslessly"
+            android:title="Always cut sponsors on download"/>
+
         <Preference
             app:iconSpaceReserved="false"
             android:dependency="@string/sponsor_block_enable_key"
