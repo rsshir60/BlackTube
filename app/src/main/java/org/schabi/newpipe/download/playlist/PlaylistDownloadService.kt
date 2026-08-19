@@ -6,9 +6,11 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import org.schabi.newpipe.MainActivity
 import org.schabi.newpipe.R
@@ -23,9 +25,6 @@ class PlaylistDownloadService : LifecycleService() {
 
         private const val EXTRA_BATCH_ID = "batch_id"
         private const val EXTRA_PLAYLIST_ID = "playlist_id"
-        private const val ACTION_PAUSE = "pause"
-        private const val ACTION_RESUME = "resume"
-        private const val ACTION_CANCEL = "cancel"
 
         fun start(context: Context, batchId: String, playlistId: String) {
             val intent = Intent(context, PlaylistDownloadService::class.java).apply {
@@ -49,7 +48,7 @@ class PlaylistDownloadService : LifecycleService() {
                 val notificationManager = context.getSystemService(NotificationManager::class.java)
                 notificationManager?.notify(NOTIFICATION_ID, notification)
             } catch (e: Exception) {
-                // Ignore notification errors
+                // Ignore notification errors / permission revocation on Android 13+
             }
         }
 
@@ -95,9 +94,18 @@ class PlaylistDownloadService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        val initialProgress = BatchProgress(0, 0, 0, 0, 0)
-        val notification = buildNotification(this, initialProgress)
-        startForeground(NOTIFICATION_ID, notification)
+        try {
+            val initialProgress = BatchProgress(0, 0, 0, 0, 0)
+            val notification = buildNotification(this, initialProgress)
+            val serviceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            } else {
+                0
+            }
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, serviceType)
+        } catch (e: Exception) {
+            // Ignore startForeground exceptions on edge devices
+        }
 
         return START_NOT_STICKY
     }

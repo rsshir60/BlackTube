@@ -23,6 +23,9 @@ interface PlaylistDownloadDao {
     @Delete
     suspend fun delete(item: PlaylistDownloadEntity)
 
+    @Query("DELETE FROM playlist_downloads WHERE id = :id")
+    suspend fun deleteById(id: String)
+
     @Query("DELETE FROM playlist_downloads WHERE batch_id = :batchId")
     suspend fun deleteBatch(batchId: String)
 

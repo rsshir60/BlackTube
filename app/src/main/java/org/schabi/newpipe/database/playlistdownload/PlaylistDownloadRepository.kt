@@ -111,10 +111,7 @@ class PlaylistDownloadRepository(
     }
 
     suspend fun removeItem(id: String) = withContext(Dispatchers.IO) {
-        val item = dao.getNextItem(listOf(DownloadStatus.COMPLETED, DownloadStatus.FAILED, DownloadStatus.CANCELLED))
-        if (item != null) {
-            dao.delete(item)
-        }
+        dao.deleteById(id)
     }
 }
 

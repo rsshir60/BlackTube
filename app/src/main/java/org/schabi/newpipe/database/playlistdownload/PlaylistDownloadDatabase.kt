@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
 @Database(
     entities = [PlaylistDownloadEntity::class],
     version = 1,
     exportSchema = false
 )
+@TypeConverters(PlaylistDownloadConverters::class)
 abstract class PlaylistDownloadDatabase : RoomDatabase() {
     abstract fun playlistDownloadDao(): PlaylistDownloadDao
 
