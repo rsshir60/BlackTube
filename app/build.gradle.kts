@@ -66,9 +66,18 @@ configure<ApplicationExtension> {
         if (keystoreFile.exists()) {
             create("release") {
                 storeFile = keystoreFile
-                storePassword = System.getenv("BLACKTUBE_STORE_PASS") ?: "android"
-                keyAlias = System.getenv("BLACKTUBE_KEY_ALIAS") ?: "release"
-                keyPassword = System.getenv("BLACKTUBE_KEY_PASS") ?: "android"
+                storePassword = (project.findProperty("KEYSTORE_PASSWORD") as? String)
+                    ?: System.getenv("BLACKTUBE_STORE_PASS")
+                    ?: System.getenv("KEYSTORE_PASSWORD")
+                    ?: "android"
+                keyAlias = (project.findProperty("KEY_ALIAS") as? String)
+                    ?: System.getenv("BLACKTUBE_KEY_ALIAS")
+                    ?: System.getenv("KEY_ALIAS")
+                    ?: "release"
+                keyPassword = (project.findProperty("KEY_PASSWORD") as? String)
+                    ?: System.getenv("BLACKTUBE_KEY_PASS")
+                    ?: System.getenv("KEY_PASSWORD")
+                    ?: "android"
             }
         }
     }

@@ -2,6 +2,7 @@
 
 ## Helps debug release versions
 -dontobfuscate
+-keepattributes SourceFile,LineNumberTable
 
 ## Rules for NewPipeExtractor
 -keep class org.schabi.newpipe.extractor.timeago.patterns.** { *; }
@@ -22,8 +23,9 @@
 # See https://github.com/jhy/jsoup/issues/2459 - may be resolved in future, then this may be removed
 -dontwarn com.google.re2j.**
 
-## Rules for ExoPlayer
+## Rules for ExoPlayer & Media3
 -keep class com.google.android.exoplayer2.** { *; }
+-keep class androidx.media3.** { *; }
 
 ## Rules for OkHttp. Copy pasted from https://github.com/square/okhttp
 -dontwarn okhttp3.**
@@ -43,4 +45,15 @@
 # Prevent R8 from stripping or renaming Protobuf internal fields
 -keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite {
     <fields>;
+}
+
+## ⚡ BlackTube AI & SLM Native Keep Rules
+-keep class com.blacktube.app.ai.** { *; }
+-keep class org.schabi.newpipe.ai.** { *; }
+-keep class org.schabi.newpipe.database.** { *; }
+-keep class com.google.ai.client.generativeai.** { *; }
+
+## ⚡ JNI Native Bridge Signatures
+-keepclasseswithmembernames class * {
+    native <methods>;
 }
