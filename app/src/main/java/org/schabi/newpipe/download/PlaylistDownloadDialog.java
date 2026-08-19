@@ -253,9 +253,18 @@ public class PlaylistDownloadDialog extends DialogFragment {
 
     private long getAvailableStorageBytes() {
         try {
-            final File path = Environment.getExternalStorageDirectory();
-            final StatFs stat = new StatFs(path.getPath());
-            return stat.getAvailableBytes();
+            File path = null;
+            if (getContext() != null) {
+                path = getContext().getExternalFilesDir(null);
+            }
+            if (path == null) {
+                path = Environment.getExternalStorageDirectory();
+            }
+            if (path != null) {
+                final StatFs stat = new StatFs(path.getPath());
+                return stat.getAvailableBytes();
+            }
+            return 0L;
         } catch (final Exception e) {
             return 0L;
         }
