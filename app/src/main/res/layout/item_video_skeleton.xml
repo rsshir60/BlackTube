@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/skeleton_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Thumbnail skeleton -->
+    <View
+        android:id="@+id/skeleton_thumbnail"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:background="@drawable/bg_skeleton_block" />
+
+    <!-- Title skeleton -->
+    <View
+        android:id="@+id/skeleton_title"
+        android:layout_width="240dp"
+        android:layout_height="14dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_skeleton_block" />
+
+    <!-- Channel name skeleton -->
+    <View
+        android:id="@+id/skeleton_channel"
+        android:layout_width="140dp"
+        android:layout_height="10dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_skeleton_block" />
+</LinearLayout>
