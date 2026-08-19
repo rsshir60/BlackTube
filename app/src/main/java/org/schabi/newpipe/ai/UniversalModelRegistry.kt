@@ -23,7 +23,7 @@ object UniversalModelRegistry {
         id = "phi_4_mini_3_8b",
         name = "Phi-4 Mini 3.8B (Flagship Offline SLM)",
         description = "Microsoft's flagship 3.8B SLM. Provides high-accuracy offline video summaries and Q&A.",
-        downloadUrl = "https://huggingface.co/bartowski/Phi-4-mini-instruct-GGUF/resolve/main/Phi-4-mini-instruct-Q4_K_M.gguf?download=true",
+        downloadUrl = "https://huggingface.co/unsloth/Phi-4-mini-instruct-GGUF/resolve/main/Phi-4-mini-instruct-Q4_K_M.gguf?download=true",
         fileName = "Phi-4-mini-instruct-Q4_K_M.gguf",
         fileSizeMB = 2490,
         minRamGB = 4,
