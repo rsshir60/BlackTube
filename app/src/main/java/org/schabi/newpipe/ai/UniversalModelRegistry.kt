@@ -18,6 +18,7 @@ data class LocalModelInfo(
 object UniversalModelRegistry {
     const val PREF_ACTIVE_MODEL_ID = "pref_key_active_local_model_id"
 
+    @JvmField
     val DEFAULT_MODEL = LocalModelInfo(
         id = "phi_4_mini_3_8b",
         name = "Phi-4 Mini 3.8B (Flagship Offline SLM)",
