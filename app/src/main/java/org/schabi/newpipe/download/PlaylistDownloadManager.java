@@ -6,12 +6,15 @@ import static org.schabi.newpipe.util.ListHelper.getStreamsOfSpecifiedDelivery;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
 
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.extractor.MediaFormat;
@@ -28,9 +31,9 @@ import org.schabi.newpipe.util.ListHelper;
 import org.schabi.newpipe.util.SecondaryStreamHelper;
 import us.shandian.giga.get.MissionRecoveryInfo;
 import us.shandian.giga.postprocessing.Postprocessing;
+import us.shandian.giga.service.DownloadManager;
 import us.shandian.giga.service.DownloadManagerService;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -160,6 +163,7 @@ public class PlaylistDownloadManager {
         final boolean isAudioOnly = currentQualityMode == QualityMode.AUDIO_ONLY;
         final char kind = isAudioOnly ? 'a' : 'v';
         final int threads = isAudioOnly ? 2 : 4;
+        final String tag = isAudioOnly ? DownloadManager.TAG_AUDIO : DownloadManager.TAG_VIDEO;
 
         String[] urls;
         String psName = null;
@@ -185,6 +189,12 @@ public class PlaylistDownloadManager {
             mime = audioStream.getFormat().getMimeType();
             filename = indexPrefix + cleanTitle + "." + audioStream.getFormat().getSuffix();
             nearLength = audioStream.getAverageBitrate() > 0 ? (info.getDuration() * audioStream.getAverageBitrate() / 8) : 0;
+
+            if (audioStream.getFormat() == MediaFormat.M4A) {
+                psName = Postprocessing.ALGORITHM_M4A_NO_DASH;
+            } else if (audioStream.getFormat() == MediaFormat.WEBMA_OPUS) {
+                psName = Postprocessing.ALGORITHM_OGG_FROM_WEBM_DEMUXER;
+            }
         } else {
             final List<VideoStream> videoStreams = ListHelper.getSortedStreamVideosList(
                     context,
@@ -211,7 +221,6 @@ public class PlaylistDownloadManager {
             filename = indexPrefix + cleanTitle + "." + selectedVideo.getFormat().getSuffix();
 
             if (selectedVideo.isVideoOnly()) {
-                // Secondary stream muxing required for 1080p, 1440p, 4K
                 final AudioStream audioStream = SecondaryStreamHelper.getAudioStreamFor(context, audioStreams, selectedVideo);
                 if (audioStream != null) {
                     urls = new String[]{ selectedVideo.getContent(), audioStream.getContent() };
@@ -233,15 +242,32 @@ public class PlaylistDownloadManager {
             }
         }
 
-        final File baseDownloadDir = new File(context.getExternalFilesDir(null), "Download");
-        final String sanitizedFolder = FilenameUtils.createFilename(context, currentPlaylistTitle);
-        final File playlistFolder = new File(baseDownloadDir, "Playlists" + File.separator + sanitizedFolder);
-        if (!playlistFolder.exists()) {
-            playlistFolder.mkdirs();
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final int prefKey = isAudioOnly ? R.string.download_path_audio_key : R.string.download_path_video_key;
+        final String savedPath = prefs.getString(context.getString(prefKey), null);
+
+        StoredDirectoryHelper mainStorage = null;
+        if (savedPath != null && !savedPath.isEmpty()) {
+            try {
+                mainStorage = new StoredDirectoryHelper(context, Uri.parse(savedPath), tag);
+            } catch (final Exception e) {
+                Log.w(TAG, "Failed to open configured storage for " + tag + ": " + savedPath, e);
+            }
         }
 
-        final StoredDirectoryHelper dirHelper = new StoredDirectoryHelper(context, Uri.fromFile(playlistFolder), "playlist_batch");
-        final StoredFileHelper storage = dirHelper.createFile(filename, mime);
+        StoredFileHelper storage;
+        if (mainStorage != null) {
+            storage = mainStorage.createFile(filename, mime);
+        } else {
+            storage = new StoredFileHelper(null, filename, mime, tag);
+            if (!storage.existsAsFile()) {
+                storage.create();
+            }
+        }
+
+        if (storage == null) {
+            throw new IllegalStateException("Failed to create target storage file: " + filename);
+        }
 
         DownloadManagerService.startMission(context, urls, storage, kind, threads,
                 info, psName, psArgs, nearLength, new ArrayList<>(recoveryInfo));

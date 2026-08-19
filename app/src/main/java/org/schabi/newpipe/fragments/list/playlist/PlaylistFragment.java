@@ -266,14 +266,22 @@ public class PlaylistFragment extends BaseListInfoFragment<StreamInfoItem, Playl
     }
 
     private void openPlaylistDownloadDialog() {
-        if (infoListAdapter == null) return;
         final List<StreamInfoItem> items = new ArrayList<>();
-        for (final InfoItem i : infoListAdapter.getItemsList()) {
-            if (i instanceof StreamInfoItem) {
-                items.add((StreamInfoItem) i);
+        if (currentInfo != null && currentInfo.getRelatedItems() != null && !currentInfo.getRelatedItems().isEmpty()) {
+            items.addAll(currentInfo.getRelatedItems());
+        } else if (infoListAdapter != null && infoListAdapter.getItemsList() != null) {
+            for (final InfoItem i : infoListAdapter.getItemsList()) {
+                if (i instanceof StreamInfoItem) {
+                    items.add((StreamInfoItem) i);
+                }
             }
         }
-        if (items.isEmpty()) return;
+        if (items.isEmpty()) {
+            if (getContext() != null) {
+                android.widget.Toast.makeText(getContext(), R.string.no_videos_selected, android.widget.Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         final String playlistTitle = currentInfo != null ? currentInfo.getName() : "";
         PlaylistDownloadDialog.newInstance(items, playlistTitle)
                 .show(getChildFragmentManager(), "PlaylistDownloadDialog");

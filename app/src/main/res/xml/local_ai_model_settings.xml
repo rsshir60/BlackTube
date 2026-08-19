@@ -1,25 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:title="Universal Local Model Hub">
+    android:title="Offline Local AI Engine">
 
     <!-- ══════════════════════════════════════════════════════════
-         SECTION 1: Model Selection & Status
+         SECTION 1: Single Default Local Model
          ══════════════════════════════════════════════════════════ -->
 
     <PreferenceCategory
         android:layout="@layout/settings_category_header_layout"
-        android:title="🤖  Local Model Catalog"
+        android:title="🤖  Offline Local SLM Engine"
         app:iconSpaceReserved="true">
 
-        <ListPreference
-            android:defaultValue="phi_5_1_3b"
-            android:entries="@array/local_ai_model_entries"
-            android:entryValues="@array/local_ai_model_values"
+        <Preference
             android:icon="@drawable/ic_sparkles_modern"
-            android:key="pref_key_active_local_model_id"
-            android:summary="Select active local model for airplane-mode summaries"
-            android:title="Active Local LLM Model"
+            android:key="pref_key_local_ai_model_info"
+            android:summary="Microsoft Phi-4 Mini 3.8B (Q4_K_M • 2.4 GB). Runs 100% locally on-device without internet."
+            android:title="Model: Phi-4 Mini 3.8B"
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />
 
@@ -34,27 +31,27 @@
         <Preference
             android:icon="@drawable/ic_file_download"
             android:key="pref_key_local_ai_download"
-            android:summary="Download active model from HuggingFace for offline summaries"
-            android:title="Download Active Model"
+            android:summary="Download Phi-4 Mini from HuggingFace for 100% offline summaries"
+            android:title="Download Offline Model (2.4 GB)"
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />
 
     </PreferenceCategory>
 
     <!-- ══════════════════════════════════════════════════════════
-         SECTION 2: Hardware & Specs
+         SECTION 2: Hardware & Privacy
          ══════════════════════════════════════════════════════════ -->
 
     <PreferenceCategory
         android:layout="@layout/settings_category_header_layout"
-        android:title="⚡  Hardware &amp; Architecture"
+        android:title="🔒  Privacy &amp; System Demands"
         app:iconSpaceReserved="true">
 
         <Preference
             android:icon="@drawable/ic_settings"
             android:selectable="false"
-            android:summary="Phi-5 1.3B (3GB+ RAM) • Qwen 1.5B (4GB+ RAM) • Phi-4 3.8B (6GB+ RAM). Runs 100% locally via GGUF neural weights."
-            android:title="Hardware Recommendation"
+            android:summary="Requires 4GB+ device RAM. Zero network requests during inference. All processing runs directly on your CPU/GPU neural cores."
+            android:title="Hardware &amp; Zero-Telemetry"
             app:iconSpaceReserved="true"
             app:singleLineTitle="false" />
 

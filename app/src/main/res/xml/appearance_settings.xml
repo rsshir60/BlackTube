@@ -68,22 +68,6 @@
             app:iconSpaceReserved="false"
             app:useSimpleSummaryProvider="true" />
 
-        <Preference
-            android:key="@string/pref_key_import_custom_font"
-            android:summary="@string/import_custom_font_summary"
-            android:title="@string/import_custom_font_title"
-            android:icon="@drawable/ic_file_download"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
-
-        <Preference
-            android:key="@string/pref_key_remove_custom_font"
-            android:summary="@string/remove_custom_font_summary"
-            android:title="@string/remove_custom_font_title"
-            android:icon="@drawable/ic_delete"
-            app:singleLineTitle="false"
-            app:iconSpaceReserved="false" />
-
     </PreferenceCategory>
 
 </PreferenceScreen>
