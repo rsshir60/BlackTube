@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -35,6 +37,7 @@ import us.shandian.giga.service.DownloadManager;
 import us.shandian.giga.service.DownloadManagerService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -66,9 +69,10 @@ public class PlaylistDownloadManager {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
     private boolean isProcessing = false;
-    private final List<PlaylistDownloadEntry> queue = new ArrayList<>();
+    private final List<PlaylistDownloadEntry> queue = Collections.synchronizedList(new ArrayList<>());
     private QualityMode currentQualityMode = QualityMode.BEST_VIDEO;
     private String currentPlaylistTitle = "Playlist";
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private PlaylistDownloadManager() { }
 
@@ -80,6 +84,7 @@ public class PlaylistDownloadManager {
             return;
         }
 
+        final Context appContext = context.getApplicationContext();
         this.currentQualityMode = qualityMode;
         if (playlistTitle != null && !playlistTitle.trim().isEmpty()) {
             this.currentPlaylistTitle = playlistTitle.trim();
@@ -87,25 +92,27 @@ public class PlaylistDownloadManager {
             this.currentPlaylistTitle = "Playlist";
         }
 
-        for (final StreamInfoItem item : items) {
-            queue.add(new PlaylistDownloadEntry(item));
+        synchronized (queue) {
+            for (final StreamInfoItem item : items) {
+                queue.add(new PlaylistDownloadEntry(item));
+            }
         }
 
-        createNotificationChannel(context);
+        createNotificationChannel(appContext);
 
-        Toast.makeText(context,
-                context.getString(R.string.playlist_download_starting),
-                Toast.LENGTH_SHORT).show();
+        mainHandler.post(() -> Toast.makeText(appContext,
+                appContext.getString(R.string.playlist_download_starting),
+                Toast.LENGTH_SHORT).show());
 
         if (!isProcessing) {
-            processNextInQueue(context.getApplicationContext());
+            processNextInQueue(appContext);
         }
     }
 
     private void processNextInQueue(final Context context) {
         PlaylistDownloadEntry nextEntry = null;
 
-        synchronized (this) {
+        synchronized (queue) {
             for (final PlaylistDownloadEntry entry : queue) {
                 if (entry.getState() == PlaylistDownloadEntry.State.PENDING) {
                     nextEntry = entry;
@@ -115,7 +122,10 @@ public class PlaylistDownloadManager {
 
             if (nextEntry == null) {
                 isProcessing = false;
-                showCompletionNotification(context);
+                final int completedCount = queue.size();
+                showCompletionNotification(context, completedCount);
+                queue.clear();
+                disposables.clear();
                 return;
             }
 
@@ -124,14 +134,25 @@ public class PlaylistDownloadManager {
         }
 
         final PlaylistDownloadEntry currentEntry = nextEntry;
-        final int currentIdx = queue.indexOf(currentEntry) + 1;
-        final int totalCount = queue.size();
+        final int currentIdx;
+        final int totalCount;
+        synchronized (queue) {
+            currentIdx = queue.indexOf(currentEntry) + 1;
+            totalCount = queue.size();
+        }
 
         updateNotification(context,
                 context.getString(R.string.playlist_download_resolving, currentIdx, totalCount),
                 currentEntry.getTitle(), currentIdx, totalCount);
 
         final StreamInfoItem item = currentEntry.getStreamItem();
+        if (item == null || item.getUrl() == null) {
+            currentEntry.setState(PlaylistDownloadEntry.State.ERROR);
+            currentEntry.setErrorMessage("Invalid stream item URL");
+            processNextInQueue(context);
+            return;
+        }
+
         disposables.add(ExtractorHelper.getStreamInfo(context, item.getServiceId(), item.getUrl(), false)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -303,28 +324,36 @@ public class PlaylistDownloadManager {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager == null) return;
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_file_download)
-                .setContentTitle(title)
-                .setContentText(contentText)
-                .setProgress(total, current, false)
-                .setOngoing(true);
+        try {
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_file_download)
+                    .setContentTitle(title)
+                    .setContentText(contentText)
+                    .setProgress(total, current, false)
+                    .setOngoing(true);
 
-        manager.notify(NOTIFICATION_ID, builder.build());
+            manager.notify(NOTIFICATION_ID, builder.build());
+        } catch (final SecurityException e) {
+            Log.w(TAG, "Missing notification permission on Android 13+", e);
+        }
     }
 
-    private void showCompletionNotification(final Context context) {
+    private void showCompletionNotification(final Context context, final int count) {
         final NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager == null) return;
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_file_download)
-                .setContentTitle(context.getString(R.string.playlist_download_completed))
-                .setContentText(context.getString(R.string.playlist_download_progress, queue.size(), queue.size()))
-                .setOngoing(false)
-                .setAutoCancel(true);
+        try {
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_file_download)
+                    .setContentTitle(context.getString(R.string.playlist_download_completed))
+                    .setContentText(context.getString(R.string.playlist_download_progress, count, count))
+                    .setOngoing(false)
+                    .setAutoCancel(true);
 
-        manager.notify(NOTIFICATION_ID, builder.build());
+            manager.notify(NOTIFICATION_ID, builder.build());
+        } catch (final SecurityException e) {
+            Log.w(TAG, "Missing notification permission on Android 13+", e);
+        }
     }
 }
