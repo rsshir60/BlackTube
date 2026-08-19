@@ -29,12 +29,19 @@ public class LocalAiModelSettingsFragment extends BasePreferenceFragment {
                 final LocalModelInfo activeModel = UniversalModelRegistry.DEFAULT_MODEL;
                 final boolean isDownloaded = UniversalModelRegistry.INSTANCE.isModelDownloaded(requireContext(), activeModel);
                 if (isDownloaded) {
-                    final File modelFile = UniversalModelRegistry.INSTANCE.getModelFile(requireContext(), activeModel);
-                    if (modelFile.exists()) {
-                        modelFile.delete();
-                    }
-                    Toast.makeText(requireContext(), activeModel.getName() + " deleted from storage", Toast.LENGTH_SHORT).show();
-                    updateStatus(statusPref, downloadPref);
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle("Delete Offline Model")
+                            .setMessage("Are you sure you want to delete " + activeModel.getName() + " (" + activeModel.getFileSizeMB() + " MB) from device storage?")
+                            .setPositiveButton(R.string.delete, (dialog, which) -> {
+                                final File modelFile = UniversalModelRegistry.INSTANCE.getModelFile(requireContext(), activeModel);
+                                if (modelFile.exists()) {
+                                    modelFile.delete();
+                                }
+                                Toast.makeText(requireContext(), activeModel.getName() + " deleted from storage", Toast.LENGTH_SHORT).show();
+                                updateStatus(statusPref, downloadPref);
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
                 } else {
                     ModelDownloaderManager.INSTANCE.startModelDownload(requireContext(), activeModel);
                     Toast.makeText(requireContext(), "Downloading " + activeModel.getName() + " in background...", Toast.LENGTH_SHORT).show();
