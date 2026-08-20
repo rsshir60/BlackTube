@@ -1116,7 +1116,7 @@ Logical next topics to explore.
                         category = category,
                         promptText = obj.getString("promptText"),
                         isBuiltIn = false,
-                        parentId = obj.optString("parentId", null)
+                        parentId = if (obj.has("parentId")) obj.getString("parentId") else null
                     )
                 )
             }
