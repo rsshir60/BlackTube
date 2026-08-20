@@ -150,7 +150,8 @@ class NotificationHelper(val context: Context) {
         fun areNotificationsEnabledOnDevice(context: Context): Boolean {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channelId = context.getString(R.string.streams_notification_channel_id)
-                val manager = context.getSystemService<NotificationManager>()!!
+                val manager = context.getSystemService<NotificationManager>()
+                    ?: return false
                 val enabled = manager.areNotificationsEnabled()
                 val channel = manager.getNotificationChannel(channelId)
                 enabled && channel?.importance != NotificationManager.IMPORTANCE_NONE

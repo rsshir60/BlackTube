@@ -27,9 +27,11 @@ interface PlaylistStreamDAO : BasicDAO<PlaylistStreamEntity> {
     @Query("DELETE FROM playlist_stream_join")
     override fun deleteAll(): Int
 
-    override fun listByService(serviceId: Int): Flowable<List<PlaylistStreamEntity>> {
-        throw UnsupportedOperationException()
-    }
+    @Query(
+        "SELECT playlist_stream_join.* FROM playlist_stream_join INNER JOIN streams " +
+            "ON playlist_stream_join.stream_id = streams.uid WHERE streams.service_id = :serviceId"
+    )
+    override fun listByService(serviceId: Int): Flowable<List<PlaylistStreamEntity>>
 
     @Query("DELETE FROM playlist_stream_join WHERE playlist_id = :playlistId")
     fun deleteBatch(playlistId: Long)

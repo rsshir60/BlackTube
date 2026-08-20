@@ -237,7 +237,7 @@ object GeminiSummarizer {
             .replace(Regex("\\s+"), " ")
             .replace(Regex("\\[.*?\\]"), "")
             .replace(Regex("\\(.*?\\)"), "")
-            .replace(Regex("^\\d+:\\d+\\s*", RegexOption.MULTILINE), "")
+            .replace(Regex("\\b\\d{1,2}:\\d{2}\\s*"), "")
             .trim()
             .take(MAX_TRANSCRIPT_LENGTH)
     }

@@ -176,9 +176,7 @@ class FeedFragment : BaseStateFragment<FeedState>() {
             updateListViewModeOnResume = false
 
             setupListViewMode()
-            if (viewModel.stateLiveData.value != null) {
-                handleResult(viewModel.stateLiveData.value!!)
-            }
+            viewModel.stateLiveData.value?.let(::handleResult)
         }
     }
 
@@ -514,9 +512,11 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         val builder = AlertDialog.Builder(requireContext())
             .setTitle(R.string.feed_load_error)
             .setPositiveButton(R.string.unsubscribe) { _, _ ->
-                SubscriptionManager(requireContext())
-                    .deleteSubscription(subscriptionEntity.serviceId, subscriptionEntity.url!!)
-                    .subscribe()
+                subscriptionEntity.url?.takeIf { it.isNotBlank() }?.let { url ->
+                        SubscriptionManager(requireContext())
+                            .deleteSubscription(subscriptionEntity.serviceId, url)
+                            .subscribe()
+                    }
                 handleItemsErrors(nextItemsErrors)
             }
             .setNegativeButton(R.string.cancel, null)

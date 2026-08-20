@@ -81,7 +81,7 @@ object ServiceHelper {
     }
 
     @JvmStatic
-    fun getSelectedServiceId(context: Context): Int {
+    fun getSelectedServiceId(context: Context?): Int {
         return 0 // Always YouTube for BlackTube
     }
 

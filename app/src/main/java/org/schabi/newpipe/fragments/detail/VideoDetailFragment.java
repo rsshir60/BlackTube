@@ -559,9 +559,6 @@ public final class VideoDetailFragment
                 aiFragment.show(getChildFragmentManager(), "AiSummaryFragment");
             }
         };
-        if (binding.detailControlsAiSummarize != null) {
-            binding.detailControlsAiSummarize.setOnClickListener(openAiSummaryListener);
-        }
         if (binding.cardAiSummaryBanner != null) {
             binding.cardAiSummaryBanner.setOnClickListener(openAiSummaryListener);
         }
@@ -572,11 +569,6 @@ public final class VideoDetailFragment
                 ShareUtils.openUrlInBrowser(requireContext(), info.getUrl())));
         binding.detailControlsPlayWithKodi.setOnClickListener(makeOnClickListener(info ->
                 KoreUtils.playWithKore(requireContext(), Uri.parse(info.getUrl()))));
-        if (DEBUG) {
-            binding.detailControlsCrashThePlayer.setOnClickListener(v ->
-                    VideoDetailPlayerCrasher.onCrashThePlayer(requireContext(), player));
-        }
-
         final View.OnClickListener overlayListener = v -> bottomSheetBehavior
                 .setState(BottomSheetBehavior.STATE_EXPANDED);
         binding.overlayThumbnail.setOnClickListener(overlayListener);
@@ -688,12 +680,7 @@ public final class VideoDetailFragment
                         ? View.VISIBLE
                         : View.GONE
         );
-        binding.detailControlsCrashThePlayer.setVisibility(
-                DEBUG && PreferenceManager.getDefaultSharedPreferences(getContext())
-                        .getBoolean(getString(R.string.show_crash_the_player_key), false)
-                        ? View.VISIBLE
-                        : View.GONE
-        );
+        binding.detailControlsCrashThePlayer.setVisibility(View.GONE);
         accommodateForTvAndDesktopMode();
     }
 

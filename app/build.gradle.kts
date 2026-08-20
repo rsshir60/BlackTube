@@ -67,21 +67,24 @@ configure<ApplicationExtension> {
         // BlackTube: Only create release signing config when the keystore is present.
         // F-Droid's build server signs APKs with its own key — it won't have this file.
         val keystoreFile = rootProject.file("release.keystore")
-        if (keystoreFile.exists()) {
+        val configuredStorePassword = (project.findProperty("KEYSTORE_PASSWORD") as? String)
+            ?: System.getenv("BLACKTUBE_STORE_PASS")
+            ?: System.getenv("KEYSTORE_PASSWORD")
+        val configuredKeyPassword = (project.findProperty("KEY_PASSWORD") as? String)
+            ?: System.getenv("BLACKTUBE_KEY_PASS")
+            ?: System.getenv("KEY_PASSWORD")
+        if (keystoreFile.exists()
+            && !configuredStorePassword.isNullOrBlank()
+            && !configuredKeyPassword.isNullOrBlank()
+        ) {
             create("release") {
                 storeFile = keystoreFile
-                storePassword = (project.findProperty("KEYSTORE_PASSWORD") as? String)
-                    ?: System.getenv("BLACKTUBE_STORE_PASS")
-                    ?: System.getenv("KEYSTORE_PASSWORD")
-                    ?: "android"
+                storePassword = configuredStorePassword
                 keyAlias = (project.findProperty("KEY_ALIAS") as? String)
                     ?: System.getenv("BLACKTUBE_KEY_ALIAS")
                     ?: System.getenv("KEY_ALIAS")
                     ?: "release"
-                keyPassword = (project.findProperty("KEY_PASSWORD") as? String)
-                    ?: System.getenv("BLACKTUBE_KEY_PASS")
-                    ?: System.getenv("KEY_PASSWORD")
-                    ?: "android"
+                keyPassword = configuredKeyPassword
             }
         }
     }
@@ -131,10 +134,6 @@ configure<ApplicationExtension> {
         getByName("androidTest") {
             assets.directories += "$projectDir/schemas"
         }
-    }
-
-    androidResources {
-        generateLocaleConfig = true
     }
 
     buildFeatures {

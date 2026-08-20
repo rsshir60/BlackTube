@@ -7,6 +7,7 @@
 package org.schabi.newpipe
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room.databaseBuilder
 import kotlin.concurrent.Volatile
 import org.schabi.newpipe.database.AppDatabase
@@ -59,10 +60,11 @@ object NewPipeDatabase {
 
     @JvmStatic
     fun checkpoint() {
-        checkNotNull(databaseInstance) { "database is not initialized" }
-        val c = databaseInstance!!.query("pragma wal_checkpoint(full)", null)
-        if (c.moveToFirst() && c.getInt(0) == 1) {
-            throw RuntimeException("Checkpoint was blocked from completing")
+        val database = databaseInstance ?: return
+        database.query("pragma wal_checkpoint(full)", null).use { cursor ->
+            if (cursor.moveToFirst() && cursor.getInt(0) == 1) {
+                Log.w(TAG, "Database checkpoint was busy; continuing without crashing")
+            }
         }
     }
 
@@ -77,4 +79,6 @@ object NewPipeDatabase {
             }
         }
     }
+
+    private const val TAG = "NewPipeDatabase"
 }

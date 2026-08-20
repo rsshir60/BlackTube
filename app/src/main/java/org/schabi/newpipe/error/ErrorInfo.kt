@@ -22,7 +22,7 @@ import org.schabi.newpipe.extractor.exceptions.GeographicRestrictionException
 import org.schabi.newpipe.extractor.exceptions.PaidContentException
 import org.schabi.newpipe.extractor.exceptions.PrivateContentException
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException
-// import org.schabi.newpipe.extractor.exceptions.SignInConfirmNotBotException
+import org.schabi.newpipe.extractor.exceptions.SignInConfirmNotBotException
 
 // import org.schabi.newpipe.extractor.exceptions.UnsupportedContentInCountryException
 import org.schabi.newpipe.extractor.exceptions.YoutubeMusicPremiumContentException
@@ -265,8 +265,12 @@ class ErrorInfo private constructor(
                 throwable is YoutubeMusicPremiumContentException ->
                     ErrorMessage(R.string.youtube_music_premium_content)
 
-                // throwable is SignInConfirmNotBotException ->
-                    // ErrorMessage(R.string.sign_in_confirm_not_bot_error, getServiceName(serviceId), YOUTUBE_IP_BAN_FAQ_URL)
+                throwable is SignInConfirmNotBotException ->
+                    ErrorMessage(
+                        R.string.sign_in_confirm_not_bot_error,
+                        getServiceName(serviceId),
+                        YOUTUBE_IP_BAN_FAQ_URL
+                    )
 
                 throwable is ContentNotAvailableException ->
                     ErrorMessage(R.string.content_not_available)
@@ -321,6 +325,8 @@ class ErrorInfo private constructor(
                 // if the service explicitly said that content is not available (e.g. age
                 // restrictions, video deleted, etc.), there is no use in letting users report it
                 is ContentNotAvailableException -> !isContentSurelyNotAvailable(throwable)
+
+                is SignInConfirmNotBotException -> false
 
                 // we know the content is not supported, no need to let the user report it
                 is ContentNotSupportedException -> false

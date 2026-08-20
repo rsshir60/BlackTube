@@ -154,7 +154,7 @@ open class App :
     override fun newImageLoader(context: Context): ImageLoader = ImageLoader
         .Builder(this)
         .logger(if (BuildConfig.DEBUG) DebugLogger() else null)
-        .allowRgb565(getSystemService<ActivityManager>()!!.isLowRamDevice)
+        .allowRgb565(getSystemService<ActivityManager>()?.isLowRamDevice == true)
         .crossfade(true)
         .components {
             add(OkHttpNetworkFetcherFactory(callFactory = DownloaderImpl.getInstance().client))
@@ -239,10 +239,9 @@ open class App :
 
                 fun reportException(throwable: Throwable) {
                     // Throw uncaught exception that will trigger the report system
-                    Thread
-                        .currentThread()
-                        .uncaughtExceptionHandler
-                        .uncaughtException(Thread.currentThread(), throwable)
+                    val thread = Thread.currentThread()
+                    thread.uncaughtExceptionHandler?.uncaughtException(thread, throwable)
+                        ?: Log.e("BlackTube", "Unhandled RxJava exception", throwable)
                 }
             }
         )

@@ -26,8 +26,6 @@ public class DebugSettingsFragment extends BasePreferenceFragment {
                 requirePreference(R.string.show_memory_leaks_key);
         final Preference checkNewStreamsPreference =
                 requirePreference(R.string.check_new_streams_key);
-        final Preference crashTheAppPreference =
-                requirePreference(R.string.crash_the_app_key);
         final Preference showErrorSnackbarPreference =
                 requirePreference(R.string.show_error_snackbar_key);
         final Preference createErrorNotificationPreference =
@@ -54,10 +52,6 @@ public class DebugSettingsFragment extends BasePreferenceFragment {
         checkNewStreamsPreference.setOnPreferenceClickListener(preference -> {
             NotificationWorker.runNow(preference.getContext());
             return true;
-        });
-
-        crashTheAppPreference.setOnPreferenceClickListener(preference -> {
-            throw new RuntimeException(DUMMY);
         });
 
         showErrorSnackbarPreference.setOnPreferenceClickListener(preference -> {

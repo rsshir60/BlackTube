@@ -24,9 +24,11 @@ abstract class StreamHistoryDAO : BasicDAO<StreamHistoryEntity> {
     @Query("DELETE FROM stream_history")
     abstract override fun deleteAll(): Int
 
-    override fun listByService(serviceId: Int): Flowable<List<StreamHistoryEntity>> {
-        throw UnsupportedOperationException()
-    }
+    @Query(
+        "SELECT stream_history.* FROM stream_history INNER JOIN streams " +
+            "ON stream_history.stream_id = streams.uid WHERE streams.service_id = :serviceId"
+    )
+    abstract override fun listByService(serviceId: Int): Flowable<List<StreamHistoryEntity>>
 
     @get:Query("SELECT * FROM streams INNER JOIN stream_history ON uid = stream_id ORDER BY access_date DESC")
     abstract val history: Flowable<MutableList<StreamHistoryEntry>>

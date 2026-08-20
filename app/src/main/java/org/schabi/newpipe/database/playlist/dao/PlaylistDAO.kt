@@ -22,9 +22,9 @@ interface PlaylistDAO : BasicDAO<PlaylistEntity> {
     @Query("DELETE FROM playlists")
     override fun deleteAll(): Int
 
-    override fun listByService(serviceId: Int): Flowable<List<PlaylistEntity>> {
-        throw UnsupportedOperationException()
-    }
+    // Local playlists are not tied to a streaming service. Return all rows so generic
+    // database cleanup/import code never crashes on this service-independent table.
+    override fun listByService(serviceId: Int): Flowable<List<PlaylistEntity>> = getAll()
 
     @Query("SELECT * FROM playlists WHERE uid = :playlistId")
     fun getPlaylist(playlistId: Long): Flowable<MutableList<PlaylistEntity>>

@@ -23,8 +23,8 @@ object UniversalModelRegistry {
         id = "phi_4_mini_3_8b",
         name = "Phi-4 Mini 3.8B (Flagship Offline SLM)",
         description = "Microsoft's flagship 3.8B SLM. Provides high-accuracy offline video summaries and Q&A.",
-        downloadUrl = "https://huggingface.co/unsloth/Phi-4-mini-instruct-GGUF/resolve/main/Phi-4-mini-instruct-Q4_K_M.gguf?download=true",
-        fileName = "Phi-4-mini-instruct-Q4_K_M.gguf",
+        downloadUrl = "https://huggingface.co/microsoft/phi-4-mini-instruct-gguf/resolve/main/phi-4-mini-instruct-q4_k_m.gguf?download=true",
+        fileName = "phi-4-mini-instruct-q4_k_m.gguf",
         fileSizeMB = 2490,
         minRamGB = 4,
         quantFormat = "Q4_K_M"
@@ -41,27 +41,24 @@ object UniversalModelRegistry {
     }
 
     fun getModelFile(context: Context, modelInfo: LocalModelInfo = DEFAULT_MODEL): File {
-        // 1. App-specific storage directory (Permission-free on all Android versions)
-        val baseDir = context.getExternalFilesDir("models") ?: File(context.filesDir, "models")
-        if (!baseDir.exists()) {
-            baseDir.mkdirs()
-        }
-        val appFile = File(baseDir, modelInfo.fileName)
-        if (appFile.exists() && appFile.length() > 50 * 1024 * 1024L) {
-            return appFile
+        // 1. Check public DIRECTORY_DOWNLOADS/BlackTube_AI/ first (written by system DownloadManager)
+        val publicDir = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "BlackTube_AI")
+        val publicFile = File(publicDir, modelInfo.fileName)
+        if (publicFile.exists() && publicFile.length() > 50 * 1024 * 1024L) {
+            return publicFile
         }
 
-        // 2. Check public DIRECTORY_DOWNLOADS/BlackTube_AI/ fallback (if already downloaded there)
-        try {
-            val publicDir = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "BlackTube_AI")
-            val publicFile = File(publicDir, modelInfo.fileName)
-            if (publicFile.exists() && publicFile.length() > 50 * 1024 * 1024L) {
-                return publicFile
-            }
-        } catch (ignored: Throwable) {}
+        // 2. Check app private files directory fallback
+        val privateDir = File(context.getExternalFilesDir(null), "models")
+        if (!privateDir.exists()) {
+            privateDir.mkdirs()
+        }
+        val privateFile = File(privateDir, modelInfo.fileName)
+        if (privateFile.exists() && privateFile.length() > 50 * 1024 * 1024L) {
+            return privateFile
+        }
 
-        // Default write destination for new downloads is the permission-free appFile
-        return appFile
+        return publicFile
     }
 
     fun isModelDownloaded(context: Context, modelInfo: LocalModelInfo = DEFAULT_MODEL): Boolean {

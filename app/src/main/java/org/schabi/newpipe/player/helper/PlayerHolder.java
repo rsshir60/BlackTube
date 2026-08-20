@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -15,6 +16,7 @@ import androidx.media3.common.PlaybackParameters;
 
 import org.schabi.newpipe.App;
 import org.schabi.newpipe.MainActivity;
+import org.schabi.newpipe.R;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
 import org.schabi.newpipe.player.PlayerService;
 import org.schabi.newpipe.player.Player;
@@ -136,7 +138,13 @@ public final class PlayerHolder {
         unbind(context);
         final Intent intent = new Intent(context, PlayerService.class);
         intent.putExtra(PlayerService.SHOULD_START_FOREGROUND_EXTRA, true);
-        ContextCompat.startForegroundService(context, intent);
+        try {
+            ContextCompat.startForegroundService(context, intent);
+        } catch (final RuntimeException e) {
+            Log.w(TAG, "Unable to start player foreground service", e);
+            Toast.makeText(context, R.string.player_stream_failure, Toast.LENGTH_SHORT).show();
+            return;
+        }
         serviceConnection.doPlayAfterConnect(playAfterConnect);
         bind(context);
     }
@@ -206,9 +214,6 @@ public final class PlayerHolder {
         }
         // BIND_AUTO_CREATE starts the service if it's not already running
         bound = bind(context, Context.BIND_AUTO_CREATE);
-        if (!bound) {
-            context.unbindService(serviceConnection);
-        }
     }
 
     public void tryBindIfNeeded(final Context context) {

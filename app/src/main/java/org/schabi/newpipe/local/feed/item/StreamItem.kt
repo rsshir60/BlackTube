@@ -129,7 +129,7 @@ data class StreamItem(
         val uploadDate = getFormattedRelativeUploadDate(context)
         return when {
             !TextUtils.isEmpty(uploadDate) -> when {
-                viewsAndDate.isEmpty() -> uploadDate!!
+                viewsAndDate.isEmpty() -> uploadDate.orEmpty()
                 else -> Localization.concatenateStrings(viewsAndDate, uploadDate)
             }
 

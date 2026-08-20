@@ -24,9 +24,11 @@ interface StreamStateDAO : BasicDAO<StreamStateEntity> {
     @Query("DELETE FROM " + StreamStateEntity.STREAM_STATE_TABLE)
     override fun deleteAll(): Int
 
-    override fun listByService(serviceId: Int): Flowable<List<StreamStateEntity>> {
-        throw UnsupportedOperationException()
-    }
+    @Query(
+        "SELECT stream_state.* FROM stream_state INNER JOIN streams " +
+            "ON stream_state.stream_id = streams.uid WHERE streams.service_id = :serviceId"
+    )
+    override fun listByService(serviceId: Int): Flowable<List<StreamStateEntity>>
 
     @Query("SELECT * FROM " + StreamStateEntity.STREAM_STATE_TABLE + " WHERE " + StreamStateEntity.JOIN_STREAM_ID + " = :streamId")
     fun getState(streamId: Long): Flowable<MutableList<StreamStateEntity>>

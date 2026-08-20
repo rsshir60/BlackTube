@@ -217,13 +217,12 @@ class FeedLoadManager(private val context: Context) {
                 streams = fetchedStreams
             }
 
+            val info = originalInfo
+            if (info == null) {
+                throw IllegalStateException("Feed extractor returned no channel information")
+            }
             return Notification.createOnNext(
-                FeedUpdateInfo(
-                    subscriptionEntity,
-                    originalInfo!!,
-                    streams!!,
-                    errors
-                )
+                FeedUpdateInfo(subscriptionEntity, info, streams.orEmpty(), errors)
             )
         } catch (e: Throwable) {
             val request = "${subscriptionEntity.serviceId}:${subscriptionEntity.url}"
@@ -273,9 +272,9 @@ class FeedLoadManager(private val context: Context) {
                 for (notification in list) {
                     when {
                         notification.isOnNext -> {
-                            val info = notification.value!!
+                            val info = notification.value ?: return@runInTransaction
 
-                            notification.value!!.newStreams = filterNewStreams(info.streams)
+                            info.newStreams = filterNewStreams(info.streams)
 
                             feedDatabaseManager.upsertAll(info.uid, info.streams)
                             subscriptionManager.updateFromInfo(info)
@@ -296,7 +295,10 @@ class FeedLoadManager(private val context: Context) {
 
                         notification.isOnError -> {
                             val error = notification.error
-                            feedResultsHolder.addError(error!!)
+                            if (error == null) {
+                                continue
+                            }
+                            feedResultsHolder.addError(error)
 
                             if (error is FeedLoadService.RequestException) {
                                 feedDatabaseManager.markAsOutdated(error.subscriptionId)
@@ -314,9 +316,9 @@ class FeedLoadManager(private val context: Context) {
                     // Streams older than this date are automatically removed from the feed.
                     // Therefore, streams which are not in the database,
                     // but older than this date, are considered old.
-                    it.uploadDate!!.offsetDateTime().isAfter(
+                    it.uploadDate?.offsetDateTime()?.isAfter(
                         FeedDatabaseManager.FEED_OLDEST_ALLOWED_DATE
-                    )
+                    ) == true
             }
         }
     }

@@ -30,8 +30,15 @@ class NotificationModeConfigAdapter(
     }
 
     fun update(newData: List<SubscriptionEntity>) {
-        val items = newData.map {
-            SubscriptionItem(it.uid, it.name!!, it.notificationMode, it.serviceId, it.url!!)
+        val items = newData.mapNotNull { subscription ->
+            val url = subscription.url?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            SubscriptionItem(
+                subscription.uid,
+                subscription.name?.takeIf { it.isNotBlank() } ?: url,
+                subscription.notificationMode,
+                subscription.serviceId,
+                url
+            )
         }
         submitList(items)
     }

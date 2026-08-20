@@ -48,12 +48,6 @@
         app:iconSpaceReserved="false" />
 
     <Preference
-        android:key="@string/crash_the_app_key"
-        android:title="@string/crash_the_app"
-        app:singleLineTitle="false"
-        app:iconSpaceReserved="false" />
-
-    <Preference
         android:key="@string/show_error_snackbar_key"
         android:title="@string/show_error_snackbar"
         app:singleLineTitle="false"

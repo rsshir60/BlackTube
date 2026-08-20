@@ -24,7 +24,8 @@ public abstract class SponsorBlockWhitelistDAO implements BasicDAO<SponsorBlockW
 
     @Override
     public Flowable<List<SponsorBlockWhitelistEntry>> listByService(final int serviceId) {
-        throw new UnsupportedOperationException();
+        // SponsorBlock whitelist entries are uploader-based and not stored per service.
+        return getAll();
     }
 
     @Query("DELETE FROM " + SPONSORBLOCK_WHITELIST_TABLE + " WHERE " + UPLOADER + " = :uploader")

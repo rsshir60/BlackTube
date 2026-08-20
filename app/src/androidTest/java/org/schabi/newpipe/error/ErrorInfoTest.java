@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.extractor.ServiceList;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
+import org.schabi.newpipe.extractor.exceptions.SignInConfirmNotBotException;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -58,5 +59,19 @@ public class ErrorInfoTest {
         assertEquals(R.string.parsing_error, getMessageFromErrorInfo(infoFromParcel));
 
         parcel.recycle();
+    }
+
+    @Test
+    public void signInConfirmNotBotIsKnownNonReportableError()
+            throws NoSuchFieldException, IllegalAccessException {
+        final ErrorInfo info = new ErrorInfo(
+                new SignInConfirmNotBotException("LOGIN_REQUIRED"),
+                UserAction.REQUESTED_STREAM,
+                "https://www.youtube.com/watch?v=aB5LGrHISqY",
+                ServiceList.YouTube.getServiceId());
+
+        assertEquals(R.string.sign_in_confirm_not_bot_error, getMessageFromErrorInfo(info));
+        assertEquals(false, info.isReportable());
+        assertTrue(info.isRetryable());
     }
 }

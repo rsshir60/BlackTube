@@ -35,9 +35,9 @@ data class PlaylistEntity @JvmOverloads constructor(
     constructor(item: PlaylistMetadataEntry) : this(
         uid = item.uid,
         name = item.orderingName,
-        isThumbnailPermanent = item.isThumbnailPermanent!!,
-        thumbnailStreamId = item.thumbnailStreamId!!,
-        displayIndex = item.displayIndex!!
+        isThumbnailPermanent = item.isThumbnailPermanent ?: false,
+        thumbnailStreamId = item.thumbnailStreamId ?: DEFAULT_THUMBNAIL_ID,
+        displayIndex = item.displayIndex ?: 0L
     )
 
     companion object {

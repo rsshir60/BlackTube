@@ -45,7 +45,7 @@ object PlaylistDownloadButtonBinder {
                 label.text = "Download All"
             }
             is BatchState.Queued -> {
-                icon.setImageResource(R.drawable.ic_hourglass_empty)
+                icon.setImageResource(R.drawable.ic_hourglass_top)
                 icon.setColorFilter(COLOR_SECONDARY)
                 label.setTextColor(COLOR_SECONDARY)
                 label.text = "Queued…"
@@ -58,13 +58,13 @@ object PlaylistDownloadButtonBinder {
                 label.text = "${state.done}/${state.total} • ${state.percent}%"
             }
             is BatchState.Paused -> {
-                icon.setImageResource(R.drawable.ic_pause_circle)
+                icon.setImageResource(R.drawable.ic_pause)
                 icon.setColorFilter(COLOR_WARNING)
                 label.setTextColor(COLOR_WARNING)
                 label.text = "Paused • ${state.done}/${state.total}"
             }
             is BatchState.Complete -> {
-                icon.setImageResource(R.drawable.ic_download_done)
+                icon.setImageResource(R.drawable.ic_done)
                 icon.setColorFilter(COLOR_SUCCESS)
                 label.setTextColor(COLOR_SUCCESS)
                 label.text = "Downloaded"
@@ -77,7 +77,7 @@ object PlaylistDownloadButtonBinder {
                 label.text = "${state.done}/${state.total} • Retry"
             }
             is BatchState.Failed -> {
-                icon.setImageResource(R.drawable.ic_error)
+                icon.setImageResource(R.drawable.ic_bug_report)
                 icon.setColorFilter(COLOR_ERROR)
                 label.setTextColor(COLOR_ERROR)
                 label.text = "Failed • Retry"

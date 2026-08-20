@@ -48,7 +48,7 @@ class ErrorActivity : AppCompatActivity() {
 
     private val osString: String
         get() {
-            val name = System.getProperty("os.name")!!
+            val name = System.getProperty("os.name") ?: "Android"
             val osBase = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 Build.VERSION.BASE_OS.ifEmpty { "Android" }
             } else {
@@ -80,7 +80,14 @@ class ErrorActivity : AppCompatActivity() {
             setDisplayShowTitleEnabled(true)
         }
 
-        errorInfo = IntentCompat.getParcelableExtra(intent, ERROR_INFO, ErrorInfo::class.java)!!
+        errorInfo = IntentCompat.getParcelableExtra(intent, ERROR_INFO, ErrorInfo::class.java)
+            ?: ErrorInfo(
+                arrayOf("Error report payload was missing or malformed."),
+                UserAction.UI_ERROR,
+                "Opening error report",
+                null,
+                R.string.general_error
+            )
 
         // important add guru meditation
         addGuruMeditation()
