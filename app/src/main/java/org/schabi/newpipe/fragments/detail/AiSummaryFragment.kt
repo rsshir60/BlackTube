@@ -204,26 +204,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             }
         }
 
-        val etQuery = view.findViewById<android.widget.EditText>(R.id.et_ask_video)
-        val btnAsk = view.findViewById<AppCompatButton>(R.id.btn_send_ask)
-
-        val triggerAsk = {
-            val queryText = etQuery?.text?.toString()?.trim() ?: ""
-            if (queryText.isNotEmpty()) {
-                if (btnAsk != null) animateAndHaptic(btnAsk) { etQuery?.setText("") }
-                else etQuery?.setText("")
-                runCustomQuestion(queryText)
-            }
-        }
-
-        btnAsk?.setOnClickListener { triggerAsk() }
-        etQuery?.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEND || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
-                triggerAsk()
-                true
-            } else false
-        }
-
         refreshPromptChip()
         refreshEngineChip()
         checkStateAndLoad()
@@ -337,42 +317,5 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             Instructions:
             ${activePrompt.promptText}
         """.trimIndent()
-    }
-
-    private fun runCustomQuestion(userQuery: String) {
-        val info = streamInfo ?: return
-        showState(stateLoading)
-
-        lifecycleScope.launch {
-            try {
-                val ctx = requireContext()
-                val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)
-                val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
-                val isLocalReady = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
-
-                val answer: String = if (engineMode == "local" || (engineMode == "auto" && isLocalReady)) {
-                    val promptPayload = buildRichLocalPrompt(info) + "\n\nUser Question: $userQuery"
-                    org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
-                    org.schabi.newpipe.ai.LocalModelEngine.generateSummary(promptPayload)
-                } else {
-                    val geminiRes = GeminiSummarizer.askQuestion(ctx, info, userQuery)
-                    when (geminiRes) {
-                        is GeminiSummarizer.SummaryResult.Markdown -> geminiRes.text
-                        is GeminiSummarizer.SummaryResult.Error -> "⚠️ Could not answer question: ${geminiRes.message}"
-                    }
-                }
-
-                showState(stateSuccess)
-                val existingText = tvSummaryContent.text?.toString() ?: ""
-                val qnaBlock = "\n\n---\n💬 **Question**: $userQuery\n\n$answer"
-                tvSummaryContent.text = if (existingText.isNotEmpty()) existingText + qnaBlock else answer.trim()
-
-                delay(100)
-                view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.ai_summary_scroll_view)?.fullScroll(View.FOCUS_DOWN)
-            } catch (e: Exception) {
-                showState(stateSuccess)
-                Toast.makeText(requireContext(), "⚠️ Q&A response: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-        }
     }
 }

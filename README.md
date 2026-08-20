@@ -5,12 +5,12 @@
 
   <h1>BlackTube v1.1.0</h1>
 
-  <p><b>A privacy-first YouTube client powered by On-Device Local AI (Phi-5) & Cloud Gemini.</b></p>
+  <p><b>A privacy-first YouTube client powered by On-Device Local AI (Phi-4 Mini) & Cloud Gemini.</b></p>
 
   <p>
     <a href="https://github.com/TeamNewPipe/NewPipe/blob/dev/LICENSE"><img alt="License: GPLv3" src="https://img.shields.io/badge/License-GPLv3-blue.svg"></a>
     <img alt="Version" src="https://img.shields.io/badge/Version-v1.1.0-red.svg">
-    <img alt="Local AI Model" src="https://img.shields.io/badge/Local_AI-Phi--5_1.3B-success.svg?logo=android">
+    <img alt="Local AI Model" src="https://img.shields.io/badge/Local_AI-Phi--4_Mini_3.8B-success.svg?logo=android">
     <img alt="Kotlin Version" src="https://img.shields.io/badge/Kotlin-2.3.10-purple.svg?logo=kotlin">
     <img alt="GitHub Stars" src="https://img.shields.io/github/stars/rsshir60/BlackTube?style=social">
   </p>
@@ -33,13 +33,13 @@
 
 BlackTube is a high-performance fork of [NewPipe](https://github.com/TeamNewPipe/NewPipe) focused on a YouTube-first experience with advanced on-device and cloud AI features. Core extraction, streaming, subscriptions, background playback, and zero-tracking privacy come from the NewPipe ecosystem. 
 
-BlackTube adds **On-Device Local AI (Phi-5 1.3B)**, **Bring-Your-Own-Key Cloud Gemini**, **Interactive Talk-to-Video Q&A**, **Executive PDF Exports**, and a customizable **Prompt Library**.
+BlackTube adds **On-Device Local AI (Phi-4 Mini 3.8B)**, **Bring-Your-Own-Key Cloud Gemini**, **Interactive Talk-to-Video Q&A**, **Executive PDF Exports**, and a customizable **Prompt Library**.
 
 ## Key Features
 
 ### 🔒 Dual AI Engine Suite
 
-- **On-Device Local AI Engine (Microsoft Phi-5 1.3B)**: Runs 100% offline via native C++ NDK GGUF inference (`llama.cpp`). Zero cloud data transmission, complete airplane-mode privacy.
+- **On-Device Local AI Engine (Microsoft Phi-4 Mini 3.8B)**: Runs 100% offline via native C++ NDK GGUF inference (`llama.cpp`). Zero cloud data transmission, complete airplane-mode privacy.
 - **Cloud Gemini Engine**: Bring-your-own-key Google Gemini 3.1 Flash-Lite API integration for instant cloud synthesis.
 - **Universal Engine Provider Selector**: Switch seamlessly between *Local AI*, *Cloud Gemini*, or *Auto-Select* via Settings or 1-tap in-fragment chip menu.
 
@@ -90,7 +90,7 @@ app/build/outputs/apk/release/app-release-signed-v1.1.apk
 ## Tech Stack
 
 - **Core**: Kotlin & Java, AndroidX Media3, Material Design 3
-- **Local AI**: C++ NDK, `llama.cpp` JNI, Microsoft Phi-5 1.3B GGUF Q5_K_M
+- **Local AI**: C++ NDK, `llama.cpp` JNI, Microsoft Phi-4 Mini 3.8B GGUF Q4_K_M
 - **Cloud AI**: Google Gemini Generative AI SDK
 - **Markdown & PDF**: Markwon, Android `PdfDocument` & `Canvas` API
 - **Extractor**: NewPipe Extractor via local included build

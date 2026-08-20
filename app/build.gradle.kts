@@ -69,15 +69,12 @@ configure<ApplicationExtension> {
                 storePassword = (project.findProperty("KEYSTORE_PASSWORD") as? String)
                     ?: System.getenv("BLACKTUBE_STORE_PASS")
                     ?: System.getenv("KEYSTORE_PASSWORD")
-                    ?: "android"
                 keyAlias = (project.findProperty("KEY_ALIAS") as? String)
                     ?: System.getenv("BLACKTUBE_KEY_ALIAS")
                     ?: System.getenv("KEY_ALIAS")
-                    ?: "release"
                 keyPassword = (project.findProperty("KEY_PASSWORD") as? String)
                     ?: System.getenv("BLACKTUBE_KEY_PASS")
                     ?: System.getenv("KEY_PASSWORD")
-                    ?: "android"
             }
         }
     }
@@ -222,12 +219,12 @@ tasks.register<CheckDependenciesOrder>("checkDependenciesOrder") {
     tomlFile = layout.projectDirectory.file("../gradle/libs.versions.toml")
 }
 
-// BlackTube: pre-build checks disabled for faster builds
-// afterEvaluate {
-//     tasks.named("preDebugBuild").configure {
-//         dependsOn("runCheckstyle", "runKtlint", "checkDependenciesOrder")
-//     }
-// }
+// BlackTube: Enable pre-build checks for code quality
+afterEvaluate {
+    tasks.named("preDebugBuild").configure {
+        dependsOn("runCheckstyle", "runKtlint", "checkDependenciesOrder")
+    }
+}
 
 sonar {
     properties {
