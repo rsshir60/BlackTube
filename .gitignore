@@ -1,49 +1,48 @@
 ```
-# Logs
-*.log
-hs_err_*.log
-build_output.log
-
-# Local configuration
-local.properties
-
-# Temporary files
-*.tmp
-*.swp
-*.swo
-
 # Dependencies
 node_modules/
-.venv/
 venv/
+.venv/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
 target/
 .gradle/
 
-# Build artifacts
-build/
-dist/
-out/
+# Compiled/Binary files
+*.pyc
+*.class
+*.o
+*.exe
+*.dll
+*.so
+*.a
+*.obj
+*.out
 
-# IDE files
+# Editor/IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# System files
+# System/Environment files
 .DS_Store
 Thumbs.db
-
-# Environment files
 .env
 .env.local
 *.env.*
 
-# Coverage reports
+# Logs and coverage
+*.log
 coverage/
 htmlcov/
 .coverage
+
+# Build/dist directories
+dist/
+build/
 
 # Compressed files
 *.zip
