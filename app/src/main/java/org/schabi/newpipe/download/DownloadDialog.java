@@ -258,6 +258,9 @@ public class DownloadDialog extends DialogFragment
                 askForSavePath = mgr.askForSavePath();
 
                 okButton.setEnabled(true);
+                if (dialogBinding != null && dialogBinding.btnStartDownload != null) {
+                    dialogBinding.btnStartDownload.setEnabled(true);
+                }
 
                 context.unbindService(this);
             }
@@ -350,6 +353,14 @@ public class DownloadDialog extends DialogFragment
 
         initToolbar(dialogBinding.toolbarLayout.toolbar);
         setupDownloadOptions();
+
+        if (dialogBinding.btnStartDownload != null) {
+            dialogBinding.btnStartDownload.setEnabled(downloadManager != null);
+            dialogBinding.btnStartDownload.setOnClickListener(v -> {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
+                prepareSelectedDownload();
+            });
+        }
 
         prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
 

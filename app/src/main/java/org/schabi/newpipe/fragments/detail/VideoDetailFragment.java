@@ -554,9 +554,12 @@ public final class VideoDetailFragment
             }
         });
         View.OnClickListener openAiSummaryListener = v -> {
+            v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
             if (currentInfo != null) {
                 AiSummaryFragment aiFragment = new AiSummaryFragment(currentInfo);
                 aiFragment.show(getChildFragmentManager(), "AiSummaryFragment");
+            } else {
+                Toast.makeText(requireContext(), R.string.video_streams_empty, Toast.LENGTH_SHORT).show();
             }
         };
         if (binding.cardAiSummaryBanner != null) {
@@ -1764,6 +1767,14 @@ public final class VideoDetailFragment
         final boolean noVideoStreams =
                 info.getVideoStreams().isEmpty() && info.getVideoOnlyStreams().isEmpty();
         binding.detailControlsPopup.setVisibility(noVideoStreams ? View.GONE : View.VISIBLE);
+
+        final boolean isAiEnabled = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .getBoolean(getString(R.string.gemini_enable_key), true);
+        if (binding.cardAiSummaryBanner != null) {
+            binding.cardAiSummaryBanner.setVisibility(
+                    isAiEnabled && info.getStreamType() != StreamType.LIVE_STREAM
+                            ? View.VISIBLE : View.GONE);
+        }
         binding.detailThumbnailPlayButton.setImageResource(
                 noVideoStreams ? R.drawable.ic_headset_shadow : R.drawable.ic_play_arrow_shadow);
     }
@@ -2868,6 +2879,8 @@ public final class VideoDetailFragment
         player.seekTo(positionMillis);
     }
 }
+
+
 
 
 

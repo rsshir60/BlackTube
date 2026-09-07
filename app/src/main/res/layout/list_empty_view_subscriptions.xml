@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,19 +8,31 @@
     android:minHeight="128dp"
     android:orientation="vertical">
 
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="16dp"
+        android:alpha="0.75"
+        android:src="@drawable/ic_subscriptions"
+        app:tint="?android:attr/textColorSecondary"
+        android:contentDescription="@null" />
+
     <org.schabi.newpipe.views.NewPipeTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="¯\\_(ツ)_/¯"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        tools:ignore="HardcodedText" />
+        android:text="@string/tab_subscriptions"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <org.schabi.newpipe.views.NewPipeTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="24dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="14sp"
         android:text="@string/import_subscriptions_hint" />
 </LinearLayout>
