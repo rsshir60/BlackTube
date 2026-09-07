@@ -118,24 +118,6 @@
                         android:textAllCaps="false"
                         android:textColor="@color/bt_ai_button_text_selector"
                         android:textSize="12sp" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/chip_engine_selector"
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_bt_ai_prompt_chip"
-                        android:drawableStart="@drawable/ic_settings"
-                        android:drawablePadding="6dp"
-                        android:drawableTint="?attr/colorAccent"
-                        android:gravity="center"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingHorizontal="16dp"
-                        android:text="✨ Auto ▾"
-                        android:textAllCaps="false"
-                        android:textColor="@color/bt_ai_button_text_selector"
-                        android:textSize="12sp" />
-
                 </LinearLayout>
 
                 <androidx.appcompat.widget.AppCompatButton

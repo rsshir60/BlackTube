@@ -1,4 +1,4 @@
-package org.schabi.newpipe.settings
+﻿package org.schabi.newpipe.settings
 
 import android.app.Activity
 import android.content.Context
@@ -14,7 +14,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.EditTextPreference
-import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
@@ -22,11 +21,9 @@ import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
 import org.schabi.newpipe.R
-import org.schabi.newpipe.ai.LocalModelEngine
-import org.schabi.newpipe.ai.UniversalModelRegistry
 
 /**
- * BlackTube AI Features Settings — Big-Tech Grade Design & Privacy.
+ * BlackTube AI Features Settings — Google Gemini Cloud Intelligence.
  */
 class AiFeaturesSettingsFragment : BasePreferenceFragment() {
 
@@ -46,7 +43,6 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.ai_features_settings)
         hookApiKeyPref()
-        hookEngineModePref()
         hookClearCache()
         hookPromptLibrary()
     }
@@ -77,14 +73,6 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
     private fun maskKey(key: String): String {
         if (key.length <= 10) return "••••••••••"
         return key.take(7) + "•".repeat(14) + key.takeLast(4)
-    }
-
-    private fun hookEngineModePref() {
-        findPreference<ListPreference>("pref_key_ai_engine_mode")
-            ?.setOnPreferenceChangeListener { _, _ ->
-                view?.post { refreshCustomViews() }
-                true
-            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -134,23 +122,17 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
     private fun hookToggleDependencies() {
         val enablePref = findPreference<SwitchPreferenceCompat>(getString(R.string.gemini_enable_key))
         val apiKeyPref = findPreference<EditTextPreference>(getString(R.string.gemini_api_key_key))
-        val enginePref = findPreference<ListPreference>("pref_key_ai_engine_mode")
-        val modelPref = findPreference<Preference>("pref_key_local_ai_screen")
         val libraryPref = findPreference<Preference>(getString(R.string.prompt_library_key))
         val cachePref = findPreference<Preference>(getString(R.string.clear_ai_cache_key))
 
         val enabled = enablePref?.isChecked ?: true
         apiKeyPref?.isEnabled = enabled
-        enginePref?.isEnabled = enabled
-        modelPref?.isEnabled = enabled
         libraryPref?.isEnabled = enabled
         cachePref?.isEnabled = enabled
 
         enablePref?.setOnPreferenceChangeListener { _, newValue ->
             val isOn = newValue as Boolean
             apiKeyPref?.isEnabled = isOn
-            enginePref?.isEnabled = isOn
-            modelPref?.isEnabled = isOn
             libraryPref?.isEnabled = isOn
             cachePref?.isEnabled = isOn
             view?.post { refreshCustomViews() }
@@ -168,41 +150,14 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
             .getBoolean(getString(R.string.gemini_enable_key), true)
         val isConfigured = GeminiSummarizer.isConfigured()
         val activePrompt = PromptLibrary.getActivePrompt(ctx)
-        val activeLocalModel = UniversalModelRegistry.getActiveModel(ctx)
-        val isLocalDownloaded = LocalModelEngine.isModelDownloaded(ctx)
-
-        val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-        val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
-
-        // ── Dynamic Engine Provider Icon & Summary ────────────────────────
-        val enginePref = findPreference<ListPreference>("pref_key_ai_engine_mode")
-        if (enginePref != null) {
-            when (engineMode) {
-                "local" -> enginePref.setIcon(R.drawable.ic_memory)
-                "gemini" -> enginePref.setIcon(R.drawable.ic_cloud)
-                else -> enginePref.setIcon(R.drawable.ic_auto_mode)
-            }
-        }
 
         // ── Engine-Aware Master Toggle Summary ────────────────────────────
         val enablePref = findPreference<SwitchPreferenceCompat>(getString(R.string.gemini_enable_key))
         if (enablePref != null) {
             enablePref.summary = when {
                 !isEnabled -> "AI summaries are disabled"
-                engineMode == "local" || (engineMode == "auto" && isLocalDownloaded) ->
-                    "Local ${activeLocalModel.name} is active ✓ (100% offline)"
-                isConfigured -> "Cloud Gemini 3.1 Flash-Lite is active ✓"
+                isConfigured -> "Google Gemini 3.1 Flash-Lite is active ✓"
                 else -> "Enable AI video summaries, chapter insights, and Q&A"
-            }
-        }
-
-        // ── Dynamic Local Model Hub Row Summary ───────────────────────────
-        val localModelPref = findPreference<Preference>("pref_key_local_ai_screen")
-        if (localModelPref != null) {
-            localModelPref.summary = if (isLocalDownloaded) {
-                "${activeLocalModel.name} ready • ${activeLocalModel.fileSizeMB} MB on disk"
-            } else {
-                "No offline model downloaded — tap to download 2.4GB Phi-4 Mini GGUF"
             }
         }
 
@@ -234,51 +189,24 @@ class AiFeaturesSettingsFragment : BasePreferenceFragment() {
         val tvPromptHeader = v.findViewById<TextView>(R.id.tv_ai_active_prompt_header)
 
         if (tvModelName != null) {
-            when (engineMode) {
-                "local" -> {
-                    tvModelName.text = if (isLocalDownloaded)
-                        "🔒 Local ${activeLocalModel.name} (${activeLocalModel.fileSizeMB} MB GGUF)"
-                    else
-                        "⚠️ Local Engine Selected (Model Download Required)"
-                }
-                "gemini" -> {
-                    tvModelName.text = if (isConfigured)
-                        "☁️ Gemini 3.1 Flash-Lite (Cloud API)"
-                    else
-                        "⚠️ Gemini Engine Selected (API Key Required)"
-                }
-                else -> {
-                    tvModelName.text = if (isLocalDownloaded)
-                        "✨ Auto: Local ${activeLocalModel.name} Active"
-                    else if (isConfigured)
-                        "✨ Auto: Cloud Gemini Active"
-                    else
-                        "⚠️ No Engine Ready (Tap 1-Click Download or Add Key)"
-                }
-            }
+            tvModelName.text = if (isConfigured)
+                "☁️ Gemini 3.1 Flash-Lite (Google AI)"
+            else
+                "⚠️ Gemini API Key Required"
         }
 
         if (chipStatus != null) {
-            val isActive = when (engineMode) {
-                "local" -> isLocalDownloaded
-                "gemini" -> isConfigured
-                else -> isLocalDownloaded || isConfigured
-            }
-
             when {
                 !isEnabled -> {
                     chipStatus.text = "⚪ Disabled"
                     chipStatus.setBackgroundResource(R.drawable.bg_ai_status_disabled)
                 }
-                isActive -> {
-                    chipStatus.text = if (engineMode == "local" || (engineMode == "auto" && isLocalDownloaded))
-                        "🟢 Local AI Active"
-                    else
-                        "🟢 Cloud AI Active"
+                isConfigured -> {
+                    chipStatus.text = "🟢 Gemini AI Active"
                     chipStatus.setBackgroundResource(R.drawable.bg_ai_status_active)
                 }
                 else -> {
-                    chipStatus.text = "🔴 Setup Required"
+                    chipStatus.text = "🔴 Key Required"
                     chipStatus.setBackgroundResource(R.drawable.bg_ai_status_error)
                 }
             }

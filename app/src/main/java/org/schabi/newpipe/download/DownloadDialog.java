@@ -1332,9 +1332,7 @@ public class DownloadDialog extends DialogFragment
             } catch (Exception ignored) {
                 // Raw markdown/text summary fallback
             }
-
-            final String engineUsed = org.schabi.newpipe.ai.LocalModelEngine.INSTANCE.isModelDownloaded(context)
-                    ? "Phi-4 Mini 3.8B (On-Device SLM)" : "Gemini 3.1 Flash-Lite (Cloud)";
+            final String engineUsed = "Gemini 3.1 Flash-Lite (Cloud)";
 
             final com.blacktube.app.ai.SummaryPdfData pdfData = new com.blacktube.app.ai.SummaryPdfData(
                     title,

@@ -1,4 +1,4 @@
-package org.schabi.newpipe.fragments.detail
+﻿package org.schabi.newpipe.fragments.detail
 
 import android.app.Activity
 import android.content.Context
@@ -18,10 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.schabi.newpipe.R
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.settings.SettingsActivity
@@ -39,7 +38,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
     private lateinit var tvErrorMessage: TextView
     private lateinit var tvSummaryContent: TextView
     private lateinit var chipActivePrompt: AppCompatButton
-    private lateinit var chipEngineSelector: AppCompatButton
 
     private lateinit var promptLibraryLauncher: ActivityResultLauncher<Intent>
 
@@ -71,36 +69,12 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
             showState(stateLoading)
             val ctx = requireContext()
 
-            val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)
-            val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
-            val isLocalDownloaded = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
-
-            val useLocal = when (engineMode) {
-                "local" -> true
-                "gemini" -> false
-                else -> isLocalDownloaded
+            if (!GeminiSummarizer.isConfigured()) {
+                showState(stateNoKey)
+                return@launch
             }
 
-            val result = if (useLocal) {
-                if (isLocalDownloaded) {
-                    val prompt = buildRichLocalPrompt(info)
-                    val initialized = org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
-                    if (initialized) {
-                        val localText = org.schabi.newpipe.ai.LocalModelEngine.generateSummary(prompt)
-                        GeminiSummarizer.SummaryResult.Markdown(localText)
-                    } else if (GeminiSummarizer.isConfigured()) {
-                        GeminiSummarizer.summarize(ctx, info, forceRefresh)
-                    } else {
-                        GeminiSummarizer.SummaryResult.Error("Local AI engine is preparing. Please tap 1-Click Download or check device RAM.")
-                    }
-                } else {
-                    GeminiSummarizer.SummaryResult.Error("Local AI Engine selected in Settings, but model is not downloaded yet. Tap 1-Click Download Phi-5 AI below.")
-                }
-            } else if (GeminiSummarizer.isConfigured()) {
-                GeminiSummarizer.summarize(ctx, info, forceRefresh)
-            } else {
-                GeminiSummarizer.SummaryResult.Error("No AI engine available. Please download the 1-Click Local Model or add a Gemini API key.")
-            }
+            val result = GeminiSummarizer.summarize(ctx, info, forceRefresh)
 
             if (!isAdded || context == null) return@launch
             when (result) {
@@ -132,16 +106,10 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         tvErrorMessage = view.findViewById(R.id.tv_error_message)
         tvSummaryContent = view.findViewById(R.id.tv_summary_content)
         chipActivePrompt = view.findViewById(R.id.chip_active_prompt)
-        chipEngineSelector = view.findViewById(R.id.chip_engine_selector)
 
         // Prompt chip → opens Prompt Library
         chipActivePrompt.setOnClickListener {
             promptLibraryLauncher.launch(PromptLibraryActivity.createIntent(requireContext()))
-        }
-
-        // Engine chip → opens 1-tap Engine Selector Popup
-        chipEngineSelector.setOnClickListener {
-            showEngineSelectorPopupMenu(it)
         }
 
         view.findViewById<Button>(R.id.btn_open_settings).setOnClickListener {
@@ -149,36 +117,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
                 putExtra("show_fragment", "org.schabi.newpipe.settings.AiFeaturesSettingsFragment")
             }
             startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.btn_open_settings)?.let { btn ->
-            val activeModel = org.schabi.newpipe.ai.UniversalModelRegistry.getActiveModel(requireContext())
-            if (!org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
-                btn.text = "⚡ 1-Click Download ${activeModel.name} (${activeModel.fileSizeMB} MB)"
-                btn.setOnClickListener {
-                    org.schabi.newpipe.ai.ModelDownloaderManager.startModelDownload(requireContext(), activeModel)
-                    btn.isEnabled = false
-
-                    lifecycleScope.launch {
-                        org.schabi.newpipe.ai.ModelDownloaderManager.downloadProgress.collect { progress ->
-                            if (progress.isDownloading) {
-                                val downloadedMb = progress.bytesDownloaded / (1024 * 1024)
-                                val totalMb = if (progress.totalBytes > 0) progress.totalBytes / (1024 * 1024) else activeModel.fileSizeMB.toLong()
-                                val speedMb = progress.speedBytesPerSec / (1024.0 * 1024.0)
-                                btn.text = String.format(java.util.Locale.US, "⏬ %d%% (%d/%d MB) • %.1f MB/s", progress.progressPercent, downloadedMb, totalMb, speedMb)
-                            } else if (progress.isCompleted || org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())) {
-                                btn.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
-                                btn.text = "✅ ${activeModel.name} Downloaded!"
-                                delay(1000)
-                                checkStateAndLoad()
-                            } else if (progress.error != null) {
-                                btn.isEnabled = true
-                                btn.text = "⚠️ " + progress.error
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         fun animateAndHaptic(v: View, action: () -> Unit) {
@@ -225,7 +163,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         }
 
         refreshPromptChip()
-        refreshEngineChip()
         checkStateAndLoad()
 
         return view
@@ -240,51 +177,13 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         }
     }
 
-    private fun refreshEngineChip() {
-        val ctx = context ?: return
-        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)
-        val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
-        val isLocalDownloaded = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
-
-        chipEngineSelector.text = when (engineMode) {
-            "local" -> if (isLocalDownloaded) "🔒 Local AI ▾" else "⚠️ Local AI ▾"
-            "gemini" -> if (GeminiSummarizer.isConfigured()) "☁️ Gemini ▾" else "⚠️ Gemini ▾"
-            else -> if (isLocalDownloaded) "✨ Auto (Local) ▾" else "✨ Auto (Gemini) ▾"
-        }
-    }
-
-    private fun showEngineSelectorPopupMenu(anchor: View) {
-        val popup = androidx.appcompat.widget.PopupMenu(requireContext(), anchor)
-        val ctx = requireContext()
-        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)
-
-        popup.menu.add(0, 1, 0, "✨ Auto-Select (Prefer Local, Fallback to Gemini)")
-        popup.menu.add(0, 2, 1, "🔒 Local AI Engine (On-Device GGUF)")
-        popup.menu.add(0, 3, 2, "☁️ Cloud Gemini Engine (Google AI API)")
-        popup.menu.add(0, 4, 3, "⚙️ Configure Engine Settings…")
-
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                1 -> prefs.edit().putString("pref_key_ai_engine_mode", "auto").apply()
-                2 -> prefs.edit().putString("pref_key_ai_engine_mode", "local").apply()
-                3 -> prefs.edit().putString("pref_key_ai_engine_mode", "gemini").apply()
-                4 -> startActivity(Intent(requireContext(), SettingsActivity::class.java))
-            }
-            refreshEngineChip()
-            runSummarize(forceRefresh = true)
-            true
-        }
-        popup.show()
-    }
-
     private fun checkStateAndLoad() {
         if (streamInfo == null || streamInfo.id.isNullOrEmpty()) {
             showState(stateReady)
             return
         }
 
-        val isLocalReady = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(requireContext())
-        if (!isLocalReady && !GeminiSummarizer.isConfigured()) {
+        if (!GeminiSummarizer.isConfigured()) {
             showState(stateNoKey)
             return
         }
@@ -310,35 +209,6 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.ai_summary_scroll_view)?.smoothScrollTo(0, 0)
     }
 
-    private suspend fun buildRichLocalPrompt(info: StreamInfo): String = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-        val activePrompt = PromptLibrary.getSummaryPrompt(requireContext())
-        val title = info.name ?: "Untitled Video"
-        val uploader = info.uploaderName ?: "Unknown Creator"
-        val desc = info.description?.content?.take(800) ?: ""
-
-        val transcriptText = try {
-            val subtitles = info.subtitles
-            if (!subtitles.isNullOrEmpty()) {
-                val sub = subtitles.find { it.languageTag.startsWith("en") } ?: subtitles[0]
-                val response = org.schabi.newpipe.extractor.NewPipe.getDownloader().get(sub.content)
-                response.responseBody().take(3000)
-            } else ""
-        } catch (e: Exception) {
-            ""
-        }
-
-        return@withContext """
-            Video Title: $title
-            Creator: $uploader
-            Description: $desc
-            ${if (transcriptText.isNotEmpty()) "Transcript Excerpt: $transcriptText" else ""}
-
-            Active Prompt Style: ${activePrompt.title}
-            Instructions:
-            ${activePrompt.promptText}
-        """.trimIndent()
-    }
-
     private fun runCustomQuestion(userQuery: String) {
         val info = streamInfo ?: return
         showState(stateLoading)
@@ -346,20 +216,10 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         lifecycleScope.launch {
             try {
                 val ctx = requireContext()
-                val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)
-                val engineMode = prefs.getString("pref_key_ai_engine_mode", "auto") ?: "auto"
-                val isLocalReady = org.schabi.newpipe.ai.LocalModelEngine.isModelDownloaded(ctx)
-
-                val answer: String = if (engineMode == "local" || (engineMode == "auto" && isLocalReady)) {
-                    val promptPayload = buildRichLocalPrompt(info) + "\n\nUser Question: $userQuery"
-                    org.schabi.newpipe.ai.LocalModelEngine.initialize(ctx)
-                    org.schabi.newpipe.ai.LocalModelEngine.generateSummary(promptPayload)
-                } else {
-                    val geminiRes = GeminiSummarizer.askQuestion(ctx, info, userQuery)
-                    when (geminiRes) {
-                        is GeminiSummarizer.SummaryResult.Markdown -> geminiRes.text
-                        is GeminiSummarizer.SummaryResult.Error -> "⚠️ Could not answer question: ${geminiRes.message}"
-                    }
+                val geminiRes = GeminiSummarizer.askQuestion(ctx, info, userQuery)
+                val answer: String = when (geminiRes) {
+                    is GeminiSummarizer.SummaryResult.Markdown -> geminiRes.text
+                    is GeminiSummarizer.SummaryResult.Error -> "⚠️ Could not answer question: ${geminiRes.message}"
                 }
 
                 showState(stateSuccess)
