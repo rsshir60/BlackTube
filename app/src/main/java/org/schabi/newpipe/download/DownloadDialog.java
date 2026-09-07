@@ -661,6 +661,16 @@ public class DownloadDialog extends DialogFragment
         }
 
         dialogBinding.threads.setEnabled(flag);
+        final boolean isSummary = (checkedId == R.id.summary_button);
+        if (dialogBinding.threadsLayout != null) {
+            dialogBinding.threadsLayout.setVisibility(isSummary ? View.GONE : View.VISIBLE);
+        }
+        if (dialogBinding.threadsTextView != null) {
+            dialogBinding.threadsTextView.setVisibility(isSummary ? View.GONE : View.VISIBLE);
+        }
+        if (dialogBinding.switchCutSponsors != null) {
+            dialogBinding.switchCutSponsors.setEnabled(!isSummary);
+        }
     }
 
     @Override
@@ -1239,52 +1249,25 @@ public class DownloadDialog extends DialogFragment
             summaryText = "✨ AI Video Summary for: " + videoTitle + "\n\n"
                     + "1. High-Level Overview: Key synthesis generated for " + currentInfo.getUploaderName() + ".\n"
                     + "2. Core Takeaways: Detailed topic analysis and chapter breakdown.\n"
-                    + "3. Export Details: Exported via BlackTube v1.1.0 AI Summary Engine.";
+                    + "3. Export Details: Exported via BlackTube AI Summary Engine.";
         }
 
-        final String sanitizedTitle = videoTitle.replaceAll("[^a-zA-Z0-9._-]", "_");
-
-        File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        if (downloadsDir == null) {
-            downloadsDir = new File(context.getFilesDir(), "summaries");
+        final com.blacktube.app.ai.SummaryExportHelper.ExportFormat format;
+        if (formatIndex == 0) {
+            format = com.blacktube.app.ai.SummaryExportHelper.ExportFormat.PDF;
+        } else if (formatIndex == 1) {
+            format = com.blacktube.app.ai.SummaryExportHelper.ExportFormat.MARKDOWN;
+        } else {
+            format = com.blacktube.app.ai.SummaryExportHelper.ExportFormat.TXT;
         }
-        downloadsDir.mkdirs();
 
-        File targetFile = null;
-        String mime = "application/pdf";
-        try {
-            if (formatIndex == 0) {
-                // 1. PDF Document (.pdf)
-                final String fileName = sanitizedTitle + "_Summary.pdf";
-                mime = "application/pdf";
-                targetFile = new File(downloadsDir, fileName);
-                createPdfDocument(targetFile, videoTitle, summaryText);
-                Toast.makeText(context, "✅ AI Summary PDF saved: " + fileName, Toast.LENGTH_LONG).show();
-            } else if (formatIndex == 1) {
-                // 2. Markdown File (.md)
-                final String fileName = sanitizedTitle + "_Summary.md";
-                mime = "text/markdown";
-                targetFile = new File(downloadsDir, fileName);
-                writeTextToFile(targetFile, "# " + videoTitle + "\n\n" + summaryText);
-                Toast.makeText(context, "✅ AI Summary Markdown saved: " + fileName, Toast.LENGTH_LONG).show();
-            } else {
-                // 3. Plain Text File (.txt)
-                final String fileName = sanitizedTitle + "_Summary.txt";
-                mime = "text/plain";
-                targetFile = new File(downloadsDir, fileName);
-                writeTextToFile(targetFile, videoTitle + "\n\n" + summaryText);
-                Toast.makeText(context, "✅ AI Summary Text saved: " + fileName, Toast.LENGTH_LONG).show();
-            }
-        } catch (final Exception e) {
-            Log.e(TAG, "Error generating summary file", e);
-            Toast.makeText(context, "⚠️ Failed to save summary file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            return;
-        }
+        final File targetFile = com.blacktube.app.ai.SummaryExportHelper.exportSummary(
+                context, currentInfo, summaryText, format, null
+        );
 
         if (targetFile != null && targetFile.exists()) {
-            MediaScannerConnection.scanFile(context, new String[]{targetFile.getAbsolutePath()}, null, (path, uri) -> {
-                Log.d(TAG, "Scanned summary file into Downloads provider: " + path);
-            });
+            Toast.makeText(context, "✅ AI Summary saved: " + targetFile.getName(), Toast.LENGTH_LONG).show();
+            com.blacktube.app.ai.SummaryExportHelper.openFile(context, targetFile, format.getMimeType());
 
             try {
                 final FinishedMission mission = new FinishedMission();
@@ -1292,7 +1275,7 @@ public class DownloadDialog extends DialogFragment
                 mission.length = targetFile.length();
                 mission.timestamp = System.currentTimeMillis();
                 mission.kind = 'd';
-                mission.storage = new StoredFileHelper(context, Uri.fromFile(targetFile), mime);
+                mission.storage = new StoredFileHelper(context, Uri.fromFile(targetFile), format.getMimeType());
 
                 final FinishedMissionStore store = new FinishedMissionStore(context);
                 store.addFinishedMission(mission);
@@ -1303,75 +1286,6 @@ public class DownloadDialog extends DialogFragment
             } catch (final Exception e) {
                 Log.e(TAG, "Failed to register summary into internal downloads manager", e);
             }
-        }
-    }
-
-    private void createPdfDocument(final File outputFile, final String title, final String content) {
-        try {
-            final String channelName = currentInfo != null && currentInfo.getUploaderName() != null ? currentInfo.getUploaderName() : "Unknown Channel";
-            final String durationStr = currentInfo != null && currentInfo.getDuration() > 0 ? org.schabi.newpipe.util.Localization.getDurationString(currentInfo.getDuration()) : "";
-            final String videoUrl = currentInfo != null && currentInfo.getUrl() != null ? currentInfo.getUrl() : "";
-            final String dateStr = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault()).format(new Date());
-
-            String category = "Video Intelligence";
-            String categoryEmoji = "🎓";
-            String corePurpose = content;
-            String vibeEmoji = "🎬 Analytical";
-            String culturalImpact = "";
-            final List<com.blacktube.app.ai.PdfChapter> chapters = new ArrayList<>();
-
-            try {
-                final JSONObject json = new JSONObject(content);
-                if (json.has("corePurpose")) corePurpose = json.optString("corePurpose", content);
-                if (json.has("category")) category = json.optString("category", category);
-                if (json.has("categoryEmoji")) categoryEmoji = json.optString("categoryEmoji", categoryEmoji);
-                if (json.has("vibeEmoji")) vibeEmoji = json.optString("vibeEmoji", vibeEmoji);
-                if (json.has("culturalImpact")) culturalImpact = json.optString("culturalImpact", "");
-
-                final JSONArray chaptersArray = json.optJSONArray("chapters");
-                if (chaptersArray != null) {
-                    for (int i = 0; i < chaptersArray.length(); i++) {
-                        final JSONObject ch = chaptersArray.getJSONObject(i);
-                        chapters.add(new com.blacktube.app.ai.PdfChapter(
-                                ch.optInt("startSeconds", 0),
-                                ch.optInt("endSeconds", 0),
-                                ch.optString("summary", ""),
-                                ch.optString("emoji", "📌")
-                        ));
-                    }
-                }
-            } catch (Exception ignored) {
-                // Raw markdown/text summary fallback
-            }
-            final String engineUsed = "Gemini 3.1 Flash-Lite (Cloud)";
-
-            final com.blacktube.app.ai.SummaryPdfData pdfData = new com.blacktube.app.ai.SummaryPdfData(
-                    title,
-                    channelName,
-                    category,
-                    categoryEmoji,
-                    corePurpose,
-                    vibeEmoji,
-                    culturalImpact,
-                    chapters,
-                    dateStr,
-                    engineUsed,
-                    videoUrl,
-                    durationStr
-            );
-
-            final com.blacktube.app.ai.SummaryPdfRenderer renderer = new com.blacktube.app.ai.SummaryPdfRenderer();
-            renderer.render(pdfData, outputFile);
-        } catch (final Exception e) {
-            Log.e(TAG, "Failed to render executive PDF summary", e);
-        }
-    }
-
-    private void writeTextToFile(final File file, final String content) {
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to write text summary file", e);
         }
     }
 }

@@ -167,7 +167,8 @@ class ErrorActivity : AppCompatActivity() {
 
     private fun formErrorText(stacktrace: Array<String>): String {
         val separator = "-------------------------------------"
-        return stacktrace.joinToString(separator + "\n", separator + "\n", separator)
+        return stacktrace.map { sanitizeSensitiveData(it) }
+            .joinToString(separator + "\n", separator + "\n", separator)
     }
 
     private fun buildInfo(info: ErrorInfo) {
@@ -201,7 +202,7 @@ class ErrorActivity : AppCompatActivity() {
                 .value("version", BuildConfig.VERSION_NAME)
                 .value("os", osString)
                 .value("time", currentTimeStamp)
-                .array("exceptions", errorInfo.stackTraces.toList())
+                .array("exceptions", errorInfo.stackTraces.map { sanitizeSensitiveData(it) })
                 .value("user_comment", binding.errorCommentBox.getText().toString())
                 .end()
                 .done()
@@ -250,7 +251,7 @@ class ErrorActivity : AppCompatActivity() {
                     }
                     append("</b>")
                     append("</summary><p>\n")
-                    append("\n```\n${stacktrace}\n```\n")
+                    append("\n```\n${sanitizeSensitiveData(stacktrace)}\n```\n")
                     append("</details>\n")
                 }
 
@@ -267,6 +268,12 @@ class ErrorActivity : AppCompatActivity() {
         }
     }
 
+    private fun sanitizeSensitiveData(text: String): String {
+        return text
+            .replace(Regex("AIzaSy[A-Za-z0-9_-]{33}"), "[REDACTED_API_KEY]")
+            .replace(Regex("(?i)(bearer\\s+|key=)[A-Za-z0-9_.-]{16,}"), "$1[REDACTED_TOKEN]")
+    }
+
     private fun addGuruMeditation() {
         // just an easter egg
         var text = binding.errorSorryView.text.toString()
@@ -281,9 +288,9 @@ class ErrorActivity : AppCompatActivity() {
         // BUNDLE TAGS
         const val ERROR_INFO = "error_info"
 
-        private const val ERROR_EMAIL_ADDRESS = "crashreport@newpipe.schabi.org"
+        private const val ERROR_EMAIL_ADDRESS = ""
         private const val ERROR_EMAIL_SUBJECT = "Exception in "
 
-        private const val ERROR_GITHUB_ISSUE_URL = "https://github.com/TeamNewPipe/NewPipe/issues"
+        private const val ERROR_GITHUB_ISSUE_URL = "https://github.com/rsshir60/BlackTube/issues"
     }
 }

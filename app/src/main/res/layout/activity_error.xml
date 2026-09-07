@@ -92,13 +92,16 @@
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center">
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_ai_panel"
+                android:padding="12dp">
 
                 <org.schabi.newpipe.views.NewPipeTextView
                     android:id="@+id/errorView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textIsSelectable="true"
+                    android:textSize="12sp"
                     android:typeface="monospace" />
             </HorizontalScrollView>
 
@@ -113,33 +116,46 @@
                 android:id="@+id/errorCommentBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_prompt_input_field"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
                 android:inputType="" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/errorReportCopyButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_bt_ai_action_button"
+                android:drawableStart="@drawable/ic_content_copy"
+                android:drawablePadding="8dp"
+                android:drawableTint="#FFFFFF"
+                android:gravity="center"
+                android:text="@string/copy_for_github"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/errorReportGitHubButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_bt_ai_primary_button"
+                android:gravity="center"
+                android:text="@string/error_report_open_issue_button_text"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/errorReportEmailButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:text="@string/error_report_button_text" />
-
-            <org.schabi.newpipe.views.NewPipeTextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/error_report_open_github_notice"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/errorReportCopyButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/copy_for_github" />
-
-            <Button
-                android:id="@+id/errorReportGitHubButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/error_report_open_issue_button_text" />
 
         </LinearLayout>
     </ScrollView>

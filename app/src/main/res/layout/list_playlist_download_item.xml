@@ -17,13 +17,14 @@
         android:layout_marginEnd="12dp"
         android:focusable="false" />
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/item_thumbnail"
         android:layout_width="80dp"
         android:layout_height="45dp"
         android:layout_marginEnd="12dp"
         android:scaleType="centerCrop"
-        tools:src="@drawable/placeholder_thumbnail" />
+        app:shapeAppearanceOverlay="@style/RoundedThumbnail8dp"
+        tools:src="@drawable/placeholder_thumbnail_video" />
 
     <LinearLayout
         android:layout_width="0dp"

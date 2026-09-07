@@ -1,4 +1,4 @@
-﻿package org.schabi.newpipe.fragments.detail
+package org.schabi.newpipe.fragments.detail
 
 import android.app.Activity
 import android.content.Context
@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.blacktube.app.ai.GeminiSummarizer
 import com.blacktube.app.ai.PromptLibrary
 import com.blacktube.app.ai.PromptLibraryActivity
+import com.blacktube.app.ai.SummaryExportHelper
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -130,6 +131,14 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
         view.findViewById<Button>(R.id.btn_summarize).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = false) } }
         view.findViewById<Button>(R.id.btn_retry).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = false) } }
         view.findViewById<Button>(R.id.btn_re_summarize).setOnClickListener { animateAndHaptic(it) { runSummarize(forceRefresh = true) } }
+        view.findViewById<Button>(R.id.btn_export_summary)?.setOnClickListener { btn ->
+            animateAndHaptic(btn) {
+                val summaryText = tvSummaryContent.text?.toString() ?: ""
+                if (summaryText.isNotEmpty()) {
+                    showExportChooser(summaryText)
+                }
+            }
+        }
         view.findViewById<Button>(R.id.btn_copy_summary)?.setOnClickListener { btn ->
             animateAndHaptic(btn) {
                 val summaryText = tvSummaryContent.text?.toString() ?: ""
@@ -234,5 +243,74 @@ class AiSummaryFragment(private val streamInfo: StreamInfo?) : BottomSheetDialog
                 Toast.makeText(requireContext(), "⚠️ Q&A response: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun showExportChooser(summaryText: String) {
+        val options = arrayOf(
+            "📄 Export as PDF (.pdf)",
+            "📝 Export as Markdown (.md)",
+            "📜 Export as Text (.txt)",
+            "📤 Share via other apps"
+        )
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Export AI Summary")
+            .setItems(options) { _, which ->
+                val v = view ?: return@setItems
+                when (which) {
+                    0 -> {
+                        SummaryExportHelper.exportSummary(
+                            requireContext(),
+                            streamInfo,
+                            summaryText,
+                            SummaryExportHelper.ExportFormat.PDF
+                        ) { exportedFile ->
+                            com.google.android.material.snackbar.Snackbar.make(
+                                v,
+                                "✅ Saved PDF: ${exportedFile.name}",
+                                com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                            ).setAction("OPEN") {
+                                SummaryExportHelper.openFile(requireContext(), exportedFile, "application/pdf")
+                            }.show()
+                        }
+                    }
+                    1 -> {
+                        SummaryExportHelper.exportSummary(
+                            requireContext(),
+                            streamInfo,
+                            summaryText,
+                            SummaryExportHelper.ExportFormat.MARKDOWN
+                        ) { exportedFile ->
+                            com.google.android.material.snackbar.Snackbar.make(
+                                v,
+                                "✅ Saved Markdown: ${exportedFile.name}",
+                                com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                            ).setAction("OPEN") {
+                                SummaryExportHelper.openFile(requireContext(), exportedFile, "text/markdown")
+                            }.show()
+                        }
+                    }
+                    2 -> {
+                        SummaryExportHelper.exportSummary(
+                            requireContext(),
+                            streamInfo,
+                            summaryText,
+                            SummaryExportHelper.ExportFormat.TXT
+                        ) { exportedFile ->
+                            com.google.android.material.snackbar.Snackbar.make(
+                                v,
+                                "✅ Saved Text: ${exportedFile.name}",
+                                com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                            ).setAction("OPEN") {
+                                SummaryExportHelper.openFile(requireContext(), exportedFile, "text/plain")
+                            }.show()
+                        }
+                    }
+                    3 -> {
+                        SummaryExportHelper.shareSummary(requireContext(), streamInfo, summaryText)
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 }

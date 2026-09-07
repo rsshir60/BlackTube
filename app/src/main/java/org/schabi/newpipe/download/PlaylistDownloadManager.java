@@ -115,6 +115,28 @@ public class PlaylistDownloadManager {
         }
     }
 
+    public synchronized void cancelBatchDownload(final Context context) {
+        synchronized (queue) {
+            queue.clear();
+            completedBatch.clear();
+        }
+        disposables.clear();
+        isProcessing = false;
+
+        final NotificationManager manager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.cancel(NOTIFICATION_ID);
+        }
+
+        mainHandler.post(() -> Toast.makeText(context.getApplicationContext(),
+                "Playlist download canceled", Toast.LENGTH_SHORT).show());
+    }
+
+    public boolean isProcessing() {
+        return isProcessing;
+    }
+
     private void processNextInQueue(final Context context) {
         PlaylistDownloadEntry nextEntry = null;
 

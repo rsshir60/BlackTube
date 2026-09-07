@@ -262,6 +262,26 @@
                     android:layout_marginTop="16dp">
 
                     <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_export_summary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_bt_ai_action_button"
+                        android:drawableStart="@drawable/ic_file_download"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="#FFFFFF"
+                        android:gravity="center"
+                        android:minWidth="0dp"
+                        android:minHeight="48dp"
+                        android:paddingHorizontal="16dp"
+                        android:text="Export"
+                        android:contentDescription="Export or download summary"
+                        android:textAllCaps="false"
+                        android:textColor="@color/bt_ai_button_text_selector"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/btn_copy_summary"
                         android:layout_width="wrap_content"
                         android:layout_height="48dp"

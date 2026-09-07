@@ -123,9 +123,9 @@ object GeminiSummarizer {
             Log.e(TAG, "AI Summarization failed gracefully", e)
             val friendlyMessage = when {
                 e is java.net.UnknownHostException || e is java.net.SocketTimeoutException ->
-                    "Unable to reach AI services. Please check your internet connection or use Local Airplane-Mode AI."
+                    "Unable to reach AI services. Please check your internet connection."
                 e.message?.contains("API_KEY", ignoreCase = true) == true || e.message?.contains("403") == true ->
-                    "Invalid or expired Gemini API key. Please check your key in Settings > AI Features or switch to Local AI."
+                    "Invalid or expired Gemini API key. Please check your key in Settings > AI Features."
                 else ->
                     "Temporary AI service interruption. Tapping Retry usually solves this!"
             }
@@ -140,7 +140,7 @@ object GeminiSummarizer {
         }
 
         val currentModel = model
-            ?: return@withContext SummaryResult.Error("Gemini API key not configured. Add your key in Settings > AI Features or switch to Local AI.")
+            ?: return@withContext SummaryResult.Error("Gemini API key not configured. Add your key in Settings > AI Features.")
 
         try {
             TokenUsageTracker.recordApiCall(context)

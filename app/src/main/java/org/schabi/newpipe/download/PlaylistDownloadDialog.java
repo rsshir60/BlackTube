@@ -129,6 +129,7 @@ public class PlaylistDownloadDialog extends DialogFragment {
         recyclerView.setAdapter(adapter);
 
         selectAllCheckBox.setOnClickListener(v -> {
+            v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
             adapter.setSelectAll(selectAllCheckBox.isChecked());
         });
 
@@ -140,6 +141,7 @@ public class PlaylistDownloadDialog extends DialogFragment {
             final boolean defaultCut = prefs.getBoolean("pref_key_sponsor_block_cut_downloads", false);
             switchCutSponsors.setChecked(defaultCut);
             switchCutSponsors.setOnCheckedChangeListener((btn, isChecked) -> {
+                btn.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
                 prefs.edit().putBoolean("pref_key_sponsor_block_cut_downloads", isChecked).apply();
             });
         }
@@ -147,6 +149,7 @@ public class PlaylistDownloadDialog extends DialogFragment {
         updateSelectionUI(adapter.getSelectedCount(), streamItems.size());
 
         downloadButton.setOnClickListener(v -> {
+            v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
             final List<StreamInfoItem> selectedItems = adapter.getSelectedItems();
             if (selectedItems.isEmpty()) {
                 Toast.makeText(requireContext(), R.string.no_videos_selected, Toast.LENGTH_SHORT).show();
@@ -171,6 +174,7 @@ public class PlaylistDownloadDialog extends DialogFragment {
         final RadioButton rAudio = view.findViewById(R.id.radio_quality_audio);
 
         final View.OnClickListener radioListener = v -> {
+            v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
             r1080.setChecked(v == r1080);
             r720.setChecked(v == r720);
             r480.setChecked(v == r480);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules xmlns:android="http://schemas.android.com/apk/res/android">
     <cloud-backup>
+        <exclude domain="sharedpref" path="com.blacktube.app_preferences.xml" />
         <exclude domain="sharedpref" path="ai_preferences.xml" />
         <exclude domain="sharedpref" path="blacktube_ai_cache.xml" />
         <exclude domain="sharedpref" path="blacktube_prompt_library.xml" />
